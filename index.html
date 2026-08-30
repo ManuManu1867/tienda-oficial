@@ -19,7 +19,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
         body { background-color: var(--bg); color: var(--text); padding-bottom: 60px; }
 
-        /* Navbar adaptable */
         nav {
             display: flex; justify-content: space-between; align-items: center;
             padding: 15px 20px; border-bottom: 1px solid var(--border);
@@ -55,7 +54,6 @@
             .hero-banner h1 { font-size: 1.8rem; }
         }
 
-        /* Catálogo responsivo inteligente */
         .catalogo {
             display: grid; grid-template-columns: 1fr;
             gap: 20px; max-width: 1400px; margin: 0 auto; padding: 0 20px;
@@ -85,11 +83,7 @@
             position: relative; background-color: #f3f4f6; height: 320px;
             display: flex; align-items: center; justify-content: center; overflow: hidden;
         }
-        @media (min-width: 768px) {
-            .visor-imagen { height: 350px; }
-            .visor-imagen img.img-principal { transition: transform 0.3s ease; }
-            .tarjeta:hover .img-principal { transform: scale(1.03); }
-        }
+        @media (min-width: 768px) { .visor-imagen { height: 350px; } }
         .visor-imagen img.img-principal { width: 100%; height: 100%; object-fit: cover; }
 
         .categoria-badge {
@@ -153,19 +147,8 @@
         const PUBLIC_KEY = 'camisetas_public_drive';
         const LOGO_PUBLIC_KEY = 'logo_public_drive';
 
-        // Producto por defecto con una imagen segura para que no falle nunca en móvil
-        const productosPorDefecto = [
-            {
-                id: 1,
-                titulo: "España 1ª Equipación Mundial 2026",
-                categoria: "Selecciones",
-                precio: "25.00",
-                talla: "XS, S, M, L, XL",
-                imagenes: [
-                    "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=600&q=80"
-                ]
-            }
-        ];
+        // Imagen de respaldo garantizada para móviles
+        const imagenSegura = "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=600&q=80";
 
         document.addEventListener('DOMContentLoaded', () => {
             cargarLogoPublico();
@@ -184,7 +167,29 @@
             contenedor.innerHTML = '';
 
             let productosGuardados = JSON.parse(localStorage.getItem(PUBLIC_KEY));
-            let productos = (productosGuardados && productosGuardados.length > 0) ? productosGuardados : productosPorDefecto;
+            
+            // Si hay productos guardados, validamos que su imagen no esté rota o vacía
+            let productos = [];
+            if (productosGuardados && productosGuardados.length > 0) {
+                productos = productosGuardados.map(p => {
+                    // Si el enlace de imagen es inválido o viene de pruebas anteriores, usamos la segura
+                    if (!p.imagenes || p.imagenes.length === 0 || p.imagenes[0].includes('1X...')) {
+                        p.imagenes = [imagenSegura];
+                    }
+                    return p;
+                });
+            } else {
+                productos = [
+                    {
+                        id: 1,
+                        titulo: "España 1ª Equipación Mundial 2026",
+                        categoria: "Selecciones",
+                        precio: "25.00",
+                        talla: "XS, S, M, L, XL",
+                        imagenes: [imagenSegura]
+                    }
+                ];
+            }
 
             if (categoriaFiltro !== 'todas') {
                 productos = productos.filter(p => p.categoria === categoriaFiltro);
@@ -211,7 +216,7 @@
                 tarjeta.innerHTML = `
                     <div class="visor-imagen">
                         <span class="categoria-badge">${producto.categoria}</span>
-                        <img src="${producto.imagenes[0]}" class="img-principal" id="img-main-${producto.id}">
+                        <img src="${producto.imagenes[0]}" class="img-principal" id="img-main-${producto.id}" onerror="this.src='${imagenSegura}'">
                     </div>
                     ${miniaturasHTML}
                     <div class="tarjeta-info">
