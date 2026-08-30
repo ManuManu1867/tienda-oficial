@@ -14,6 +14,7 @@
             --text-muted: #6b7280;
             --border: #e5e7eb;
             --radius: 8px;
+            --danger: #ef4444;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
@@ -27,9 +28,15 @@
         .logo { font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
         .logo img { width: 42px; height: 42px; object-fit: cover; border-radius: 50%; border: 1px solid var(--border); }
 
+        .cart-btn {
+            background: var(--primary); color: white; border: none; padding: 8px 16px;
+            border-radius: 20px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;
+            font-size: 0.9rem; transition: background 0.2s;
+        }
+        .cart-btn:hover { background: var(--accent); }
+
         .filtros {
-            display: flex; gap: 10px; overflow-x: auto; padding: 20px 5%;
-            background: #fff;
+            display: flex; gap: 10px; overflow-x: auto; padding: 20px 5%; background: #fff;
         }
         .filtro-btn {
             background: var(--surface); border: 1px solid var(--border);
@@ -44,7 +51,7 @@
         h1.section-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 25px; }
 
         .grid-productos {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px;
         }
 
         .tarjeta {
@@ -55,7 +62,7 @@
         .tarjeta:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
 
         .visor-imagen {
-            position: relative; background: #eee; height: 320px;
+            position: relative; background: #eee; height: 300px;
             display: flex; align-items: center; justify-content: center; overflow: hidden;
         }
         .visor-imagen img { width: 100%; height: 100%; object-fit: cover; transition: opacity 0.3s; }
@@ -66,30 +73,78 @@
             text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        /* Miniaturas de imágenes múltiples */
         .miniaturas {
             display: flex; gap: 6px; padding: 8px 12px; background: #fff;
             overflow-x: auto; border-top: 1px solid var(--border);
         }
         .miniatura {
-            width: 40px; height: 40px; border-radius: 4px; object-fit: cover;
+            width: 36px; height: 36px; border-radius: 4px; object-fit: cover;
             cursor: pointer; border: 2px solid transparent; opacity: 0.6; transition: all 0.2s;
         }
         .miniatura.active { border-color: var(--accent); opacity: 1; }
 
         .tarjeta-info { padding: 16px; display: flex; flex-direction: column; flex-grow: 1; }
-        .tarjeta-info h3 { font-size: 1rem; font-weight: 600; margin-bottom: 6px; }
-        .tallas { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px; }
+        .tarjeta-info h3 { font-size: 1rem; font-weight: 600; margin-bottom: 8px; }
 
-        .footer-card { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
-        .precio { font-size: 1.2rem; font-weight: 800; }
+        /* Estilo de Tallas en Círculo */
+        .seccion-tallas { margin-bottom: 12px; }
+        .label-tallas { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; display: block; }
+        .circulos-tallas { display: flex; gap: 8px; flex-wrap: wrap; }
+        .circulo-talla {
+            width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border);
+            background: #fff; display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
+        }
+        .circulo-talla.selected {
+            background: var(--primary); color: white; border-color: var(--primary);
+        }
+
+        /* Sección de Personalización */
+        .seccion-personalizacion {
+            background: #fff; border: 1px solid var(--border); border-radius: 6px;
+            padding: 10px; margin-bottom: 15px; font-size: 0.85rem;
+        }
+        .custom-checkbox-label {
+            display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; margin-bottom: 6px;
+        }
+        .custom-inputs { display: none; margin-top: 6px; gap: 6px; flex-direction: column; }
+        .custom-inputs input {
+            padding: 6px 10px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.85rem; outline: none;
+        }
+
+        .footer-card { display: flex; justify-content: space-between; align-items: center; margin-top: auto; border-top: 1px solid var(--border); padding-top: 12px; }
+        .precio { font-size: 1.15rem; font-weight: 800; }
         .btn-comprar {
             background: var(--primary); color: white; border: none;
-            padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 0.85rem;
-            cursor: pointer; text-decoration: none; transition: background 0.2s;
+            padding: 8px 14px; border-radius: 20px; font-weight: 600; font-size: 0.8rem;
+            cursor: pointer; transition: background 0.2s;
         }
         .btn-comprar:hover { background: var(--accent); }
 
+        /* Modal del Carrito */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); display: none; justify-content: flex-end; z-index: 1000;
+        }
+        .modal-overlay.open { display: flex; }
+        .carrito-modal {
+            background: white; width: 100%; max-width: 400px; height: 100%;
+            padding: 20px; display: flex; flex-direction: column; box-shadow: -4px 0 15px rgba(0,0,0,0.1);
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        .carrito-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+        .carrito-body { flex-grow: 1; overflow-y: auto; padding: 15px 0; }
+        .item-carrito { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding: 10px 0; font-size: 0.9rem; }
+        .carrito-footer { border-top: 1px solid var(--border); padding-top: 15px; }
+        .btn-cerrar-modal { background: none; border: none; font-size: 1.2rem; cursor: pointer; }
+        .btn-whatsapp {
+            background: #25d366; color: white; border: none; width: 100%; padding: 12px;
+            border-radius: var(--radius); font-weight: 700; font-size: 1rem; cursor: pointer; text-align: center; margin-top: 10px;
+        }
+        .btn-whatsapp:hover { background: #1ebe5d; }
+        .error-talla { color: var(--danger); font-size: 0.75rem; margin-top: 4px; display: none; }
+        
         .loader { text-align: center; padding: 40px; font-size: 1.1rem; color: var(--text-muted); }
     </style>
 </head>
@@ -100,6 +155,9 @@
             <img src="https://lh3.googleusercontent.com/d/1nu9bwEvAomNYNOilQ1aoIxkqUSJOcYGV" alt="Logo Tienda">
             <span>Tienda Oficial</span>
         </div>
+        <button class="cart-btn" onclick="abrirCarrito()">
+            🛒 Carrito <span id="cartCount" style="background: white; color: var(--primary); padding: 2px 6px; border-radius: 10px; font-size: 0.75rem;">0</span>
+        </button>
     </header>
 
     <div class="filtros">
@@ -115,9 +173,31 @@
         <div id="contenedorProductos" class="loader">Cargando productos desde la nube...</div>
     </div>
 
+    <!-- Modal del Carrito -->
+    <div class="modal-overlay" id="modalCarrito">
+        <div class="carrito-modal">
+            <div class="carrito-header">
+                <h2>Tu Carrito</h2>
+                <button class="btn-cerrar-modal" onclick="cerrarCarrito()">✕</button>
+            </div>
+            <div class="carrito-body" id="listaCarrito">
+                <p style="color: var(--text-muted); text-align: center; margin-top: 20px;">El carrito está vacío</p>
+            </div>
+            <div class="carrito-footer">
+                <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 1.2rem; margin-bottom: 10px;">
+                    <span>Total:</span>
+                    <span id="totalCarrito">0.00 €</span>
+                </div>
+                <button class="btn-whatsapp" onclick="enviarWhatsApp()">📲 Hacer pedido por WhatsApp</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const API_URL = 'https://script.google.com/macros/s/AKfycbwi_d3Q1xsTiSxZ0WqCdOkNBjdfQh37a2BDyKnM2aoWx27dM8ZEgjKXKwvRsd3Mp26abA/exec';
         let productosGlobales = [];
+        let estadoSelecciones = {}; // Guarda la talla y personalización de cada producto
+        let carrito = [];
 
         async function cargarProductos() {
             try {
@@ -142,6 +222,11 @@
             contenedor.innerHTML = "";
 
             lista.forEach((p, index) => {
+                let idProd = p.id || index;
+                if (!estadoSelecciones[idProd]) {
+                    estadoSelecciones[idProd] = { talla: '', custom: false, nombre: '', numero: '', parche: false };
+                }
+
                 let imgs = [];
                 if (Array.isArray(p.imagenes)) {
                     imgs = p.imagenes;
@@ -151,7 +236,13 @@
                 if (imgs.length === 0) imgs = ['https://via.placeholder.com/300x350?text=Sin+Imagen'];
 
                 let imgPrincipal = imgs[0];
-                let idProd = p.id || index;
+
+                // Procesar tallas
+                let tallasArr = p.talla ? p.talla.split(',').map(t => t.trim()) : ['Única'];
+                let htmlTallas = '';
+                tallasArr.forEach(t => {
+                    htmlTallas += `<div class="circulo-talla" onclick="seleccionarTalla('${idProd}', '${t}', this)">${t}</div>`;
+                });
 
                 let htmlMiniaturas = '';
                 if (imgs.length > 1) {
@@ -163,9 +254,6 @@
                     htmlMiniaturas += '</div>';
                 }
 
-                let textoWap = encodeURIComponent(`Hola, quiero comprar la camiseta: ${p.titulo} (Talla: ${p.talla}) por ${p.precio}€`);
-                let linkWap = `https://wa.me/?text=${textoWap}`;
-
                 const tarjeta = document.createElement('div');
                 tarjeta.className = 'tarjeta';
                 tarjeta.innerHTML = `
@@ -176,10 +264,31 @@
                     ${htmlMiniaturas}
                     <div class="tarjeta-info">
                         <h3>${p.titulo || 'Sin título'}</h3>
-                        <div class="tallas">Tallas: ${p.talla || 'Única'}</div>
+                        
+                        <div class="seccion-tallas">
+                            <span class="label-tallas">Selecciona tu talla: *</span>
+                            <div class="circulos-tallas" id="tallas-${idProd}">${htmlTallas}</div>
+                            <div class="error-talla" id="error-talla-${idProd}">¡Elige una talla obligatoriamente!</div>
+                        </div>
+
+                        <div class="seccion-personalizacion">
+                            <label class="custom-checkbox-label">
+                                <input type="checkbox" onchange="toggleCustom('${idProd}', this)">
+                                Personalizar Nombre/Número (+3€)
+                            </label>
+                            <div class="custom-inputs" id="inputs-custom-${idProd}">
+                                <input type="text" placeholder="Nombre para la espalda" id="nombre-${idProd}" oninput="actualizarPrecioCard('${idProd}', ${p.precio})">
+                                <input type="text" placeholder="Número para la espalda" id="numero-${idProd}" oninput="actualizarPrecioCard('${idProd}', ${p.precio})">
+                            </div>
+                            <label class="custom-checkbox-label" style="margin-top: 8px;">
+                                <input type="checkbox" id="parche-${idProd}" onchange="actualizarPrecioCard('${idProd}', ${p.precio})">
+                                Añadir Parche (+2€)
+                            </label>
+                        </div>
+
                         <div class="footer-card">
-                            <div class="precio">${p.precio ? p.precio + ' €' : '0.00 €'}</div>
-                            <a href="${linkWap}" target="_blank" class="btn-comprar">Ver / Comprar</a>
+                            <div class="precio" id="precio-card-${idProd}">${parseFloat(p.precio || 0).toFixed(2)} €</div>
+                            <button class="btn-comprar" onclick="agregarAlCarrito('${idProd}', '${p.titulo}', ${p.precio})">Añadir al Carrito</button>
                         </div>
                     </div>
                 `;
@@ -187,11 +296,148 @@
             });
         }
 
+        function seleccionarTalla(idProd, talla, elemento) {
+            estadoSelecciones[idProd].talla = talla;
+            const contenedorTallas = document.getElementById(`tallas-${idProd}`);
+            contenedorTallas.querySelectorAll('.circulo-talla').forEach(c => c.classList.remove('selected'));
+            elemento.classList.add('selected');
+            document.getElementById(`error-talla-${idProd}`).style.display = 'none';
+        }
+
+        function toggleCustom(idProd, checkbox) {
+            const container = document.getElementById(`inputs-custom-${idProd}`);
+            estadoSelecciones[idProd].custom = checkbox.checked;
+            container.style.display = checkbox.checked ? 'flex' : 'none';
+            // Buscar precio base del producto
+            const prod = productosGlobales.find(p => (p.id || productosGlobales.indexOf(p)) == idProd);
+            actualizarPrecioCard(idProd, prod.precio);
+        }
+
+        function calcularPrecioExtra(idProd) {
+            let extra = 0;
+            let customChecked = estadoSelecciones[idProd].custom;
+            let parcheChecked = document.getElementById(`parche-${idProd}`).checked;
+
+            if (customChecked) extra += 3;
+            if (parcheChecked) extra += 2;
+            return extra;
+        }
+
+        function actualizarPrecioCard(idProd, precioBase) {
+            let extra = calcularPrecioExtra(idProd);
+            let total = parseFloat(precioBase) + extra;
+            document.getElementById(`precio-card-${idProd}`).innerText = total.toFixed(2) + ' €';
+        }
+
         function cambiarImagen(event, idProd, nuevaUrl) {
             document.getElementById(`img-${idProd}`).src = nuevaUrl;
             const tarjeta = event.target.closest('.tarjeta');
             tarjeta.querySelectorAll('.miniatura').forEach(m => m.classList.remove('active'));
             event.target.classList.add('active');
+        }
+
+        function agregarAlCarrito(idProd, titulo, precioBase) {
+            let seleccion = estadoSelecciones[idProd];
+            
+            // Validar talla obligatoria
+            if (!seleccion.talla) {
+                document.getElementById(`error-talla-${idProd}`).style.display = 'block';
+                return;
+            }
+
+            let parcheChecked = document.getElementById(`parche-${idProd}`).checked;
+            let nombreVal = seleccion.custom ? document.getElementById(`nombre-${idProd}`).value.trim() : '';
+            let numeroVal = seleccion.custom ? document.getElementById(`numero-${idProd}`).value.trim() : '';
+            
+            let extra = calcularPrecioExtra(idProd);
+            let precioFinal = parseFloat(precioBase) + extra;
+
+            let itemCarro = {
+                id: idProd,
+                titulo: titulo,
+                talla: seleccion.talla,
+                precio: precioFinal,
+                personalizacion: seleccion.custom ? `Nombre: ${nombreVal || 'N/A'}, Nº: ${numeroVal || 'N/A'}` : 'Sin personalización',
+                parche: parcheChecked ? 'Con Parche' : 'Sin Parche'
+            };
+
+            carrito.push(itemCarro);
+            actualizarContadorCarrito();
+            abrirCarrito();
+        }
+
+        function actualizarContadorCarrito() {
+            document.getElementById('cartCount').innerText = carrito.length;
+        }
+
+        function abrirCarrito() {
+            const modal = document.getElementById('modalCarrito');
+            modal.classList.add('open');
+            renderizarListaCarrito();
+        }
+
+        function cerrarCarrito() {
+            document.getElementById('modalCarrito').classList.remove('open');
+        }
+
+        function renderizarListaCarrito() {
+            const lista = document.getElementById('listaCarrito');
+            const totalEl = document.getElementById('totalCarrito');
+
+            if (carrito.length === 0) {
+                lista.innerHTML = "<p style='color: var(--text-muted); text-align: center; margin-top: 20px;'>El carrito está vacío</p>";
+                totalEl.innerText = "0.00 €";
+                return;
+            }
+
+            let html = '';
+            let total = 0;
+
+            carrito.forEach((item, index) => {
+                total += item.precio;
+                html += `
+                    <div class="item-carrito">
+                        <div>
+                            <strong>${item.titulo}</strong><br>
+                            <small style="color: var(--text-muted);">Talla: ${item.talla} | ${item.personalizacion} | ${item.parche}</small>
+                        </div>
+                        <div style="text-align: right;">
+                            <span style="font-weight: 700;">${item.precio.toFixed(2)} €</span><br>
+                            <button onclick="eliminarDelCarrito(${index})" style="background:none; border:none; color: var(--danger); cursor:pointer; font-size: 0.8rem;">Eliminar</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            lista.innerHTML = html;
+            totalEl.innerText = total.toFixed(2) + ' €';
+        }
+
+        function eliminarDelCarrito(index) {
+            carrito.splice(index, 1);
+            actualizarContadorCarrito();
+            renderizarListaCarrito();
+        }
+
+        function enviarWhatsApp() {
+            if (carrito.length === 0) return;
+
+            let texto = "Hola, quiero realizar el siguiente pedido:\n\n";
+            let total = 0;
+
+            carrito.forEach((item, i) => {
+                texto += `${i + 1}. *${item.titulo}*\n`;
+                texto += `   - Talla: ${item.talla}\n`;
+                texto += `   - Personalización: ${item.personalizacion}\n`;
+                texto += `   - Parche: ${item.parche}\n`;
+                texto += `   - Precio: ${item.precio.toFixed(2)} €\n\n`;
+                total += item.precio;
+            });
+
+            texto += `*Total del pedido: ${total.toFixed(2)} €*`;
+
+            let urlWap = `https://wa.me/?text=${encodeURIComponent(texto)}`;
+            window.open(urlWap, '_blank');
         }
 
         function filtrar(categoria, btn) {
