@@ -263,6 +263,7 @@
             try {
                 const response = await fetch(API_URL);
                 datosTienda = await response.json();
+                console.log("Datos cargados correctamente:", datosTienda);
                 renderizarProductos(datosTienda.productos);
             } catch (error) {
                 console.error("Error al cargar:", error);
@@ -390,9 +391,28 @@
             productoEnEdicion = p;
             parchesSeleccionadosModal = {};
 
-            let parchesCentro = datosTienda.parches.filter(pr => (pr.posicion || '').toString().toLowerCase().includes('centro'));
-            let parchesIzquierdo = datosTienda.parches.filter(pr => (pr.posicion || '').toString().toLowerCase().includes('izquierdo'));
-            let parchesDerecho = datosTienda.parches.filter(pr => (pr.posicion || '').toString().toLowerCase().includes('derecho'));
+            const listaParches = datosTienda.parches || [];
+
+            let parchesCentro = listaParches.filter(pr => {
+                let pos = (pr.posicion || '').toString().toLowerCase();
+                return pos.includes('centro') || pos.includes('pecho');
+            });
+            let parchesIzquierdo = listaParches.filter(pr => {
+                let pos = (pr.posicion || '').toString().toLowerCase();
+                return pos.includes('izquierdo') || pos.includes('izq');
+            });
+            let parchesDerecho = listaParches.filter(pr => {
+                let pos = (pr.posicion || '').toString().toLowerCase();
+                return pos.includes('derecho') || pos.includes('der');
+            });
+
+            // Si por alguna razón el usuario guardó un parche con otra posición o sin especificar bien, 
+            // los metemos en centro para que no desaparezcan nunca de la interfaz.
+            let parchesAsignadosIds = new Set([...parchesCentro, ...parchesIzquierdo, ...parchesDerecho].map(pr => pr.id || pr.nombre));
+            let parchesOtros = listaParches.filter(pr => !parchesAsignadosIds.has(pr.id || pr.nombre));
+            if (parchesOtros.length > 0) {
+                parchesCentro = [...parchesCentro, ...parchesOtros];
+            }
 
             let zonasConfig = [
                 { key: 'centro_pecho', titulo: '⚽ Centro del Pecho', lista: parchesCentro },
@@ -409,7 +429,7 @@
                     let imgParche = limpiarUrlImagen(parche.imagen || parche.url || parche.foto || parche.img || '');
                     htmlGrid += `
                         <div class="parche-card" id="card-${zona.key}-${pid}" onclick="toggleParcheZona('${zona.key}', '${pid}', '${parche.nombre}')">
-                            <img src="${imgParche}" alt="${parche.nombre}">
+                            <img src="${imgParche}" alt="${parche.nombre}" onerror="this.src='https://via.placeholder.com/65?text=Parche'">
                             <h5>${parche.nombre}</h5>
                         </div>
                     `;
@@ -423,8 +443,8 @@
                 `;
             });
 
-            if (datosTienda.parches.length === 0) {
-                htmlZonas = "<p style='color:var(--text-muted); text-align:center; padding:15px;'>No hay parches configurados.</p>";
+            if (listaParches.length === 0) {
+                htmlZonas = "<p style='color:var(--text-muted); text-align:center; padding:15px;'>No hay parches guardados en Google Sheets todavía.</p>";
             }
 
             const contenedor = document.getElementById('contenidoPersonalizacion');
