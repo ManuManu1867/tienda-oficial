@@ -147,8 +147,8 @@
         const PUBLIC_KEY = 'camisetas_public_drive';
         const LOGO_PUBLIC_KEY = 'logo_public_drive';
 
-        // Imagen de respaldo garantizada para móviles
-        const imagenSegura = "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=600&q=80";
+        // Tu enlace directo oficial de Google Drive incrustado de forma fija
+        const imagenCamisetaReal = "https://lh3.googleusercontent.com/d/1PAcIp3oDkUO9F4z8g3IrMqg-gOq1jvmx";
 
         document.addEventListener('DOMContentLoaded', () => {
             cargarLogoPublico();
@@ -167,14 +167,13 @@
             contenedor.innerHTML = '';
 
             let productosGuardados = JSON.parse(localStorage.getItem(PUBLIC_KEY));
-            
-            // Si hay productos guardados, validamos que su imagen no esté rota o vacía
             let productos = [];
+
+            // Forzamos que si hay productos guardados antiguos o rotos, usen tu imagen real de Google Drive
             if (productosGuardados && productosGuardados.length > 0) {
                 productos = productosGuardados.map(p => {
-                    // Si el enlace de imagen es inválido o viene de pruebas anteriores, usamos la segura
-                    if (!p.imagenes || p.imagenes.length === 0 || p.imagenes[0].includes('1X...')) {
-                        p.imagenes = [imagenSegura];
+                    if (p.titulo.includes("España") || !p.imagenes || p.imagenes[0].includes('1X...') || p.imagenes[0].includes('unsplash')) {
+                        p.imagenes = [imagenCamisetaReal];
                     }
                     return p;
                 });
@@ -186,7 +185,7 @@
                         categoria: "Selecciones",
                         precio: "25.00",
                         talla: "XS, S, M, L, XL",
-                        imagenes: [imagenSegura]
+                        imagenes: [imagenCamisetaReal]
                     }
                 ];
             }
@@ -216,7 +215,7 @@
                 tarjeta.innerHTML = `
                     <div class="visor-imagen">
                         <span class="categoria-badge">${producto.categoria}</span>
-                        <img src="${producto.imagenes[0]}" class="img-principal" id="img-main-${producto.id}" onerror="this.src='${imagenSegura}'">
+                        <img src="${producto.imagenes[0]}" class="img-principal" id="img-main-${producto.id}" onerror="this.src='${imagenCamisetaReal}'">
                     </div>
                     ${miniaturasHTML}
                     <div class="tarjeta-info">
