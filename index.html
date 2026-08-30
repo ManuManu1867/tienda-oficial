@@ -393,7 +393,6 @@
 
             const listaParches = datosTienda.parches || [];
 
-            // Filtrado exacto basado en lo que pongas en Google Sheets (C, I, D o palabras completas)
             let parchesCentro = listaParches.filter(pr => {
                 let pos = (pr.posicion || '').toString().toLowerCase().trim();
                 return pos === 'c' || pos.includes('centro') || pos.includes('pecho');
@@ -556,7 +555,7 @@
 
         function abrirCarritoModal() {
             document.getElementById('modalCarrito').classList.add('open');
-            renderizarListaData();
+            renderizarListaCarrito(); // <--- CORREGIDO: ahora llama a renderizarListaCarrito correctamente
         }
 
         function cerrarModal(modalId) {
