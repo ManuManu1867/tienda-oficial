@@ -19,64 +19,87 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
         body { background-color: var(--bg); color: var(--text); padding-bottom: 60px; }
 
+        /* Navbar adaptable */
         nav {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 40px; border-bottom: 1px solid var(--border);
+            padding: 15px 20px; border-bottom: 1px solid var(--border);
             position: sticky; top: 0; background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(8px); z-index: 100;
+            backdrop-filter: blur(8px); z-index: 100; flex-wrap: wrap; gap: 10px;
         }
 
         .nav-brand { display: flex; align-items: center; gap: 15px; }
-        .logo-container { width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; }
+        .logo-container { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; }
         .logo-img { width: 100%; height: 100%; object-fit: contain; }
 
-        .nav-filtros { display: flex; gap: 10px; overflow-x: auto; padding: 5px 0; }
+        .nav-filtros { display: flex; gap: 6px; overflow-x: auto; width: 100%; padding-bottom: 5px; }
+        @media (min-width: 768px) {
+            .nav-filtros { width: auto; padding-bottom: 0; }
+            nav { padding: 15px 40px; }
+        }
+
         .btn-filtro {
-            background: transparent; border: none; padding: 8px 16px;
-            font-size: 0.95rem; font-weight: 600; color: var(--text-muted);
-            cursor: pointer; border-radius: 20px; transition: all 0.2s ease;
+            background: transparent; border: none; padding: 6px 14px;
+            font-size: 0.9rem; font-weight: 600; color: var(--text-muted);
+            cursor: pointer; border-radius: 20px; white-space: nowrap; transition: all 0.2s ease;
         }
         .btn-filtro:hover, .btn-filtro.activo {
             background: var(--primary); color: white;
         }
 
         .hero-banner {
-            max-width: 1400px; margin: 30px auto 20px auto; padding: 0 20px;
+            max-width: 1400px; margin: 20px auto 15px auto; padding: 0 20px;
         }
-        .hero-banner h1 { font-size: 1.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: -0.5px; }
+        .hero-banner h1 { font-size: 1.5rem; font-weight: 800; text-transform: uppercase; letter-spacing: -0.5px; }
+        @media (min-width: 768px) {
+            .hero-banner { margin: 30px auto 20px auto; }
+            .hero-banner h1 { font-size: 1.8rem; }
+        }
 
+        /* Catálogo responsivo inteligente */
         .catalogo {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 30px; max-width: 1400px; margin: 0 auto; padding: 0 20px;
+            display: grid; grid-template-columns: 1fr;
+            gap: 20px; max-width: 1400px; margin: 0 auto; padding: 0 20px;
+        }
+        @media (min-width: 550px) {
+            .catalogo { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; }
+        }
+        @media (min-width: 1024px) {
+            .catalogo { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; }
         }
 
         .tarjeta {
             background-color: var(--surface); border-radius: var(--radius);
             overflow: hidden; display: flex; flex-direction: column;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            border: 1px solid transparent;
+            border: 1px solid var(--border);
         }
-        .tarjeta:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 20px -10px rgba(0,0,0,0.1);
-            border-color: var(--border);
+        @media (min-width: 768px) {
+            .tarjeta { border: 1px solid transparent; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+            .tarjeta:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 12px 20px -10px rgba(0,0,0,0.1);
+                border-color: var(--border);
+            }
         }
 
         .visor-imagen {
-            position: relative; background-color: #f3f4f6; height: 350px;
+            position: relative; background-color: #f3f4f6; height: 320px;
             display: flex; align-items: center; justify-content: center; overflow: hidden;
         }
-        .visor-imagen img.img-principal { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
-        .tarjeta:hover .img-principal { transform: scale(1.03); }
+        @media (min-width: 768px) {
+            .visor-imagen { height: 350px; }
+            .visor-imagen img.img-principal { transition: transform 0.3s ease; }
+            .tarjeta:hover .img-principal { transform: scale(1.03); }
+        }
+        .visor-imagen img.img-principal { width: 100%; height: 100%; object-fit: cover; }
 
         .categoria-badge {
-            position: absolute; top: 15px; left: 15px; background-color: white;
+            position: absolute; top: 12px; left: 12px; background-color: white;
             color: var(--text); padding: 4px 10px; border-radius: 4px;
             font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        .miniaturas { display: flex; gap: 6px; padding: 12px 15px 0 15px; overflow-x: auto; }
+        .miniaturas { display: flex; gap: 6px; padding: 10px 15px 0 15px; overflow-x: auto; }
         .miniatura {
             width: 40px; height: 40px; border-radius: 4px; object-fit: cover;
             cursor: pointer; border: 1px solid var(--border); background-color: white;
@@ -84,8 +107,10 @@
         }
         .miniatura:hover, .miniatura.activa { opacity: 1; border-color: var(--primary); }
 
-        .tarjeta-info { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; }
-        .tarjeta-info h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+        .tarjeta-info { padding: 15px; display: flex; flex-direction: column; flex-grow: 1; }
+        @media (min-width: 768px) { .tarjeta-info { padding: 20px; } }
+
+        .tarjeta-info h3 { font-size: 1rem; font-weight: 600; margin-bottom: 6px; color: var(--text); }
         .talla { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px; }
         
         .footer-card { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
@@ -93,7 +118,7 @@
         
         .btn-comprar {
             background-color: var(--primary); color: white; border: none;
-            padding: 10px 18px; border-radius: 20px; font-weight: 600; font-size: 0.85rem;
+            padding: 10px 16px; border-radius: 20px; font-weight: 600; font-size: 0.85rem;
             cursor: pointer; transition: background 0.2s;
         }
         .btn-comprar:hover { background-color: #374151; }
@@ -128,7 +153,7 @@
         const PUBLIC_KEY = 'camisetas_public_drive';
         const LOGO_PUBLIC_KEY = 'logo_public_drive';
 
-        // Producto por defecto para que aparezca siempre en cualquier móvil o navegador
+        // Producto por defecto con una imagen segura para que no falle nunca en móvil
         const productosPorDefecto = [
             {
                 id: 1,
@@ -137,7 +162,7 @@
                 precio: "25.00",
                 talla: "XS, S, M, L, XL",
                 imagenes: [
-                    "https://lh3.googleusercontent.com/d/1X..." // Enlace base o puedes usar la imagen de prueba que tenías
+                    "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=600&q=80"
                 ]
             }
         ];
@@ -158,7 +183,6 @@
             const contenedor = document.getElementById('catalogoCliente');
             contenedor.innerHTML = '';
 
-            // Si el almacenamiento está vacío, carga el producto por defecto
             let productosGuardados = JSON.parse(localStorage.getItem(PUBLIC_KEY));
             let productos = (productosGuardados && productosGuardados.length > 0) ? productosGuardados : productosPorDefecto;
 
