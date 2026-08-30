@@ -21,10 +21,11 @@
 
         header {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 20px 5%; border-bottom: 1px solid var(--border);
+            padding: 15px 5%; border-bottom: 1px solid var(--border);
             position: sticky; top: 0; background: white; z-index: 100;
         }
-        .logo { font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
+        .logo { font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
+        .logo img { width: 42px; height: 42px; object-fit: cover; border-radius: 50%; border: 1px solid var(--border); }
 
         .filtros {
             display: flex; gap: 10px; overflow-x: auto; padding: 20px 5%;
@@ -95,7 +96,10 @@
 <body>
 
     <header>
-        <div class="logo">⚽ Tienda Oficial</div>
+        <div class="logo">
+            <img src="https://lh3.googleusercontent.com/d/1nu9bwEvAomNYNOilQ1aoIxkqUSJOcYGV" alt="Logo Tienda">
+            <span>Tienda Oficial</span>
+        </div>
     </header>
 
     <div class="filtros">
