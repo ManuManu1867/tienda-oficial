@@ -59,7 +59,6 @@
             border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; margin-top: auto;
         }
 
-        /* Modales */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1000;
@@ -108,7 +107,6 @@
 
     <main class="catalogo" id="catalogoCliente"></main>
 
-    <!-- MODAL PERSONALIZAR -->
     <div class="modal" id="modalOpciones">
         <div class="modal-content">
             <div class="modal-header">
@@ -128,7 +126,7 @@
                 <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
                     • Nombre y/o Número: +3.00 €<br>
                     • Parches: +2.00 €<br>
-                    • Completa (Nombre/Nº + Parches): +5.00 €
+                    • Completa: +5.00 €
                 </p>
 
                 <div class="form-group">
@@ -160,28 +158,24 @@
         </div>
     </div>
 
-    <!-- MODAL CARRITO -->
     <div class="modal" id="modalCarrito">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>🛒 Carrito de Compras</h2>
                 <button class="btn-cerrar" onclick="cerrarCarrito()">&times;</button>
             </div>
-            
             <div id="cartList"></div>
-            
             <div class="cart-total">
                 <span>Total:</span>
                 <span id="cartTotal">0.00 €</span>
             </div>
-
             <button class="btn-comprar" style="margin-top: 20px; background-color: var(--success);" onclick="procesarPago()">Pagar Ahora</button>
         </div>
     </div>
 
     <script>
-        const PUBLIC_KEY = 'camisetas_public';
-        const LOGO_PUBLIC_KEY = 'logo_public';
+        const PUBLIC_KEY = 'camisetas_public_drive';
+        const LOGO_PUBLIC_KEY = 'logo_public_drive';
 
         let carrito = [];
         let productoSeleccionadoActual = null;
@@ -273,9 +267,7 @@
             document.getElementById('modalOpciones').style.display = 'flex';
         }
 
-        function cerrarModalOpciones() {
-            document.getElementById('modalOpciones').style.display = 'none';
-        }
+        function cerrarModalOpciones() { document.getElementById('modalOpciones').style.display = 'none'; }
 
         function calcularPrecioCustom() {
             if (!productoSeleccionadoActual) return 0;
@@ -298,12 +290,9 @@
 
         function confirmarAgregarAlCarrito() {
             const tallaElegida = document.getElementById('selectTallaCliente').value;
-            if (!tallaElegida) {
-                alert('⚠️ Selecciona una talla.');
-                return;
-            }
+            if (!tallaElegida) { alert('⚠️ Selecciona una talla.'); return; }
 
-            const { total, extra } = calcularPrecioCustom();
+            const { total } = calcularPrecioCustom();
             const parchesElegidos = [];
             document.querySelectorAll('.check-patch:checked').forEach(cb => parchesElegidos.push(cb.value));
 
