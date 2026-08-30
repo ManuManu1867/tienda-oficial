@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tienda Oficial de Camisetas</title>
+    <title>Camisetas Fútbol España</title>
     <style>
         :root {
             --primary: #111827;
@@ -25,8 +25,8 @@
             padding: 15px 5%; border-bottom: 1px solid var(--border);
             position: sticky; top: 0; background: white; z-index: 100;
         }
-        .logo { font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
-        .logo img { height: 38px; width: auto; object-fit: contain; }
+        .logo { font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 12px; }
+        .logo img { height: 48px; width: auto; object-fit: contain; } /* Logo más grande */
         
         .cart-btn {
             background: var(--primary); color: white; border: none; padding: 8px 16px;
@@ -206,7 +206,7 @@
     <header>
         <div class="logo">
             <img src="https://lh3.googleusercontent.com/d/1nu9bwEvAomNYNOilQ1aoIxkqUSJOcYGV" alt="Logo">
-            <span>Tienda Oficial</span>
+            <span>Camisetas Fútbol España</span>
         </div>
         <button class="cart-btn" onclick="abrirCarritoModal()">
             🛒 <span id="cartCount" style="background: white; color: var(--primary); padding: 2px 6px; border-radius: 10px; font-size: 0.75rem;">0</span>
@@ -272,9 +272,16 @@
         let productoEnEdicion = null;
         let parchesSeleccionadosModal = {};
         
-        // Variables para controlar filtros y buscador
         let categoriaActual = 'Todo';
         let terminoBusqueda = '';
+
+        // Función para limpiar tildes y mayúsculas
+        function normalizarTexto(texto) {
+            if (!texto) return '';
+            return texto.toLowerCase()
+                        .normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, "");
+        }
 
         function limpiarUrlImagen(url) {
             if (!url) return '';
@@ -370,7 +377,6 @@
             });
         }
 
-        // Lógica de filtrado y búsqueda combinada
         function filtrar(categoria, btn) {
             document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
             if(btn) btn.classList.add('active');
@@ -380,21 +386,22 @@
         }
 
         function manejarBusqueda() {
-            terminoBusqueda = document.getElementById('inputBuscador').value.toLowerCase().trim();
+            terminoBusqueda = document.getElementById('inputBuscador').value;
             aplicarFiltrosYBusqueda();
         }
 
         function aplicarFiltrosYBusqueda() {
             let lista = datosTienda.productos;
 
-            // 1. Filtrar por categoría activa
+            // 1. Filtrar por categoría
             if (categoriaActual !== 'Todo') {
-                lista = lista.filter(p => p.categoria && p.categoria.toLowerCase() === categoriaActual.toLowerCase());
+                lista = lista.filter(p => p.categoria && normalizarTexto(p.categoria) === normalizarTexto(categoriaActual));
             }
 
-            // 2. Filtrar por texto escrito en el buscador
-            if (terminoBusqueda !== '') {
-                lista = lista.filter(p => p.titulo && p.titulo.toLowerCase().includes(terminoBusqueda));
+            // 2. Filtrar por buscador (insensible a tildes y mayúsculas)
+            if (terminoBusqueda.trim() !== '') {
+                let terminoNorm = normalizarTexto(terminoBusqueda);
+                lista = lista.filter(p => p.titulo && normalizarTexto(p.titulo).includes(terminoNorm));
             }
 
             renderizarProductos(lista);
@@ -448,25 +455,25 @@
             productoEnEdicion = p;
             parchesSeleccionadosModal = {};
 
-            const categoriaProd = (p.categoria || '').toLowerCase().trim();
+            const categoriaProd = normalizarTexto(p.categoria || '');
             const listaParchesOriginal = datosTienda.parches || [];
 
             const listaParches = listaParchesOriginal.filter(pr => {
-                let catParche = (pr.categoria || '').toLowerCase().trim();
+                let catParche = normalizarTexto(pr.categoria || '');
                 if (!catParche || catParche === 'todos' || catParche === 'todo') return true;
                 return catParche === categoriaProd;
             });
 
             let parchesCentro = listaParches.filter(pr => {
-                let pos = (pr.posicion || '').toString().toLowerCase().trim();
+                let pos = normalizarTexto(pr.posicion || '');
                 return pos === 'c' || pos.includes('centro') || pos.includes('pecho');
             });
             let parchesIzquierdo = listaParches.filter(pr => {
-                let pos = (pr.posicion || '').toString().toLowerCase().trim();
+                let pos = normalizarTexto(pr.posicion || '');
                 return pos === 'i' || pos.includes('izquierdo') || pos.includes('izq');
             });
             let parchesDerecho = listaParches.filter(pr => {
-                let pos = (pr.posicion || '').toString().toLowerCase().trim();
+                let pos = normalizarTexto(pr.posicion || '');
                 return pos === 'd' || pos.includes('derecho') || pos.includes('der');
             });
 
