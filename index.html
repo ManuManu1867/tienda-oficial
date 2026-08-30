@@ -19,7 +19,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
         body { background-color: var(--bg); color: var(--text); padding-bottom: 60px; }
 
-        /* Estilo Navbar estilo Nike / E-commerce Pro */
         nav {
             display: flex; justify-content: space-between; align-items: center;
             padding: 15px 40px; border-bottom: 1px solid var(--border);
@@ -41,13 +40,11 @@
             background: var(--primary); color: white;
         }
 
-        /* Banner de Categoría Superior */
         .hero-banner {
             max-width: 1400px; margin: 30px auto 20px auto; padding: 0 20px;
         }
         .hero-banner h1 { font-size: 1.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: -0.5px; }
 
-        /* Contenedor del Catálogo */
         .catalogo {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 30px; max-width: 1400px; margin: 0 auto; padding: 0 20px;
@@ -57,7 +54,7 @@
             background-color: var(--surface); border-radius: var(--radius);
             overflow: hidden; display: flex; flex-direction: column;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
-            cursor: pointer; border: 1px solid transparent;
+            border: 1px solid transparent;
         }
         .tarjeta:hover {
             transform: translateY(-4px);
@@ -88,8 +85,8 @@
         .miniatura:hover, .miniatura.activa { opacity: 1; border-color: var(--primary); }
 
         .tarjeta-info { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; }
-        .tarjeta-info h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 8px; color: var(--text); }
-        .talla { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px; }
+        .tarjeta-info h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+        .talla { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px; }
         
         .footer-card { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
         .precio { font-size: 1.15rem; font-weight: 700; color: var(--text); }
@@ -131,6 +128,20 @@
         const PUBLIC_KEY = 'camisetas_public_drive';
         const LOGO_PUBLIC_KEY = 'logo_public_drive';
 
+        // Producto por defecto para que aparezca siempre en cualquier móvil o navegador
+        const productosPorDefecto = [
+            {
+                id: 1,
+                titulo: "España 1ª Equipación Mundial 2026",
+                categoria: "Selecciones",
+                precio: "25.00",
+                talla: "XS, S, M, L, XL",
+                imagenes: [
+                    "https://lh3.googleusercontent.com/d/1X..." // Enlace base o puedes usar la imagen de prueba que tenías
+                ]
+            }
+        ];
+
         document.addEventListener('DOMContentLoaded', () => {
             cargarLogoPublico();
             cargarCatalogoCliente('todas');
@@ -147,7 +158,9 @@
             const contenedor = document.getElementById('catalogoCliente');
             contenedor.innerHTML = '';
 
-            let productos = JSON.parse(localStorage.getItem(PUBLIC_KEY)) || [];
+            // Si el almacenamiento está vacío, carga el producto por defecto
+            let productosGuardados = JSON.parse(localStorage.getItem(PUBLIC_KEY));
+            let productos = (productosGuardados && productosGuardados.length > 0) ? productosGuardados : productosPorDefecto;
 
             if (categoriaFiltro !== 'todas') {
                 productos = productos.filter(p => p.categoria === categoriaFiltro);
