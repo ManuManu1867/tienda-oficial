@@ -111,10 +111,11 @@
         .btn-personalizar {
             background: #f3f4f6; color: var(--primary); border: 1px solid var(--border);
             padding: 9px; border-radius: var(--radius); font-weight: 600; font-size: 0.85rem;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
             transition: all 0.2s; width: 100%;
         }
         .btn-personalizar:hover { background: #e5e7eb; border-color: #d1d5db; }
+        .btn-personalizar svg { width: 14px; height: 14px; fill: currentColor; }
 
         /* Modal Genérico */
         .modal-overlay {
@@ -140,21 +141,19 @@
         .zona-seccion { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 12px; }
         .zona-titulo { font-size: 0.9rem; font-weight: 700; margin-bottom: 8px; color: var(--primary); display: flex; align-items: center; gap: 6px; }
         
-        .parches-grid-zona { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
-        .parche-card {
-            border: 2px solid var(--border); border-radius: 6px; padding: 8px; text-align: center;
-            background: white; display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-            transition: all 0.2s;
-        }
-        .parche-card.active-parche { border-color: var(--accent); background: #eff6ff; }
-        .parche-card img { width: 45px; height: 45px; object-fit: contain; margin-bottom: 6px; background: #fff; border-radius: 4px; padding: 2px; border: 1px solid var(--border); }
-        .parche-card h5 { font-size: 0.75rem; margin-bottom: 6px; font-weight: 600; }
+        .parches-grid-zona { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
         
-        .btn-toggle-parche {
-            background: #e5e7eb; color: var(--text); border: none; padding: 3px 8px;
-            border-radius: 4px; font-size: 0.7rem; font-weight: 700; cursor: pointer; width: 100%; transition: background 0.2s;
+        /* Tarjeta de parche clickeable y más grande */
+        .parche-card {
+            border: 2px solid var(--border); border-radius: 8px; padding: 10px; text-align: center;
+            background: white; display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            cursor: pointer; transition: all 0.2s; position: relative;
         }
-        .parche-card.active-parche .btn-toggle-parche { background: var(--accent); color: white; }
+        .parche-card:hover { border-color: #cbd5e1; transform: translateY(-2px); }
+        .parche-card.active-parche { border-color: var(--accent); background: #eff6ff; box-shadow: 0 0 0 1px var(--accent); }
+        
+        .parche-card img { width: 65px; height: 65px; object-fit: contain; margin-bottom: 8px; background: #fff; border-radius: 6px; padding: 2px; border: 1px solid var(--border); }
+        .parche-card h5 { font-size: 0.75rem; font-weight: 600; color: var(--text); line-height: 1.2; }
 
         .item-carrito {
             display: flex; justify-content: space-between; align-items: center;
@@ -240,7 +239,6 @@
         let productoEnEdicion = null;
         let parchesSeleccionadosModal = {};
 
-        // Función para transformar enlaces de Google Drive en enlaces directos de imagen
         function limpiarUrlImagen(url) {
             if (!url) return '';
             url = url.trim();
@@ -320,7 +318,8 @@
 
                         <div class="footer-card">
                             <button class="btn-personalizar" onclick="abrirPersonalizacion('${idProd}')">
-                                ⚙️ Personalizar con Parches
+                                <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                                Personalizar Camiseta
                             </button>
                             <div class="footer-card-row">
                                 <div class="precio">${parseFloat(p.precio || 0).toFixed(2)} €</div>
@@ -404,14 +403,13 @@
                 let htmlGrid = '';
                 zona.lista.forEach(parche => {
                     let pid = parche.id || parche.nombre;
-                    // AQUÍ APLICAMOS LA CONVERSIÓN DE GOOGLE DRIVE AUTOMÁTICAMENTE
                     let imgParche = limpiarUrlImagen(parche.imagen || parche.url || parche.foto || parche.img || '');
 
+                    // Toda la tarjeta es el botón interactivo (onclick en el contenedor)
                     htmlGrid += `
-                        <div class="parche-card" id="card-${zona.key}-${pid}">
+                        <div class="parche-card" id="card-${zona.key}-${pid}" onclick="toggleParcheZona('${zona.key}', '${pid}', '${parche.nombre}')">
                             <img src="${imgParche}" alt="${parche.nombre}">
                             <h5>${parche.nombre}</h5>
-                            <button class="btn-toggle-parche" onclick="toggleParcheZona('${zona.key}', '${pid}', '${parche.nombre}')">Activar</button>
                         </div>
                     `;
                 });
@@ -443,7 +441,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Elige tus parches (Tarifa plana: +2.00 € en total):</label>
+                    <label>Añadir Parches (+2 € en total):</label>
                     ${htmlZonas}
                 </div>
 
@@ -465,19 +463,16 @@
             if (parchesSeleccionadosModal[zonaKey] && parchesSeleccionadosModal[zonaKey].id === parcheId) {
                 delete parchesSeleccionadosModal[zonaKey];
                 document.getElementById(`card-${zonaKey}-${parcheId}`).classList.remove('active-parche');
-                document.querySelector(`#card-${zonaKey}-${parcheId} .btn-toggle-parche`).innerText = 'Activar';
             } else {
                 if (parchesSeleccionadosModal[zonaKey]) {
                     let viejoId = parchesSeleccionadosModal[zonaKey].id;
                     let elemViejo = document.getElementById(`card-${zonaKey}-${viejoId}`);
                     if (elemViejo) {
                         elemViejo.classList.remove('active-parche');
-                        elemViejo.querySelector('.btn-toggle-parche').innerText = 'Activar';
                     }
                 }
                 parchesSeleccionadosModal[zonaKey] = { id: parcheId, nombre: parcheNombre };
                 document.getElementById(`card-${zonaKey}-${parcheId}`).classList.add('active-parche');
-                document.querySelector(`#card-${zonaKey}-${parcheId} .btn-toggle-parche`).innerText = 'Activado ✓';
             }
             calcularPrecioModal();
         }
