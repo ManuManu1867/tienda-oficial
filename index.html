@@ -117,7 +117,7 @@
         .btn-personalizar:hover { background: #e5e7eb; border-color: #d1d5db; }
         .btn-personalizar svg { width: 14px; height: 14px; fill: currentColor; }
 
-        /* Modal Genérico */
+        /* Modales */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); display: none; justify-content: flex-end; z-index: 1000;
@@ -165,7 +165,6 @@
         }
         .btn-cant:hover { background: var(--surface); }
 
-        /* Botón de eliminar minimalista */
         .btn-eliminar {
             background: none; border: none; cursor: pointer; color: var(--text);
             opacity: 0.5; transition: opacity 0.2s, color 0.2s; padding: 4px; display: flex; align-items: center; justify-content: center;
@@ -175,7 +174,6 @@
 
         .error-talla { color: var(--danger); font-size: 0.75rem; margin-top: 4px; display: none; }
         
-        /* Botón de WhatsApp con icono oficial */
         .btn-whatsapp {
             background: #25d366; color: white; border: none; width: 100%; padding: 12px;
             border-radius: var(--radius); font-weight: 700; font-size: 1rem; cursor: pointer; 
@@ -208,7 +206,7 @@
 
     <div class="main-container">
         <h1 class="section-title" id="tituloCategoria">Novedades y Equipaciones</h1>
-        <div id="contenedorProductos" class="loader">Cargando productos</div>
+        <div id="contenedorProductos" class="loader">Cargando productos...</div>
     </div>
 
     <!-- Modal del Carrito -->
@@ -234,7 +232,7 @@
         </div>
     </div>
 
-    <!-- Modal de Personalización (3 Zonas de Parches) -->
+    <!-- Modal de Personalización -->
     <div class="modal-overlay" id="modalPersonalizacion">
         <div class="modal-contenido">
             <div class="modal-header">
@@ -246,8 +244,7 @@
     </div>
 
     <script>
-        // URL DE GOOGLE APPS SCRIPT
-        const API_URL = 'https://script.google.com/macros/s/AKfycbxVdpVaulwpjHZyKKPBtfN0XC_FNhZxYftW3fCqXd0JeYEASagt4duknAa0mA60uIYf8g/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzFQoJGaik-xdHVm0CBBvnVGKVJt7bVyPuFNFVeXnC8iT-9plM8nRrabr1rXqdABBBv8g/exec';
         
         let datosTienda = { productos: [], parches: [] };
         let estadoSelecciones = {};
@@ -393,18 +390,9 @@
             productoEnEdicion = p;
             parchesSeleccionadosModal = {};
 
-            let parchesCentro = datosTienda.parches.filter(pr => {
-                let pos = (pr.posicion || '').toString().toLowerCase();
-                return pos.includes('c') || pos.includes('centro');
-            });
-            let parchesIzquierdo = datosTienda.parches.filter(pr => {
-                let pos = (pr.posicion || '').toString().toLowerCase();
-                return pos.includes('i') || pos.includes('izq');
-            });
-            let parchesDerecho = datosTienda.parches.filter(pr => {
-                let pos = (pr.posicion || '').toString().toLowerCase();
-                return pos.includes('d') || pos.includes('der');
-            });
+            let parchesCentro = datosTienda.parches.filter(pr => (pr.posicion || '').toString().toLowerCase().includes('c'));
+            let parchesIzquierdo = datosTienda.parches.filter(pr => (pr.posicion || '').toString().toLowerCase().includes('i'));
+            let parchesDerecho = datosTienda.parches.filter(pr => (pr.posicion || '').toString().toLowerCase().includes('d'));
 
             let zonasConfig = [
                 { key: 'centro_pecho', titulo: '⚽ Centro del Pecho', lista: parchesCentro },
@@ -415,12 +403,10 @@
             let htmlZonas = '';
             zonasConfig.forEach(zona => {
                 if (zona.lista.length === 0) return;
-                
                 let htmlGrid = '';
                 zona.lista.forEach(parche => {
                     let pid = parche.id || parche.nombre;
                     let imgParche = limpiarUrlImagen(parche.imagen || parche.url || parche.foto || parche.img || '');
-
                     htmlGrid += `
                         <div class="parche-card" id="card-${zona.key}-${pid}" onclick="toggleParcheZona('${zona.key}', '${pid}', '${parche.nombre}')">
                             <img src="${imgParche}" alt="${parche.nombre}">
@@ -438,39 +424,33 @@
             });
 
             if (datosTienda.parches.length === 0) {
-                htmlZonas = "<p style='color:var(--text-muted); text-align:center; padding:15px;'>No hay parches configurados en la pestaña PARCHES de Google Sheets.</p>";
+                htmlZonas = "<p style='color:var(--text-muted); text-align:center; padding:15px;'>No hay parches configurados.</p>";
             }
 
             const contenedor = document.getElementById('contenidoPersonalizacion');
             contenedor.innerHTML = `
                 <p style="font-weight: 600; margin-bottom: 12px; font-size: 0.95rem;">${p.titulo} (Talla: ${seleccion.talla})</p>
-                
                 <div class="form-group">
                     <label>Nombre para la espalda (+3.00 €):</label>
                     <input type="text" id="inputNombreCustom" placeholder="Ej: GAVI">
                 </div>
-
                 <div class="form-group">
                     <label>Número para la espalda:</label>
                     <input type="text" id="inputNumeroCustom" placeholder="Ej: 9">
                 </div>
-
                 <div class="form-group">
                     <label>Añadir Parches (+2 € en total):</label>
                     ${htmlZonas}
                 </div>
-
                 <div style="background: var(--surface); padding: 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
                     <span style="font-weight: 700;">Precio Total Configurado:</span>
                     <span id="precioTotalModal" style="font-size: 1.2rem; font-weight: 800; color: var(--accent);">${parseFloat(p.precio).toFixed(2)} €</span>
                 </div>
-
                 <button class="btn-whatsapp" style="background: var(--primary); margin-top: 15px;" onclick="confirmarPersonalizacion('${idProd}')">Añadir al Carrito</button>
             `;
 
             document.getElementById('inputNombreCustom').addEventListener('input', calcularPrecioModal);
             document.getElementById('inputNumeroCustom').addEventListener('input', calcularPrecioModal);
-
             document.getElementById('modalPersonalizacion').classList.add('open');
         }
 
@@ -482,9 +462,7 @@
                 if (parchesSeleccionadosModal[zonaKey]) {
                     let viejoId = parchesSeleccionadosModal[zonaKey].id;
                     let elemViejo = document.getElementById(`card-${zonaKey}-${viejoId}`);
-                    if (elemViejo) {
-                        elemViejo.classList.remove('active-parche');
-                    }
+                    if (elemViejo) elemViejo.classList.remove('active-parche');
                 }
                 parchesSeleccionadosModal[zonaKey] = { id: parcheId, nombre: parcheNombre };
                 document.getElementById(`card-${zonaKey}-${parcheId}`).classList.add('active-parche');
@@ -498,14 +476,8 @@
             let nombreVal = document.getElementById('inputNombreCustom').value.trim();
             let numeroVal = document.getElementById('inputNumeroCustom').value.trim();
 
-            if (nombreVal !== '' || numeroVal !== '') {
-                total += 3.00;
-            }
-
-            let totalParchesElegidos = Object.keys(parchesSeleccionadosModal).length;
-            if (totalParchesElegidos > 0) {
-                total += 2.00;
-            }
+            if (nombreVal !== '' || numeroVal !== '') total += 3.00;
+            if (Object.keys(parchesSeleccionadosModal).length > 0) total += 2.00;
 
             document.getElementById('precioTotalModal').innerText = total.toFixed(2) + ' €';
         }
@@ -530,10 +502,7 @@
                 detalleParchesArr.push(`${pInfo.nombre} (${zonaNombreLindo})`);
             });
 
-            if (detalleParchesArr.length > 0) {
-                costoExtra += 2.00;
-            }
-
+            if (detalleParchesArr.length > 0) costoExtra += 2.00;
             let textoParches = detalleParchesArr.length > 0 ? detalleParchesArr.join(' | ') : 'Sin parches';
 
             agregarAlCarritoFinal({
@@ -624,9 +593,7 @@
 
         function cambiarCantidad(index, delta) {
             carrito[index].cantidad += delta;
-            if (carrito[index].cantidad <= 0) {
-                carrito.splice(index, 1);
-            }
+            if (carrito[index].cantidad <= 0) carrito.splice(index, 1);
             actualizarContadorCarrito();
             renderizarListaCarrito();
         }
@@ -639,7 +606,6 @@
 
         function enviarWhatsApp() {
             if (carrito.length === 0) return;
-
             let texto = "Hola, quiero realizar el siguiente pedido:\n\n";
             let totalGeneral = 0;
 
@@ -654,9 +620,7 @@
             });
 
             texto += `*Total del pedido: ${totalGeneral.toFixed(2)} €*`;
-
-            let urlWap = `https://wa.me/?text=${encodeURIComponent(texto)}`;
-            window.open(urlWap, '_blank');
+            window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
         }
 
         function filtrar(categoria, btn) {
