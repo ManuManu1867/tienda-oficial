@@ -244,7 +244,7 @@
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzFQoJGaik-xdHVm0CBBvnVGKVJt7bVyPuFNFVeXnC8iT-9plM8nRrabr1rXqdABBBv8g/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzUfkNGoiVZqENyykQTtmvJW3qr-o0SLs831lwRIRinsnkSaCx75YLd_jLZT2NgA72uAQ/exec';
         
         let datosTienda = { productos: [], parches: [] };
         let estadoSelecciones = {};
@@ -390,9 +390,9 @@
             productoEnEdicion = p;
             parchesSeleccionadosModal = {};
 
-            let parchesCentro = datosTienda.parches.filter(pr => (pr.posicion || '').toString().toLowerCase().includes('c'));
-            let parchesIzquierdo = datosTienda.parches.filter(pr => (pr.posicion || '').toString().toLowerCase().includes('i'));
-            let parchesDerecho = datosTienda.parches.filter(pr => (pr.posicion || '').toString().toLowerCase().includes('d'));
+            let parchesCentro = datosTienda.parches.filter(pr => (pr.posicion || '').toString().toLowerCase().includes('centro'));
+            let parchesIzquierdo = datosTienda.parches.filter(pr => (pr.posicion || '').toString().toLowerCase().includes('izquierdo'));
+            let parchesDerecho = datosTienda.parches.filter(pr => (pr.posicion || '').toString().toLowerCase().includes('derecho'));
 
             let zonasConfig = [
                 { key: 'centro_pecho', titulo: '⚽ Centro del Pecho', lista: parchesCentro },
