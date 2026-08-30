@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tienda Oficial - Catálogo</title>
+    <title>Tienda Oficial</title>
     <style>
         :root {
             --primary: #111827;
@@ -17,206 +17,165 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
-        body { background-color: var(--bg); color: var(--text); padding-bottom: 60px; }
+        body { background-color: var(--bg); color: var(--text); }
 
-        nav {
+        header {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 20px; border-bottom: 1px solid var(--border);
-            position: sticky; top: 0; background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(8px); z-index: 100; flex-wrap: wrap; gap: 10px;
+            padding: 20px 5%; border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; background: white; z-index: 100;
+        }
+        .logo { font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
+
+        .filtros {
+            display: flex; gap: 10px; overflow-x: auto; padding: 20px 5%;
+            background: #fff;
+        }
+        .filtro-btn {
+            background: var(--surface); border: 1px solid var(--border);
+            padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 0.9rem;
+            cursor: pointer; transition: all 0.2s; white-space: nowrap;
+        }
+        .filtro-btn.active, .filtro-btn:hover {
+            background: var(--primary); color: white; border-color: var(--primary);
         }
 
-        .nav-brand { display: flex; align-items: center; gap: 15px; }
-        .logo-container { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; }
-        .logo-img { width: 100%; height: 100%; object-fit: contain; }
+        .main-container { padding: 20px 5% 60px 5%; }
+        h1.section-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 25px; }
 
-        .nav-filtros { display: flex; gap: 6px; overflow-x: auto; width: 100%; padding-bottom: 5px; }
-        @media (min-width: 768px) {
-            .nav-filtros { width: auto; padding-bottom: 0; }
-            nav { padding: 15px 40px; }
-        }
-
-        .btn-filtro {
-            background: transparent; border: none; padding: 6px 14px;
-            font-size: 0.9rem; font-weight: 600; color: var(--text-muted);
-            cursor: pointer; border-radius: 20px; white-space: nowrap; transition: all 0.2s ease;
-        }
-        .btn-filtro:hover, .btn-filtro.activo {
-            background: var(--primary); color: white;
-        }
-
-        .hero-banner {
-            max-width: 1400px; margin: 20px auto 15px auto; padding: 0 20px;
-        }
-        .hero-banner h1 { font-size: 1.5rem; font-weight: 800; text-transform: uppercase; letter-spacing: -0.5px; }
-        @media (min-width: 768px) {
-            .hero-banner { margin: 30px auto 20px auto; }
-            .hero-banner h1 { font-size: 1.8rem; }
-        }
-
-        .catalogo {
-            display: grid; grid-template-columns: 1fr;
-            gap: 20px; max-width: 1400px; margin: 0 auto; padding: 0 20px;
-        }
-        @media (min-width: 550px) {
-            .catalogo { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; }
-        }
-        @media (min-width: 1024px) {
-            .catalogo { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; }
+        .grid-productos {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px;
         }
 
         .tarjeta {
-            background-color: var(--surface); border-radius: var(--radius);
-            overflow: hidden; display: flex; flex-direction: column;
-            border: 1px solid var(--border);
+            background: var(--surface); border-radius: var(--radius); overflow: hidden;
+            border: 1px solid var(--border); display: flex; flex-direction: column;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-        @media (min-width: 768px) {
-            .tarjeta { border: 1px solid transparent; transition: transform 0.2s ease, box-shadow 0.2s ease; }
-            .tarjeta:hover {
-                transform: translateY(-4px);
-                box-shadow: 0 12px 20px -10px rgba(0,0,0,0.1);
-                border-color: var(--border);
-            }
-        }
+        .tarjeta:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
 
         .visor-imagen {
-            position: relative; background-color: #f3f4f6; height: 320px;
+            position: relative; background: #eee; height: 320px;
             display: flex; align-items: center; justify-content: center; overflow: hidden;
         }
-        @media (min-width: 768px) { .visor-imagen { height: 350px; } }
-        .visor-imagen img.img-principal { width: 100%; height: 100%; object-fit: cover; }
-
+        .visor-imagen img { width: 100%; height: 100%; object-fit: cover; transition: opacity 0.3s; }
+        
         .categoria-badge {
-            position: absolute; top: 12px; left: 12px; background-color: white;
-            color: var(--text); padding: 4px 10px; border-radius: 4px;
-            font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            position: absolute; top: 12px; left: 12px; background: white;
+            padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700;
+            text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        .miniaturas { display: flex; gap: 6px; padding: 10px 15px 0 15px; overflow-x: auto; }
+        /* Miniaturas de imágenes múltiples */
+        .miniaturas {
+            display: flex; gap: 6px; padding: 8px 12px; background: #fff;
+            overflow-x: auto; border-top: 1px solid var(--border);
+        }
         .miniatura {
             width: 40px; height: 40px; border-radius: 4px; object-fit: cover;
-            cursor: pointer; border: 1px solid var(--border); background-color: white;
-            opacity: 0.7; transition: opacity 0.2s;
+            cursor: pointer; border: 2px solid transparent; opacity: 0.6; transition: all 0.2s;
         }
-        .miniatura:hover, .miniatura.activa { opacity: 1; border-color: var(--primary); }
+        .miniatura.active { border-color: var(--accent); opacity: 1; }
 
-        .tarjeta-info { padding: 15px; display: flex; flex-direction: column; flex-grow: 1; }
-        @media (min-width: 768px) { .tarjeta-info { padding: 20px; } }
+        .tarjeta-info { padding: 16px; display: flex; flex-direction: column; flex-grow: 1; }
+        .tarjeta-info h3 { font-size: 1rem; font-weight: 600; margin-bottom: 6px; }
+        .tallas { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px; }
 
-        .tarjeta-info h3 { font-size: 1rem; font-weight: 600; margin-bottom: 6px; color: var(--text); }
-        .talla { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px; }
-        
         .footer-card { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
-        .precio { font-size: 1.15rem; font-weight: 700; color: var(--text); }
-        
+        .precio { font-size: 1.2rem; font-weight: 800; }
         .btn-comprar {
-            background-color: var(--primary); color: white; border: none;
-            padding: 10px 16px; border-radius: 20px; font-weight: 600; font-size: 0.85rem;
-            cursor: pointer; transition: background 0.2s;
+            background: var(--primary); color: white; border: none;
+            padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 0.85rem;
+            cursor: pointer; text-decoration: none; transition: background 0.2s;
         }
-        .btn-comprar:hover { background-color: #374151; }
+        .btn-comprar:hover { background: var(--accent); }
 
-        .sin-productos { text-align: center; grid-column: 1 / -1; padding: 60px; color: var(--text-muted); font-size: 1.1rem; }
-        .cargando { text-align: center; grid-column: 1 / -1; padding: 60px; font-weight: 600; color: var(--text-muted); }
+        .loader { text-align: center; padding: 40px; font-size: 1.1rem; color: var(--text-muted); }
     </style>
 </head>
 <body>
 
-    <nav>
-        <div class="nav-brand">
-            <div class="logo-container" id="logoContainer">
-                <h2>TIENDA</h2>
-            </div>
-        </div>
-        <div class="nav-filtros">
-            <button class="btn-filtro activo" onclick="filtrar('todas', this)">Todo</button>
-            <button class="btn-filtro" onclick="filtrar('Selecciones', this)">Selecciones</button>
-            <button class="btn-filtro" onclick="filtrar('Clubes', this)">Clubes</button>
-            <button class="btn-filtro" onclick="filtrar('Retro', this)">Retro</button>
-            <button class="btn-filtro" onclick="filtrar('Otros', this)">Otros</button>
-        </div>
-    </nav>
+    <header>
+        <div class="logo">⚽ Tienda Oficial</div>
+    </header>
 
-    <div class="hero-banner">
-        <h1 id="tituloCategoria">Novedades y Equipaciones</h1>
+    <div class="filtros">
+        <button class="filtro-btn active" onclick="filtrar('Todo', this)">Todo</button>
+        <button class="filtro-btn" onclick="filtrar('Selecciones', this)">Selecciones</button>
+        <button class="filtro-btn" onclick="filtrar('Clubes', this)">Clubes</button>
+        <button class="filtro-btn" onclick="filtrar('Retro', this)">Retro</button>
+        <button class="filtro-btn" onclick="filtrar('Otros', this)">Otros</button>
     </div>
 
-    <div class="catalogo" id="catalogoCliente">
-        <div class="cargando">Cargando productos desde la nube...</div>
+    <div class="main-container">
+        <h1 class="section-title" id="tituloCategoria">Novedades y Equipaciones</h1>
+        <div id="contenedorProductos" class="loader">Cargando productos desde la nube...</div>
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbxGW9FSTwk-n_kKSpuglJjEVAps2DJ7tEeoZrW823KUXTukMbNUtA3GunYn9OaTtDCcnw/exec';
-        let listaProductosGlobal = [];
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwi_d3Q1xsTiSxZ0WqCdOkNBjdfQh37a2BDyKnM2aoWx27dM8ZEgjKXKwvRsd3Mp26abA/exec';
+        let productosGlobales = [];
 
-        document.addEventListener('DOMContentLoaded', () => {
-            cargarLogoPublico();
-            obtenerProductosDeGoogleSheets('todas');
-        });
-
-        function cargarLogoPublico() {
-            const logo = localStorage.getItem('logo_public_drive');
-            if (logo) {
-                document.getElementById('logoContainer').innerHTML = `<img src="${logo}" class="logo-img">`;
-            }
-        }
-
-        async function obtenerProductosDeGoogleSheets(categoriaFiltro) {
-            const contenedor = document.getElementById('catalogoCliente');
+        async function cargarProductos() {
             try {
-                const respuesta = await fetch(API_URL);
-                listaProductosGlobal = await respuesta.json();
-                renderizarCatalogo(categoriaFiltro);
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                productosGlobales = data;
+                renderizarProductos(productosGlobales);
             } catch (error) {
-                console.error("Error al cargar productos:", error);
-                contenedor.innerHTML = `<div class="sin-productos">Error al conectar con la base de datos de Google. Inténtalo más tarde.</div>`;
+                console.error("Error al cargar:", error);
+                document.getElementById('contenedorProductos').innerHTML = "Error al cargar los productos. Comprueba tu conexión.";
             }
         }
 
-        function renderizarCatalogo(categoriaFiltro) {
-            const contenedor = document.getElementById('catalogoCliente');
-            contenedor.innerHTML = '';
-
-            let productos = listaProductosGlobal;
-
-            if (categoriaFiltro !== 'todas') {
-                productos = productos.filter(p => p.categoria && p.categoria.trim().toLowerCase() === categoriaFiltro.toLowerCase());
-            }
-
-            if (productos.length === 0) {
-                contenedor.innerHTML = `<div class="sin-productos">No hay productos disponibles en esta categoría actualmente.</div>`;
+        function renderizarProductos(lista) {
+            const contenedor = document.getElementById('contenedorProductos');
+            if (!lista || lista.length === 0) {
+                contenedor.innerHTML = "<p style='text-align:center; color: var(--text-muted);'>No hay productos disponibles todavía.</p>";
                 return;
             }
 
-            productos.forEach(producto => {
-                const tarjeta = document.createElement('div');
-                tarjeta.classList.add('tarjeta');
+            contenedor.className = "grid-productos";
+            contenedor.innerHTML = "";
 
-                let imagenesArray = Array.isArray(producto.imagenes) ? producto.imagenes : [producto.imagenes];
-                let imagenPrincipal = imagenesArray[0] || '';
+            lista.forEach((p, index) => {
+                let imgs = [];
+                if (Array.isArray(p.imagenes)) {
+                    imgs = p.imagenes;
+                } else if (typeof p.imagenes === 'string' && p.imagenes.trim() !== '') {
+                    imgs = p.imagenes.split(',').map(s => s.trim());
+                }
+                if (imgs.length === 0) imgs = ['https://via.placeholder.com/300x350?text=Sin+Imagen'];
 
-                let miniaturasHTML = '';
-                if (imagenesArray.length > 1) {
-                    miniaturasHTML = `<div class="miniaturas">`;
-                    imagenesArray.forEach((imgSrc, index) => {
-                        miniaturasHTML += `<img src="${imgSrc.trim()}" class="miniatura ${index === 0 ? 'activa' : ''}" onclick="cambiarImagenPrincipalCliente('${producto.id}', '${imgSrc.trim()}', this)">`;
+                let imgPrincipal = imgs[0];
+                let idProd = p.id || index;
+
+                let htmlMiniaturas = '';
+                if (imgs.length > 1) {
+                    htmlMiniaturas = '<div class="miniaturas">';
+                    imgs.forEach((imgUrl, imgIdx) => {
+                        let activeClass = imgIdx === 0 ? 'active' : '';
+                        htmlMiniaturas += `<img src="${imgUrl}" class="miniatura ${activeClass}" onclick="cambiarImagen(event, '${idProd}', '${imgUrl}')">`;
                     });
-                    miniaturasHTML += `</div>`;
+                    htmlMiniaturas += '</div>';
                 }
 
+                let textoWap = encodeURIComponent(`Hola, quiero comprar la camiseta: ${p.titulo} (Talla: ${p.talla}) por ${p.precio}€`);
+                let linkWap = `https://wa.me/?text=${textoWap}`;
+
+                const tarjeta = document.createElement('div');
+                tarjeta.className = 'tarjeta';
                 tarjeta.innerHTML = `
                     <div class="visor-imagen">
-                        <span class="categoria-badge">${producto.categoria}</span>
-                        <img src="${imagenPrincipal.trim()}" class="img-principal" id="img-main-${producto.id}">
+                        <span class="categoria-badge">${p.categoria || 'General'}</span>
+                        <img id="img-${idProd}" src="${imgPrincipal}" alt="${p.titulo}">
                     </div>
-                    ${miniaturasHTML}
+                    ${htmlMiniaturas}
                     <div class="tarjeta-info">
-                        <h3>${producto.titulo}</h3>
-                        <div class="talla">Tallas: ${producto.talla}</div>
+                        <h3>${p.titulo || 'Sin título'}</h3>
+                        <div class="tallas">Tallas: ${p.talla || 'Única'}</div>
                         <div class="footer-card">
-                            <div class="precio">${producto.precio} €</div>
-                            <button class="btn-comprar" onclick="alert('Redirigiendo a pasarela de compra para: ${producto.titulo}')">Ver / Comprar</button>
+                            <div class="precio">${p.precio ? p.precio + ' €' : '0.00 €'}</div>
+                            <a href="${linkWap}" target="_blank" class="btn-comprar">Ver / Comprar</a>
                         </div>
                     </div>
                 `;
@@ -224,20 +183,27 @@
             });
         }
 
-        function cambiarImagenPrincipalCliente(id, nuevaSrc, elementoThumb) {
-            document.getElementById(`img-main-${id}`).src = nuevaSrc;
-            const tarjeta = elementoThumb.closest('.tarjeta');
-            tarjeta.querySelectorAll('.miniatura').forEach(thumb => thumb.classList.remove('activa'));
-            elementoThumb.classList.add('activa');
+        function cambiarImagen(event, idProd, nuevaUrl) {
+            document.getElementById(`img-${idProd}`).src = nuevaUrl;
+            const tarjeta = event.target.closest('.tarjeta');
+            tarjeta.querySelectorAll('.miniatura').forEach(m => m.classList.remove('active'));
+            event.target.classList.add('active');
         }
 
-        function filtrar(categoria, botonElemento) {
-            document.querySelectorAll('.btn-filtro').forEach(btn => btn.classList.remove('activo'));
-            botonElemento.classList.add('activo');
-            
-            document.getElementById('tituloCategoria').innerText = categoria === 'todas' ? 'Novedades y Equipaciones' : categoria;
-            renderizarCatalogo(categoria);
+        function filtrar(categoria, btn) {
+            document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('tituloCategoria').innerText = categoria === 'Todo' ? 'Novedades y Equipaciones' : categoria;
+
+            if (categoria === 'Todo') {
+                renderizarProductos(productosGlobales);
+            } else {
+                const filtrados = productosGlobales.filter(p => p.categoria && p.categoria.toLowerCase() === categoria.toLowerCase());
+                renderizarProductos(filtrados);
+            }
         }
+
+        cargarProductos();
     </script>
 </body>
 </html>
