@@ -268,7 +268,6 @@
                     estadoSelecciones[idProd] = { talla: '' };
                 }
 
-                // CORRECCIÓN DE IMÁGENES: Separación limpia por comas
                 let imgs = [];
                 if (typeof p.imagenes === 'string' && p.imagenes.trim() !== '') {
                     imgs = p.imagenes.split(',').map(s => s.trim()).filter(Boolean);
@@ -395,7 +394,10 @@
                 let htmlGrid = '';
                 zona.lista.forEach(parche => {
                     let pid = parche.id || parche.nombre;
-                    let imgParche = parche.imagen ? parche.imagen.trim() : '';
+                    // COMPATIBILIDAD TOTAL DE NOMBRES DE COLUMNA PARA LA IMAGEN DEL PARCHE
+                    let imgParche = parche.imagen || parche.url || parche.foto || parche.img || '';
+                    imgParche = imgParche.trim();
+
                     htmlGrid += `
                         <div class="parche-card" id="card-${zona.key}-${pid}">
                             <img src="${imgParche}" alt="${parche.nombre}">
