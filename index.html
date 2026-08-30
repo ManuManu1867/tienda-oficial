@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tienda Oficial</title>
+    <title>Tienda Oficial de Camisetas</title>
     <style>
         :root {
             --primary: #111827;
@@ -15,7 +15,6 @@
             --border: #e5e7eb;
             --radius: 8px;
             --danger: #ef4444;
-            --success: #10b981;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
@@ -27,12 +26,12 @@
             position: sticky; top: 0; background: white; z-index: 100;
         }
         .logo { font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
-        .logo img { height: 45px; width: auto; object-fit: contain; }
+        .logo img { height: 40px; width: auto; object-fit: contain; }
 
         .cart-btn {
-            background: var(--primary); color: white; border: none; padding: 8px 14px;
+            background: var(--primary); color: white; border: none; padding: 8px 16px;
             border-radius: 20px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;
-            font-size: 1.1rem; transition: background 0.2s;
+            font-size: 1rem; transition: background 0.2s;
         }
         .cart-btn:hover { background: var(--accent); }
 
@@ -87,7 +86,6 @@
         .tarjeta-info { padding: 16px; display: flex; flex-direction: column; flex-grow: 1; }
         .tarjeta-info h3 { font-size: 1rem; font-weight: 600; margin-bottom: 12px; }
 
-        /* Estilo de Tallas en Círculo */
         .seccion-tallas { margin-bottom: 15px; }
         .label-tallas { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; display: block; }
         .circulos-tallas { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -119,7 +117,7 @@
         }
         .btn-personalizar:hover { background: #e5e7eb; border-color: #d1d5db; }
 
-        /* Modal Genérico / Personalización */
+        /* Modal Genérico */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); display: none; justify-content: flex-end; z-index: 1000;
@@ -127,7 +125,7 @@
         .modal-overlay.open { display: flex; }
         
         .modal-contenido {
-            background: white; width: 100%; max-width: 450px; height: 100%;
+            background: white; width: 100%; max-width: 480px; height: 100%;
             padding: 20px; display: flex; flex-direction: column; box-shadow: -4px 0 15px rgba(0,0,0,0.1);
             animation: slideIn 0.3s ease; overflow-y: auto;
         }
@@ -136,25 +134,26 @@
         .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 15px; }
         .btn-cerrar-modal { background: none; border: none; font-size: 1.2rem; cursor: pointer; }
 
-        /* Estilos específicos Modal Personalización */
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: var(--text); }
         .form-group input { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; outline: none; }
         
-        .parches-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .zona-seccion { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+        .zona-titulo { font-size: 0.9rem; font-weight: 700; margin-bottom: 8px; color: var(--primary); display: flex; align-items: center; gap: 6px; }
+        
+        .parches-grid-zona { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
         .parche-card {
-            border: 2px solid var(--border); border-radius: 8px; padding: 10px; text-align: center;
-            background: var(--surface); display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            border: 2px solid var(--border); border-radius: 6px; padding: 8px; text-align: center;
+            background: white; display: flex; flex-direction: column; align-items: center; justify-content: space-between;
             transition: all 0.2s;
         }
         .parche-card.active-parche { border-color: var(--accent); background: #eff6ff; }
-        .parche-card img { width: 60px; height: 60px; object-fit: contain; margin-bottom: 8px; background: white; border-radius: 4px; padding: 4px; border: 1px solid var(--border); }
-        .parche-card h4 { font-size: 0.8rem; margin-bottom: 4px; font-weight: 600; }
-        .parche-card span { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px; display: block; }
+        .parche-card img { width: 45px; height: 45px; object-fit: contain; margin-bottom: 6px; background: #fff; border-radius: 4px; padding: 2px; border: 1px solid var(--border); }
+        .parche-card h5 { font-size: 0.75rem; margin-bottom: 6px; font-weight: 600; }
         
         .btn-toggle-parche {
-            background: #e5e7eb; color: var(--text); border: none; padding: 4px 10px;
-            border-radius: 4px; font-size: 0.75rem; font-weight: 700; cursor: pointer; width: 100%; transition: background 0.2s;
+            background: #e5e7eb; color: var(--text); border: none; padding: 3px 8px;
+            border-radius: 4px; font-size: 0.7rem; font-weight: 700; cursor: pointer; width: 100%; transition: background 0.2s;
         }
         .parche-card.active-parche .btn-toggle-parche { background: var(--accent); color: white; }
 
@@ -182,8 +181,7 @@
 
     <header>
         <div class="logo">
-            <img src="https://lh3.googleusercontent.com/d/1nu9bwEvAomNYNOilQ1aoIxkqUSJOcYGV" alt="Logo Tienda">
-            <span>Tienda Oficial</span>
+            <span>Tienda de Camisetas</span>
         </div>
         <button class="cart-btn" onclick="abrirCarritoModal()">
             🛒 <span id="cartCount" style="background: white; color: var(--primary); padding: 2px 6px; border-radius: 10px; font-size: 0.75rem;">0</span>
@@ -195,12 +193,11 @@
         <button class="filtro-btn" onclick="filtrar('Selecciones', this)">Selecciones</button>
         <button class="filtro-btn" onclick="filtrar('Clubes', this)">Clubes</button>
         <button class="filtro-btn" onclick="filtrar('Retro', this)">Retro</button>
-        <button class="filtro-btn" onclick="filtrar('Otros', this)">Otros</button>
     </div>
 
     <div class="main-container">
         <h1 class="section-title" id="tituloCategoria">Novedades y Equipaciones</h1>
-        <div id="contenedorProductos" class="loader">Cargando productos desde la nube...</div>
+        <div id="contenedorProductos" class="loader">Cargando productos desde Google Sheets...</div>
     </div>
 
     <!-- Modal del Carrito -->
@@ -223,50 +220,35 @@
         </div>
     </div>
 
-    <!-- Modal de Personalización -->
+    <!-- Modal de Personalización (3 Zonas de Parches) -->
     <div class="modal-overlay" id="modalPersonalizacion">
         <div class="modal-contenido">
             <div class="modal-header">
                 <h2>Personalizar Equipación</h2>
                 <button class="btn-cerrar-modal" onclick="cerrarModal('modalPersonalizacion')">✕</button>
             </div>
-            <div id="contenidoPersonalizacion">
-                <!-- Se llena dinámicamente -->
-            </div>
+            <div id="contenidoPersonalizacion"></div>
         </div>
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwi_d3Q1xsTiSxZ0WqCdOkNBjdfQh37a2BDyKnM2aoWx27dM8ZEgjKXKwvRsd3Mp26abA/exec';
-        let productosGlobales = [];
+        // NUEVA URL DE GOOGLE APPS SCRIPT
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxVdpVaulwpjHZyKKPBtfN0XC_FNhZxYftW3fCqXd0JeYEASagt4duknAa0mA60uIYf8g/exec';
+        
+        let datosTienda = { productos: [], parches: [] };
         let estadoSelecciones = {};
         let carrito = [];
+        let productoEnEdicion = null;
+        let parchesSeleccionadosModal = {};
 
-        // Parches disponibles con sus fotos de previsualización (puedes cambiar los enlaces de imagen cuando quieras)
-        const parchesDisponibles = [
-            { 
-                id: 'parche_mundial', 
-                nombre: 'Parche Mundial', 
-                precio: 2.00, 
-                imagen: 'https://cdn-icons-png.flaticon.com/512/3313/3313437.png' 
-            },
-            { 
-                id: 'parche_champions', 
-                nombre: 'Parche Champions', 
-                precio: 2.50, 
-                imagen: 'https://cdn-icons-png.flaticon.com/512/1193/1193827.png' 
-            }
-        ];
-
-        async function cargarProductos() {
+        async function cargarDatos() {
             try {
                 const response = await fetch(API_URL);
-                const data = await response.json();
-                productosGlobales = data;
-                renderizarProductos(productosGlobales);
+                datosTienda = await response.json();
+                renderizarProductos(datosTienda.productos);
             } catch (error) {
                 console.error("Error al cargar:", error);
-                document.getElementById('contenedorProductos').innerHTML = "Error al cargar los productos. Comprueba tu conexión.";
+                document.getElementById('contenedorProductos').innerHTML = "Error al cargar los datos. Comprueba tu conexión.";
             }
         }
 
@@ -287,12 +269,10 @@
                 }
 
                 let imgs = [];
-                if (Array.isArray(p.imagenes)) {
-                    imgs = p.imagenes;
-                } else if (typeof p.imagenes === 'string' && p.imagenes.trim() !== '') {
-                    imgs = p.imagenes.split(',').map(s => s.trim());
+                if (typeof p.imagenes === 'string' && p.imagenes.trim() !== '') {
+                    imgs = p.imagenes.split(/https:\/\//).filter(Boolean).map(s => 'https://' + s.trim());
                 }
-                if (imgs.length === 0) imgs = ['https://via.placeholder.com/300x350?text=Sin+Imagen'];
+                if (imgs.length === 0) imgs = [p.imagenes || 'https://via.placeholder.com/300x350?text=Sin+Imagen'];
 
                 let imgPrincipal = imgs[0];
                 let tallasArr = p.talla ? p.talla.split(',').map(t => t.trim()) : ['Única'];
@@ -330,7 +310,7 @@
 
                         <div class="footer-card">
                             <button class="btn-personalizar" onclick="abrirPersonalizacion('${idProd}')">
-                                ⚙️ Personalizar y Añadir
+                                ⚙️ Personalizar con Parches
                             </button>
                             <div class="footer-card-row">
                                 <div class="precio">${parseFloat(p.precio || 0).toFixed(2)} €</div>
@@ -364,7 +344,7 @@
                 document.getElementById(`error-talla-${idProd}`).style.display = 'block';
                 return;
             }
-            const p = productosGlobales.find(prod => (prod.id || productosGlobales.indexOf(prod)) == idProd);
+            const p = datosTienda.productos.find(prod => (prod.id || datosTienda.productos.indexOf(prod)) == idProd);
             
             agregarAlCarritoFinal({
                 id: idProd,
@@ -377,10 +357,6 @@
             });
         }
 
-        // Abrir Modal de Personalización
-        let productoEnEdicion = null;
-        let parchesSeleccionadosModal = {};
-
         function abrirPersonalizacion(idProd) {
             let seleccion = estadoSelecciones[idProd];
             if (!seleccion.talla) {
@@ -388,23 +364,56 @@
                 return;
             }
 
-            const p = productosGlobales.find(prod => (prod.id || productosGlobales.indexOf(prod)) == idProd);
+            const p = datosTienda.productos.find(prod => (prod.id || datosTienda.productos.indexOf(prod)) == idProd);
             productoEnEdicion = p;
             parchesSeleccionadosModal = {};
 
-            let htmlParches = '';
-            parchesDisponibles.forEach(parche => {
-                htmlParches += `
-                    <div class="parche-card" id="card-parche-${parche.id}">
-                        <img src="${parche.imagen}" alt="${parche.nombre}">
-                        <div>
-                            <h4>${parche.nombre}</h4>
-                            <span>+${parche.precio.toFixed(2)} €</span>
+            let parchesCentro = datosTienda.parches.filter(pr => {
+                let pos = (pr.posicion || '').toString().toLowerCase();
+                return pos.includes('c') || pos.includes('centro');
+            });
+            let parchesIzquierdo = datosTienda.parches.filter(pr => {
+                let pos = (pr.posicion || '').toString().toLowerCase();
+                return pos.includes('i') || pos.includes('izq');
+            });
+            let parchesDerecho = datosTienda.parches.filter(pr => {
+                let pos = (pr.posicion || '').toString().toLowerCase();
+                return pos.includes('d') || pos.includes('der');
+            });
+
+            let zonasConfig = [
+                { key: 'centro_pecho', titulo: '⚽ Centro del Pecho', lista: parchesCentro },
+                { key: 'hombro_izquierdo', titulo: '🛡️ Hombro Izquierdo', lista: parchesIzquierdo },
+                { key: 'hombro_derecho', titulo: '🛡️ Hombro Derecho', lista: parchesDerecho }
+            ];
+
+            let htmlZonas = '';
+            zonasConfig.forEach(zona => {
+                if (zona.lista.length === 0) return;
+                
+                let htmlGrid = '';
+                zona.lista.forEach(parche => {
+                    let pid = parche.id || parche.nombre;
+                    htmlGrid += `
+                        <div class="parche-card" id="card-${zona.key}-${pid}">
+                            <img src="${parche.imagen}" alt="${parche.nombre}">
+                            <h5>${parche.nombre}</h5>
+                            <button class="btn-toggle-parche" onclick="toggleParcheZona('${zona.key}', '${pid}', '${parche.nombre}')">Activar</button>
                         </div>
-                        <button class="btn-toggle-parche" onclick="toggleParcheModal('${parche.id}')">Activar</button>
+                    `;
+                });
+
+                htmlZonas += `
+                    <div class="zona-seccion">
+                        <div class="zona-titulo">${zona.titulo}</div>
+                        <div class="parches-grid-zona">${htmlGrid}</div>
                     </div>
                 `;
             });
+
+            if (datosTienda.parches.length === 0) {
+                htmlZonas = "<p style='color:var(--text-muted); text-align:center; padding:15px;'>No hay parches configurados en la pestaña PARCHES de Google Sheets.</p>";
+            }
 
             const contenedor = document.getElementById('contenidoPersonalizacion');
             contenedor.innerHTML = `
@@ -421,10 +430,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Elige tus parches (Previsualización):</label>
-                    <div class="parches-grid">
-                        ${htmlParches}
-                    </div>
+                    <label>Elige tus parches (Tarifa plana: +2.00 € en total):</label>
+                    ${htmlZonas}
                 </div>
 
                 <div style="background: var(--surface); padding: 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
@@ -435,22 +442,29 @@
                 <button class="btn-whatsapp" style="background: var(--primary); margin-top: 15px;" onclick="confirmarPersonalizacion('${idProd}')">Añadir al Carrito</button>
             `;
 
-            // Actualizar precio en tiempo real al escribir
             document.getElementById('inputNombreCustom').addEventListener('input', calcularPrecioModal);
             document.getElementById('inputNumeroCustom').addEventListener('input', calcularPrecioModal);
 
             document.getElementById('modalPersonalizacion').classList.add('open');
         }
 
-        function toggleParcheModal(parcheId) {
-            if (parchesSeleccionadosModal[parcheId]) {
-                delete parchesSeleccionadosModal[parcheId];
-                document.getElementById(`card-parche-${parcheId}`).classList.remove('active-parche');
-                document.querySelector(`#card-parche-${parcheId} .btn-toggle-parche`).innerText = 'Activar';
+        function toggleParcheZona(zonaKey, parcheId, parcheNombre) {
+            if (parchesSeleccionadosModal[zonaKey] && parchesSeleccionadosModal[zonaKey].id === parcheId) {
+                delete parchesSeleccionadosModal[zonaKey];
+                document.getElementById(`card-${zonaKey}-${parcheId}`).classList.remove('active-parche');
+                document.querySelector(`#card-${zonaKey}-${parcheId} .btn-toggle-parche`).innerText = 'Activar';
             } else {
-                parchesSeleccionadosModal[parcheId] = true;
-                document.getElementById(`card-parche-${parcheId}`).classList.add('active-parche');
-                document.querySelector(`#card-parche-${parcheId} .btn-toggle-parche`).innerText = 'Activado ✓';
+                if (parchesSeleccionadosModal[zonaKey]) {
+                    let viejoId = parchesSeleccionadosModal[zonaKey].id;
+                    let elemViejo = document.getElementById(`card-${zonaKey}-${viejoId}`);
+                    if (elemViejo) {
+                        elemViejo.classList.remove('active-parche');
+                        elemViejo.querySelector('.btn-toggle-parche').innerText = 'Activar';
+                    }
+                }
+                parchesSeleccionadosModal[zonaKey] = { id: parcheId, nombre: parcheNombre };
+                document.getElementById(`card-${zonaKey}-${parcheId}`).classList.add('active-parche');
+                document.querySelector(`#card-${zonaKey}-${parcheId} .btn-toggle-parche`).innerText = 'Activado ✓';
             }
             calcularPrecioModal();
         }
@@ -462,13 +476,13 @@
             let numeroVal = document.getElementById('inputNumeroCustom').value.trim();
 
             if (nombreVal !== '' || numeroVal !== '') {
-                total += 3.00; // Costo por nombre/número
+                total += 3.00;
             }
 
-            Object.keys(parchesSeleccionadosModal).forEach(parcheId => {
-                let parcheObj = parchesDisponibles.find(p => p.id === parcheId);
-                if (parcheObj) total += parcheObj.precio;
-            });
+            let totalParchesElegidos = Object.keys(parchesSeleccionadosModal).length;
+            if (totalParchesElegidos > 0) {
+                total += 2.00;
+            }
 
             document.getElementById('precioTotalModal').innerText = total.toFixed(2) + ' €';
         }
@@ -486,16 +500,18 @@
                 textoPersonalizacion = `Nombre: ${nombreVal || 'N/A'}, Nº: ${numeroVal || 'N/A'}`;
             }
 
-            let nombresParchesArr = [];
-            Object.keys(parchesSeleccionadosModal).forEach(parcheId => {
-                let parcheObj = parchesDisponibles.find(p => p.id === parcheId);
-                if (parcheObj) {
-                    costoExtra += parcheObj.precio;
-                    nombresParchesArr.push(parcheObj.nombre);
-                }
+            let detalleParchesArr = [];
+            Object.keys(parchesSeleccionadosModal).forEach(zonaKey => {
+                let pInfo = parchesSeleccionadosModal[zonaKey];
+                let zonaNombreLindo = zonaKey === 'centro_pecho' ? 'Centro' : (zonaKey === 'hombro_izquierdo' ? 'Hombro Izq' : 'Hombro Der');
+                detalleParchesArr.push(`${pInfo.nombre} (${zonaNombreLindo})`);
             });
 
-            let textoParches = nombresParchesArr.length > 0 ? nombresParchesArr.join(', ') : 'Sin parches';
+            if (detalleParchesArr.length > 0) {
+                costoExtra += 2.00;
+            }
+
+            let textoParches = detalleParchesArr.length > 0 ? detalleParchesArr.join(' | ') : 'Sin parches';
 
             agregarAlCarritoFinal({
                 id: idProd,
@@ -562,7 +578,7 @@
                     <div class="item-carrito">
                         <div>
                             <strong>${item.titulo}</strong><br>
-                            <small style="color: var(--text-muted);">Talla: ${item.talla} | ${item.personalizacion} | ${item.parches}</small>
+                            <small style="color: var(--text-muted);">Talla: ${item.talla}<br>Personalización: ${item.personalizacion}<br>Parches: ${item.parches}</small>
                             <div class="controles-cantidad">
                                 <button class="btn-cant" onclick="cambiarCantidad(${index}, -1)">-</button>
                                 <span style="font-weight: 700; font-size: 0.9rem; min-width: 20px; text-align: center;">${item.cantidad}</span>
@@ -570,7 +586,7 @@
                             </div>
                         </div>
                         <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; height: 100%;">
-                            <button onclick="eliminarDelCarrito(${index})" style="background:none; border:none; cursor:pointer; font-size: 1.1rem; padding: 0;" title="Eliminar producto">🗑️</button>
+                            <button onclick="eliminarDelCarrito(${index})" style="background:none; border:none; cursor:pointer; font-size: 1.1rem; padding: 0;" title="Eliminar">🗑️</button>
                             <span style="font-weight: 700; margin-top: 15px;">${subtotal.toFixed(2)} €</span>
                         </div>
                     </div>
@@ -624,14 +640,14 @@
             document.getElementById('tituloCategoria').innerText = categoria === 'Todo' ? 'Novedades y Equipaciones' : categoria;
 
             if (categoria === 'Todo') {
-                renderizarProductos(productosGlobales);
+                renderizarProductos(datosTienda.productos);
             } else {
-                const filtrados = productosGlobales.filter(p => p.categoria && p.categoria.toLowerCase() === categoria.toLowerCase());
+                const filtrados = datosTienda.productos.filter(p => p.categoria && p.categoria.toLowerCase() === categoria.toLowerCase());
                 renderizarProductos(filtrados);
             }
         }
 
-        cargarProductos();
+        cargarDatos();
     </script>
 </body>
 </html>
