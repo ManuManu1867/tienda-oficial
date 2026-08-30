@@ -65,7 +65,6 @@
         .main-container { padding: 25px 5% 60px 5%; }
         h1.section-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 25px; }
 
-        /* Estilos para las secciones por categorías/ligas */
         .seccion-categoria { margin-bottom: 40px; }
         .subtitulo-categoria { font-size: 1.3rem; font-weight: 700; margin-bottom: 15px; color: var(--primary); border-left: 4px solid var(--accent); padding-left: 10px; text-transform: capitalize; }
 
@@ -137,7 +136,6 @@
         .btn-personalizar:hover { background: #e5e7eb; border-color: #d1d5db; }
         .btn-personalizar svg { width: 14px; height: 14px; fill: currentColor; }
 
-        /* Botón Ver Más por sección */
         .contenedor-ver-mas { text-align: center; margin-top: 20px; }
         .btn-ver-mas {
             background: var(--surface); color: var(--primary); border: 1px solid var(--border);
@@ -287,7 +285,7 @@
         
         let categoriaActual = 'Todo';
         let terminoBusqueda = '';
-        let limitesVisibles = {}; // Controla cuántos productos se ven por sección (de 4 en 4)
+        let limitesVisibles = {};
 
         function normalizarTexto(texto) {
             if (!texto) return '';
@@ -310,7 +308,6 @@
             try {
                 const response = await fetch(API_URL);
                 datosTienda = await response.json();
-                console.log("Datos cargados correctamente:", datosTienda);
                 aplicarFiltrosYBusqueda();
             } catch (error) {
                 console.error("Error al cargar:", error);
@@ -318,7 +315,6 @@
             }
         }
 
-        // Renderizado general estructurado por grupos / secciones
         function renderizarProductos(lista) {
             const contenedor = document.getElementById('contenedorProductos');
             if (!lista || lista.length === 0) {
@@ -326,10 +322,9 @@
                 return;
             }
 
-            contenedor.className = ""; // Limpiar grid global si se usaba
+            contenedor.className = "";
             contenedor.innerHTML = "";
 
-            // Agrupar productos según su categoría/subcategoría
             let grupos = {};
             lista.forEach(p => {
                 let cat = (p.categoria || 'General').trim();
@@ -337,16 +332,14 @@
                 grupos[cat].push(p);
             });
 
-            // Recorrer cada grupo para pintarlo en secciones de 4 en 4
             Object.keys(grupos).forEach(nombreGrupo => {
                 let productosGrupo = grupos[nombreGrupo];
 
                 if (!limitesVisibles[nombreGrupo]) {
-                    limitesVisibles[nombreGrupo] = 4; // Límite inicial de 4 por sección
+                    limitesVisibles[nombreGrupo] = 4;
                 }
                 let limiteActual = limitesVisibles[nombreGrupo];
 
-                // Crear contenedor de la sección
                 const seccionDiv = document.createElement('div');
                 seccionDiv.className = 'seccion-categoria';
 
@@ -416,11 +409,13 @@
 
                 htmlSeccion += `</div>`;
 
-                // Botón "Ver más" si hay más de 4 productos en este grupo
-                if (productosGrupo.length > limiteActual) {
+                // Cálculo dinámico de cuántos productos quedan reales por mostrar
+                let productosRestantes = productosGrupo.length - limiteActual;
+                if (productosRestantes > 0) {
+                    let aMostrarEnSiguienteClick = Math.min(4, productosRestantes);
                     htmlSeccion += `
                         <div class="contenedor-ver-mas">
-                            <button class="btn-ver-mas" onclick="incrementarLimite('${nombreGrupo}')">Ver más (+4)</button>
+                            <button class="btn-ver-mas" onclick="incrementarLimite('${nombreGrupo}')">Ver más (+${aMostrarEnSiguienteClick})</button>
                         </div>
                     `;
                 }
@@ -440,7 +435,7 @@
             document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
             if(btn) btn.classList.add('active');
             categoriaActual = categoria;
-            limitesVisibles = {}; // Resetear límites al cambiar de pestaña
+            limitesVisibles = {}; 
             document.getElementById('tituloCategoria').innerText = categoria === 'Todo' ? 'Novedades y Equipaciones' : categoria;
             aplicarFiltrosYBusqueda();
         }
@@ -453,7 +448,6 @@
         function aplicarFiltrosYBusqueda() {
             let lista = datosTienda.productos;
 
-            // 1. Filtrar por categoría principal seleccionada en los botones
             if (categoriaActual !== 'Todo') {
                 let catActualNorm = normalizarTexto(categoriaActual);
                 lista = lista.filter(p => {
@@ -462,7 +456,6 @@
                 });
             }
 
-            // 2. Filtrar por buscador (insensible a tildes y mayúsculas)
             if (terminoBusqueda.trim() !== '') {
                 let terminoNorm = normalizarTexto(terminoBusqueda);
                 lista = lista.filter(p => p.titulo && normalizarTexto(p.titulo).includes(terminoNorm));
