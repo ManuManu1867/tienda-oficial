@@ -143,7 +143,6 @@
         
         .parches-grid-zona { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
         
-        /* Tarjeta de parche clickeable y más grande */
         .parche-card {
             border: 2px solid var(--border); border-radius: 8px; padding: 10px; text-align: center;
             background: white; display: flex; flex-direction: column; align-items: center; justify-content: space-between;
@@ -166,12 +165,26 @@
         }
         .btn-cant:hover { background: var(--surface); }
 
+        /* Botón de eliminar minimalista */
+        .btn-eliminar {
+            background: none; border: none; cursor: pointer; color: var(--text);
+            opacity: 0.5; transition: opacity 0.2s, color 0.2s; padding: 4px; display: flex; align-items: center; justify-content: center;
+        }
+        .btn-eliminar:hover { opacity: 1; color: var(--danger); }
+        .btn-eliminar svg { width: 16px; height: 16px; fill: currentColor; }
+
         .error-talla { color: var(--danger); font-size: 0.75rem; margin-top: 4px; display: none; }
+        
+        /* Botón de WhatsApp con icono oficial */
         .btn-whatsapp {
             background: #25d366; color: white; border: none; width: 100%; padding: 12px;
-            border-radius: var(--radius); font-weight: 700; font-size: 1rem; cursor: pointer; text-align: center; margin-top: 15px;
+            border-radius: var(--radius); font-weight: 700; font-size: 1rem; cursor: pointer; 
+            text-align: center; margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: background 0.2s;
         }
+        .btn-whatsapp svg { width: 20px; height: 20px; fill: currentColor; }
         .btn-whatsapp:hover { background: #1ebe5d; }
+        
         .loader { text-align: center; padding: 40px; font-size: 1.1rem; color: var(--text-muted); }
     </style>
 </head>
@@ -195,7 +208,7 @@
 
     <div class="main-container">
         <h1 class="section-title" id="tituloCategoria">Novedades y Equipaciones</h1>
-        <div id="contenedorProductos" class="loader">Cargando productos desde Google Sheets...</div>
+        <div id="contenedorProductos" class="loader">Cargando productos</div>
     </div>
 
     <!-- Modal del Carrito -->
@@ -213,7 +226,10 @@
                     <span>Total:</span>
                     <span id="totalCarrito">0.00 €</span>
                 </div>
-                <button class="btn-whatsapp" onclick="enviarWhatsApp()">📲 Hacer pedido por WhatsApp</button>
+                <button class="btn-whatsapp" onclick="enviarWhatsApp()">
+                    <svg viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01C17.18 3.03 14.69 2 12.04 2zM12.04 20.1c-1.47 0-2.91-.4-4.16-1.16l-.3-.18-3.12.82.83-3.04-.2-.31c-.82-1.31-1.25-2.83-1.25-4.38 0-4.54 3.69-8.23 8.23-8.23 2.2 0 4.27.86 5.82 2.42 1.56 1.56 2.42 3.63 2.42 5.82 0 4.54-3.69 8.23-8.23 8.23zm4.52-6.16c-.25-.13-1.47-.72-1.7-.8s-.4-.13-.57.13-.66.82-.81.99-.3.18-.55.05c-.25-.13-1.05-.39-2-1.23-.74-.66-1.24-1.47-1.38-1.72s-.03-.39.11-.52c.11-.11.25-.29.37-.43s.16-.23.25-.38.04-.29-.02-.41c-.06-.13-.57-1.38-.79-1.89-.21-.49-.42-.42-.57-.43l-.49-.01c-.17 0-.45.06-.69.31s-.92.9-.92 2.2 0.94 2.55 1.07 2.72c.13.17 1.85 2.82 4.48 3.96.63.27 1.12.43 1.5.55.63.2 1.2.17 1.65.1.5-.08 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.11-.23-.18-.48-.31z"/></svg>
+                    Hacer pedido por WhatsApp
+                </button>
             </div>
         </div>
     </div>
@@ -405,7 +421,6 @@
                     let pid = parche.id || parche.nombre;
                     let imgParche = limpiarUrlImagen(parche.imagen || parche.url || parche.foto || parche.img || '');
 
-                    // Toda la tarjeta es el botón interactivo (onclick en el contenedor)
                     htmlGrid += `
                         <div class="parche-card" id="card-${zona.key}-${pid}" onclick="toggleParcheZona('${zona.key}', '${pid}', '${parche.nombre}')">
                             <img src="${imgParche}" alt="${parche.nombre}">
@@ -594,7 +609,9 @@
                             </div>
                         </div>
                         <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; height: 100%;">
-                            <button onclick="eliminarDelCarrito(${index})" style="background:none; border:none; cursor:pointer; font-size: 1.1rem; padding: 0;" title="Eliminar">🗑️</button>
+                            <button onclick="eliminarDelCarrito(${index})" class="btn-eliminar" title="Eliminar">
+                                <svg viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14V4zM6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg>
+                            </button>
                             <span style="font-weight: 700; margin-top: 15px;">${subtotal.toFixed(2)} €</span>
                         </div>
                     </div>
