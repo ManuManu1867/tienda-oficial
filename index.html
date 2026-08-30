@@ -26,7 +26,7 @@
             position: sticky; top: 0; background: white; z-index: 100;
         }
         .logo { font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 12px; }
-        .logo img { height: 48px; width: auto; object-fit: contain; } /* Logo más grande */
+        .logo img { height: 48px; width: auto; object-fit: contain; }
         
         .cart-btn {
             background: var(--primary); color: white; border: none; padding: 8px 16px;
@@ -64,6 +64,10 @@
 
         .main-container { padding: 25px 5% 60px 5%; }
         h1.section-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 25px; }
+
+        /* Estilos para las secciones por categorías/ligas */
+        .seccion-categoria { margin-bottom: 40px; }
+        .subtitulo-categoria { font-size: 1.3rem; font-weight: 700; margin-bottom: 15px; color: var(--primary); border-left: 4px solid var(--accent); padding-left: 10px; text-transform: capitalize; }
 
         .grid-productos {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px;
@@ -132,6 +136,15 @@
         }
         .btn-personalizar:hover { background: #e5e7eb; border-color: #d1d5db; }
         .btn-personalizar svg { width: 14px; height: 14px; fill: currentColor; }
+
+        /* Botón Ver Más por sección */
+        .contenedor-ver-mas { text-align: center; margin-top: 20px; }
+        .btn-ver-mas {
+            background: var(--surface); color: var(--primary); border: 1px solid var(--border);
+            padding: 8px 20px; border-radius: 20px; font-weight: 600; font-size: 0.85rem;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .btn-ver-mas:hover { background: var(--primary); color: white; border-color: var(--primary); }
 
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -274,8 +287,8 @@
         
         let categoriaActual = 'Todo';
         let terminoBusqueda = '';
+        let limitesVisibles = {}; // Controla cuántos productos se ven por sección (de 4 en 4)
 
-        // Función para limpiar tildes y mayúsculas
         function normalizarTexto(texto) {
             if (!texto) return '';
             return texto.toLowerCase()
@@ -305,6 +318,7 @@
             }
         }
 
+        // Renderizado general estructurado por grupos / secciones
         function renderizarProductos(lista) {
             const contenedor = document.getElementById('contenedorProductos');
             if (!lista || lista.length === 0) {
@@ -312,75 +326,121 @@
                 return;
             }
 
-            contenedor.className = "grid-productos";
+            contenedor.className = ""; // Limpiar grid global si se usaba
             contenedor.innerHTML = "";
 
-            lista.forEach((p, index) => {
-                let idProd = p.id !== undefined ? p.id : index;
-                if (!estadoSelecciones[idProd]) {
-                    estadoSelecciones[idProd] = { talla: '' };
+            // Agrupar productos según su categoría/subcategoría
+            let grupos = {};
+            lista.forEach(p => {
+                let cat = (p.categoria || 'General').trim();
+                if (!grupos[cat]) grupos[cat] = [];
+                grupos[cat].push(p);
+            });
+
+            // Recorrer cada grupo para pintarlo en secciones de 4 en 4
+            Object.keys(grupos).forEach(nombreGrupo => {
+                let productosGrupo = grupos[nombreGrupo];
+
+                if (!limitesVisibles[nombreGrupo]) {
+                    limitesVisibles[nombreGrupo] = 4; // Límite inicial de 4 por sección
                 }
+                let limiteActual = limitesVisibles[nombreGrupo];
 
-                let imgs = [];
-                if (typeof p.imagenes === 'string' && p.imagenes.trim() !== '') {
-                    imgs = p.imagenes.split(',').map(s => limpiarUrlImagen(s)).filter(Boolean);
-                }
-                if (imgs.length === 0) imgs = ['https://via.placeholder.com/300x350?text=Sin+Imagen'];
+                // Crear contenedor de la sección
+                const seccionDiv = document.createElement('div');
+                seccionDiv.className = 'seccion-categoria';
 
-                let imgPrincipal = imgs[0];
-                let tallasArr = p.talla ? p.talla.split(',').map(t => t.trim()) : ['Única'];
-                let htmlTallas = '';
-                tallasArr.forEach(t => {
-                    htmlTallas += `<div class="circulo-talla" onclick="seleccionarTalla('${idProd}', '${t}', this)">${t}</div>`;
-                });
+                let htmlSeccion = `<h2 class="subtitulo-categoria">${nombreGrupo}</h2><div class="grid-productos">`;
 
-                let htmlMiniaturas = '';
-                if (imgs.length > 1) {
-                    htmlMiniaturas = '<div class="miniaturas">';
-                    imgs.forEach((imgUrl, imgIdx) => {
-                        let activeClass = imgIdx === 0 ? 'active' : '';
-                        htmlMiniaturas += `<img src="${imgUrl}" class="miniatura ${activeClass}" onclick="cambiarImagen(event, '${idProd}', '${imgUrl}')">`;
+                let productosVisibles = productosGrupo.slice(0, limiteActual);
+
+                productosVisibles.forEach(p => {
+                    let idProd = p.id !== undefined ? p.id : p.titulo;
+                    if (!estadoSelecciones[idProd]) {
+                        estadoSelecciones[idProd] = { talla: '' };
+                    }
+
+                    let imgs = [];
+                    if (typeof p.imagenes === 'string' && p.imagenes.trim() !== '') {
+                        imgs = p.imagenes.split(',').map(s => limpiarUrlImagen(s)).filter(Boolean);
+                    }
+                    if (imgs.length === 0) imgs = ['https://via.placeholder.com/300x350?text=Sin+Imagen'];
+
+                    let imgPrincipal = imgs[0];
+                    let tallasArr = p.talla ? p.talla.split(',').map(t => t.trim()) : ['Única'];
+                    let htmlTallas = '';
+                    tallasArr.forEach(t => {
+                        htmlTallas += `<div class="circulo-talla" onclick="seleccionarTalla('${idProd}', '${t}', this)">${t}</div>`;
                     });
-                    htmlMiniaturas += '</div>';
-                }
 
-                const tarjeta = document.createElement('div');
-                tarjeta.className = 'tarjeta';
-                tarjeta.innerHTML = `
-                    <div class="visor-imagen">
-                        <span class="categoria-badge">${p.categoria || 'General'}</span>
-                        <img id="img-${idProd}" src="${imgPrincipal}" alt="${p.titulo}">
-                    </div>
-                    ${htmlMiniaturas}
-                    <div class="tarjeta-info">
-                        <h3>${p.titulo || 'Sin título'}</h3>
-                        
-                        <div class="seccion-tallas">
-                            <span class="label-tallas">Selecciona tu talla: *</span>
-                            <div class="circulos-tallas" id="tallas-${idProd}">${htmlTallas}</div>
-                            <div class="error-talla" id="error-talla-${idProd}">¡Elige una talla obligatoriamente!</div>
-                        </div>
+                    let htmlMiniaturas = '';
+                    if (imgs.length > 1) {
+                        htmlMiniaturas = '<div class="miniaturas">';
+                        imgs.forEach((imgUrl, imgIdx) => {
+                            let activeClass = imgIdx === 0 ? 'active' : '';
+                            htmlMiniaturas += `<img src="${imgUrl}" class="miniatura ${activeClass}" onclick="cambiarImagen(event, '${idProd}', '${imgUrl}')">`;
+                        });
+                        htmlMiniaturas += '</div>';
+                    }
 
-                        <div class="footer-card">
-                            <button class="btn-personalizar" onclick="abrirPersonalizacion('${idProd}')">
-                                <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-                                Personalizar Camiseta
-                            </button>
-                            <div class="footer-card-row">
-                                <div class="precio">${parseFloat(p.precio || 0).toFixed(2)} €</div>
-                                <button class="btn-comprar" onclick="agregarDirecto('${idProd}')">Añadir al Carrito</button>
+                    htmlSeccion += `
+                        <div class="tarjeta">
+                            <div class="visor-imagen">
+                                <span class="categoria-badge">${p.categoria || 'General'}</span>
+                                <img id="img-${idProd}" src="${imgPrincipal}" alt="${p.titulo}">
+                            </div>
+                            ${htmlMiniaturas}
+                            <div class="tarjeta-info">
+                                <h3>${p.titulo || 'Sin título'}</h3>
+                                
+                                <div class="seccion-tallas">
+                                    <span class="label-tallas">Selecciona tu talla: *</span>
+                                    <div class="circulos-tallas" id="tallas-${idProd}">${htmlTallas}</div>
+                                    <div class="error-talla" id="error-talla-${idProd}">¡Elige una talla obligatoriamente!</div>
+                                </div>
+
+                                <div class="footer-card">
+                                    <button class="btn-personalizar" onclick="abrirPersonalizacion('${idProd}')">
+                                        <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                                        Personalizar Camiseta
+                                    </button>
+                                    <div class="footer-card-row">
+                                        <div class="precio">${parseFloat(p.precio || 0).toFixed(2)} €</div>
+                                        <button class="btn-comprar" onclick="agregarDirecto('${idProd}')">Añadir al Carrito</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `;
-                contenedor.appendChild(tarjeta);
+                    `;
+                });
+
+                htmlSeccion += `</div>`;
+
+                // Botón "Ver más" si hay más de 4 productos en este grupo
+                if (productosGrupo.length > limiteActual) {
+                    htmlSeccion += `
+                        <div class="contenedor-ver-mas">
+                            <button class="btn-ver-mas" onclick="incrementarLimite('${nombreGrupo}')">Ver más (+4)</button>
+                        </div>
+                    `;
+                }
+
+                seccionDiv.innerHTML = htmlSeccion;
+                contenedor.appendChild(seccionDiv);
             });
+        }
+
+        function incrementarLimite(nombreGrupo) {
+            if (!limitesVisibles[nombreGrupo]) limitesVisibles[nombreGrupo] = 4;
+            limitesVisibles[nombreGrupo] += 4;
+            aplicarFiltrosYBusqueda();
         }
 
         function filtrar(categoria, btn) {
             document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
             if(btn) btn.classList.add('active');
             categoriaActual = categoria;
+            limitesVisibles = {}; // Resetear límites al cambiar de pestaña
             document.getElementById('tituloCategoria').innerText = categoria === 'Todo' ? 'Novedades y Equipaciones' : categoria;
             aplicarFiltrosYBusqueda();
         }
@@ -393,9 +453,13 @@
         function aplicarFiltrosYBusqueda() {
             let lista = datosTienda.productos;
 
-            // 1. Filtrar por categoría
+            // 1. Filtrar por categoría principal seleccionada en los botones
             if (categoriaActual !== 'Todo') {
-                lista = lista.filter(p => p.categoria && normalizarTexto(p.categoria) === normalizarTexto(categoriaActual));
+                let catActualNorm = normalizarTexto(categoriaActual);
+                lista = lista.filter(p => {
+                    let catP = normalizarTexto(p.categoria || '');
+                    return catP.includes(catActualNorm);
+                });
             }
 
             // 2. Filtrar por buscador (insensible a tildes y mayúsculas)
@@ -428,7 +492,7 @@
                 document.getElementById(`error-talla-${idProd}`).style.display = 'block';
                 return;
             }
-            const p = datosTienda.productos.find((prod, index) => String(prod.id !== undefined ? prod.id : index) === String(idProd));
+            const p = datosTienda.productos.find((prod, index) => String(prod.id !== undefined ? prod.id : index) === String(idProd) || String(prod.titulo) === String(idProd));
             if (!p) return;
             
             agregarAlCarritoFinal({
@@ -449,7 +513,7 @@
                 return;
             }
 
-            const p = datosTienda.productos.find((prod, index) => String(prod.id !== undefined ? prod.id : index) === String(idProd));
+            const p = datosTienda.productos.find((prod, index) => String(prod.id !== undefined ? prod.id : index) === String(idProd) || String(prod.titulo) === String(idProd));
             if (!p) return;
 
             productoEnEdicion = p;
@@ -461,7 +525,7 @@
             const listaParches = listaParchesOriginal.filter(pr => {
                 let catParche = normalizarTexto(pr.categoria || '');
                 if (!catParche || catParche === 'todos' || catParche === 'todo') return true;
-                return catParche === categoriaProd;
+                return categoriaProd.includes(catParche) || catParche.includes(categoriaProd);
             });
 
             let parchesCentro = listaParches.filter(pr => {
