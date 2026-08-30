@@ -393,7 +393,17 @@
             productoEnEdicion = p;
             parchesSeleccionadosModal = {};
 
-            const listaParches = datosTienda.parches || [];
+            const categoriaProd = (p.categoria || '').toLowerCase().trim();
+            const listaParchesOriginal = datosTienda.parches || [];
+
+            // FILTRAR PARCHES SEGÚN LA CATEGORÍA DE LA CAMISETA
+            const listaParches = listaParchesOriginal.filter(pr => {
+                let catParche = (pr.categoria || '').toLowerCase().trim();
+                // Si la categoría del parche está vacía, es "todos" o "todo", se muestra para cualquiera
+                if (!catParche || catParche === 'todos' || catParche === 'todo') return true;
+                // De lo contrario, debe coincidir exactamente con la categoría del producto
+                return catParche === categoriaProd;
+            });
 
             let parchesCentro = listaParches.filter(pr => {
                 let pos = (pr.posicion || '').toString().toLowerCase().trim();
@@ -438,7 +448,7 @@
             });
 
             if (listaParches.length === 0) {
-                htmlZonas = "<p style='color:var(--text-muted); text-align:center; padding:15px;'>No hay parches guardados en Google Sheets todavía.</p>";
+                htmlZonas = "<p style='color:var(--text-muted); text-align:center; padding:15px;'>No hay parches compatibles configurados para esta categoría.</p>";
             }
 
             const contenedor = document.getElementById('contenidoPersonalizacion');
