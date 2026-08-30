@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda Oficial</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --success: #16a34a;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --danger: #ef4444;
+            --radius: 12px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); padding: 30px 20px; }
+
+        header {
+            max-width: 1200px;
+            margin: 0 auto 25px auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--surface);
+            padding: 20px 30px;
+            border-radius: var(--radius);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+
+        .header-brand { display: flex; align-items: center; gap: 20px; }
+        .logo-container { width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; }
+        .logo-img { width: 100%; height: 100%; object-fit: contain; }
+
+        .btn-carrito {
+            background-color: #0f172a; color: white; border: none; width: 50px; height: 50px;
+            border-radius: 50%; font-size: 1.3rem; cursor: pointer; position: relative;
+        }
+
+        .cart-count {
+            position: absolute; top: -5px; right: -5px; background-color: var(--danger);
+            color: white; font-size: 0.75rem; min-width: 20px; height: 20px; padding: 0 4px;
+            border-radius: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+        }
+
+        .catalogo {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px; max-width: 1200px; margin: 0 auto;
+        }
+
+        .tarjeta {
+            background-color: var(--surface); border-radius: var(--radius); overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column;
+        }
+
+        .visor-imagen { position: relative; background-color: #f1f5f9; height: 320px; }
+        .visor-imagen img { width: 100%; height: 100%; object-fit: contain; padding: 15px; }
+
+        .tarjeta-info { padding: 20px; text-align: center; display: flex; flex-direction: column; flex-grow: 1; }
+        .precio { font-size: 1.2rem; font-weight: 700; color: var(--success); margin: 8px 0; }
+        
+        .btn-comprar {
+            background-color: var(--primary); color: white; border: none; padding: 10px;
+            border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-brand">
+            <div class="logo-container" id="logoContainer">
+                <h2 id="logoTexto">Mi Tienda</h2>
+            </div>
+            <h1>Tienda Oficial</h1>
+        </div>
+
+        <button class="btn-carrito" onclick="alert('Carrito oficial del cliente')">
+            🛒 <span class="cart-count" id="cartCount">0</span>
+        </button>
+    </header>
+
+    <main class="catalogo" id="catalogoCliente"></main>
+
+    <script>
+        const PUBLIC_KEY = 'camisetas_public';
+        const LOGO_PUBLIC_KEY = 'logo_public';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarTiendaPublica();
+        });
+
+        // ESCUCHADOR EN TIEMPO REAL: Si el admin le da a "Lanzar a tienda" en otra pestaña, la página se actualiza sola
+        window.addEventListener('storage', (event) => {
+            if (event.key === PUBLIC_KEY || event.key === LOGO_PUBLIC_KEY) {
+                cargarTiendaPublica();
+            }
+        });
+
+        function cargarTiendaPublica() {
+            // 1. Cargar el Logo Oficial publicado
+            const logoPublico = localStorage.getItem(LOGO_PUBLIC_KEY);
+            if (logoPublico) {
+                document.getElementById('logoContainer').innerHTML = `<img src="${logoPublico}" class="logo-img">`;
+            }
+
+            // 2. Cargar ÚNICAMENTE los productos publicados
+            const catalogo = document.getElementById('catalogoCliente');
+            catalogo.innerHTML = '';
+
+            const productosPublicos = JSON.parse(localStorage.getItem(PUBLIC_KEY)) || [];
+
+            if (productosPublicos.length === 0) {
+                catalogo.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">La tienda está preparando sus productos. ¡Vuelve pronto!</p>';
+                return;
+            }
+
+            productosPublicos.forEach(producto => {
+                const tarjeta = document.createElement('div');
+                tarjeta.classList.add('tarjeta');
+                tarjeta.innerHTML = `
+                    <div class="visor-imagen">
+                        <img src="${producto.imagenes[0]}" alt="${producto.titulo}">
+                    </div>
+                    <div class="tarjeta-info">
+                        <h3>${producto.titulo}</h3>
+                        <div class="precio">${producto.precio} €</div>
+                        <p style="font-size:0.85rem; color: var(--text-muted); margin-bottom: 12px;">Tallas: ${producto.talla}</p>
+                        <button class="btn-comprar" onclick="alert('Añadido al carrito de compra')">Comprar</button>
+                    </div>
+                `;
+                catalogo.appendChild(tarjeta);
+            });
+        }
+    </script>
+</body>
+</html>
