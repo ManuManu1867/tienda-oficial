@@ -3,209 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tienda Oficial</title>
+    <title>Tienda Oficial - Catálogo</title>
     <style>
         :root {
-            --primary: #2563eb;
-            --success: #16a34a;
-            --bg: #f8fafc;
-            --surface: #ffffff;
-            --text: #0f172a;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --radius: 12px;
+            --primary: #111827;
+            --accent: #2563eb;
+            --bg: #ffffff;
+            --surface: #f9fafb;
+            --text: #111827;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --radius: 8px;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body { background-color: var(--bg); color: var(--text); padding: 30px 20px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); padding-bottom: 60px; }
 
-        header {
-            max-width: 1200px; margin: 0 auto 25px auto; display: flex;
-            justify-content: space-between; align-items: center; background: var(--surface);
-            padding: 20px 30px; border-radius: var(--radius); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        /* Estilo Navbar estilo Nike / E-commerce Pro */
+        nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 40px; border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px); z-index: 100;
         }
 
-        .header-brand { display: flex; align-items: center; gap: 20px; }
-        .logo-container { width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; }
+        .nav-brand { display: flex; align-items: center; gap: 15px; }
+        .logo-container { width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; }
         .logo-img { width: 100%; height: 100%; object-fit: contain; }
 
-        .btn-carrito {
-            background-color: #0f172a; color: white; border: none; width: 50px; height: 50px;
-            border-radius: 50%; font-size: 1.3rem; cursor: pointer; position: relative;
+        .nav-filtros { display: flex; gap: 10px; overflow-x: auto; padding: 5px 0; }
+        .btn-filtro {
+            background: transparent; border: none; padding: 8px 16px;
+            font-size: 0.95rem; font-weight: 600; color: var(--text-muted);
+            cursor: pointer; border-radius: 20px; transition: all 0.2s ease;
+        }
+        .btn-filtro:hover, .btn-filtro.activo {
+            background: var(--primary); color: white;
         }
 
-        .cart-count {
-            position: absolute; top: -5px; right: -5px; background-color: var(--danger);
-            color: white; font-size: 0.75rem; min-width: 20px; height: 20px; padding: 0 4px;
-            border-radius: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+        /* Banner de Categoría Superior */
+        .hero-banner {
+            max-width: 1400px; margin: 30px auto 20px auto; padding: 0 20px;
+        }
+        .hero-banner h1 { font-size: 1.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: -0.5px; }
+
+        /* Contenedor del Catálogo */
+        .catalogo {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px; max-width: 1400px; margin: 0 auto; padding: 0 20px;
         }
 
-        .catalogo { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; max-width: 1200px; margin: 0 auto; }
-        .tarjeta { background-color: var(--surface); border-radius: var(--radius); overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
-        .visor-imagen { position: relative; background-color: #f1f5f9; height: 320px; display: flex; align-items: center; justify-content: center; }
-        .visor-imagen img { width: 100%; height: 100%; object-fit: contain; padding: 15px; }
+        .tarjeta {
+            background-color: var(--surface); border-radius: var(--radius);
+            overflow: hidden; display: flex; flex-direction: column;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer; border: 1px solid transparent;
+        }
+        .tarjeta:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 20px -10px rgba(0,0,0,0.1);
+            border-color: var(--border);
+        }
 
-        .miniaturas { display: flex; gap: 8px; padding: 10px 15px 0 15px; overflow-x: auto; justify-content: center; }
-        .miniatura { width: 45px; height: 45px; border-radius: 6px; object-fit: cover; cursor: pointer; border: 2px solid transparent; background-color: #f1f5f9; }
-        .miniatura.activa { border-color: var(--primary); }
+        .visor-imagen {
+            position: relative; background-color: #f3f4f6; height: 350px;
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
+        }
+        .visor-imagen img.img-principal { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+        .tarjeta:hover .img-principal { transform: scale(1.03); }
 
-        .tarjeta-info { padding: 20px; text-align: center; display: flex; flex-direction: column; flex-grow: 1; }
-        .precio { font-size: 1.2rem; font-weight: 700; color: var(--success); margin: 8px 0; }
+        .categoria-badge {
+            position: absolute; top: 15px; left: 15px; background-color: white;
+            color: var(--text); padding: 4px 10px; border-radius: 4px;
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .miniaturas { display: flex; gap: 6px; padding: 12px 15px 0 15px; overflow-x: auto; }
+        .miniatura {
+            width: 40px; height: 40px; border-radius: 4px; object-fit: cover;
+            cursor: pointer; border: 1px solid var(--border); background-color: white;
+            opacity: 0.7; transition: opacity 0.2s;
+        }
+        .miniatura:hover, .miniatura.activa { opacity: 1; border-color: var(--primary); }
+
+        .tarjeta-info { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; }
+        .tarjeta-info h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+        .talla { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px; }
+        
+        .footer-card { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+        .precio { font-size: 1.15rem; font-weight: 700; color: var(--text); }
         
         .btn-comprar {
-            background-color: var(--primary); color: white; border: none; padding: 10px;
-            border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; margin-top: auto;
+            background-color: var(--primary); color: white; border: none;
+            padding: 10px 18px; border-radius: 20px; font-weight: 600; font-size: 0.85rem;
+            cursor: pointer; transition: background 0.2s;
         }
+        .btn-comprar:hover { background-color: #374151; }
 
-        .modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1000;
-            justify-content: center; align-items: center; padding: 20px;
-        }
-        .modal-content {
-            background-color: var(--surface); width: 100%; max-width: 550px;
-            border-radius: var(--radius); padding: 25px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-            max-height: 90vh; overflow-y: auto;
-        }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .btn-cerrar { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted); }
-
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 6px; font-size: 0.9rem; font-weight: 600; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; }
-
-        .customization-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 15px; margin-top: 10px; }
-        .custom-price-badge { display: inline-block; background: #dbeafe; color: #1e40af; font-size: 0.8rem; font-weight: 700; padding: 3px 8px; border-radius: 4px; margin-bottom: 10px; }
-        .patches-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 5px; }
-        .patch-option { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer; }
-
-        .cart-item { display: flex; align-items: flex-start; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
-        .cart-item img { width: 55px; height: 55px; object-fit: cover; border-radius: 6px; }
-        .cart-item-info { flex-grow: 1; margin-left: 12px; }
-        .cart-item-title { font-size: 0.95rem; font-weight: 600; }
-        .cart-item-details { font-size: 0.8rem; color: var(--text-muted); margin-top: 3px; }
-        .cart-item-price { font-size: 0.9rem; font-weight: 700; color: var(--success); margin-top: 4px; }
-        .cart-total { display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: 700; margin-top: 20px; padding-top: 15px; border-top: 2px solid var(--border); }
+        .sin-productos { text-align: center; grid-column: 1 / -1; padding: 60px; color: var(--text-muted); font-size: 1.1rem; }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="header-brand">
+    <nav>
+        <div class="nav-brand">
             <div class="logo-container" id="logoContainer">
-                <h2>Mi Tienda</h2>
+                <h2>TIENDA</h2>
             </div>
-            <h1>Tienda Oficial</h1>
         </div>
-
-        <button class="btn-carrito" onclick="abrirCarrito()">
-            🛒 <span class="cart-count" id="cartCount">0</span>
-        </button>
-    </header>
-
-    <main class="catalogo" id="catalogoCliente"></main>
-
-    <div class="modal" id="modalOpciones">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalOpcionesTitulo">Personalizar Producto</h2>
-                <button class="btn-cerrar" onclick="cerrarModalOpciones()">&times;</button>
-            </div>
-            
-            <div class="form-group">
-                <label style="color: var(--danger);">* Talla (Obligatorio):</label>
-                <select id="selectTallaCliente">
-                    <option value="">-- Selecciona tu talla --</option>
-                </select>
-            </div>
-
-            <div class="customization-box">
-                <span class="custom-price-badge">✨ Personalización (Opcional)</span>
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
-                    • Nombre y/o Número: +3.00 €<br>
-                    • Parches: +2.00 €<br>
-                    • Completa: +5.00 €
-                </p>
-
-                <div class="form-group">
-                    <label>Nombre en la camiseta:</label>
-                    <input type="text" id="customNombre" placeholder="Ej: PEDRI" oninput="calcularPrecioCustom()">
-                </div>
-
-                <div class="form-group">
-                    <label>Dorsal / Número:</label>
-                    <input type="number" id="customNumero" placeholder="Ej: 8" oninput="calcularPrecioCustom()">
-                </div>
-
-                <div class="form-group">
-                    <label>Parches en las mangas:</label>
-                    <div class="patches-grid">
-                        <label class="patch-option"><input type="checkbox" value="Mundial 2026" class="check-patch" onchange="calcularPrecioCustom()"> Mundial 2026</label>
-                        <label class="patch-option"><input type="checkbox" value="Champions League" class="check-patch" onchange="calcularPrecioCustom()"> Champions League</label>
-                        <label class="patch-option"><input type="checkbox" value="LaLiga" class="check-patch" onchange="calcularPrecioCustom()"> LaLiga</label>
-                        <label class="patch-option"><input type="checkbox" value="Respect" class="check-patch" onchange="calcularPrecioCustom()"> Respect</label>
-                    </div>
-                </div>
-            </div>
-
-            <div style="margin-top: 15px; text-align: right; font-weight: 700; font-size: 1.1rem;">
-                Precio Total: <span id="precioTotalCalculado" style="color: var(--success);">0.00 €</span>
-            </div>
-
-            <button class="btn-comprar" style="margin-top: 15px;" onclick="confirmarAgregarAlCarrito()">Añadir al Carrito</button>
+        <div class="nav-filtros">
+            <button class="btn-filtro activo" onclick="filtrar('todas', this)">Todo</button>
+            <button class="btn-filtro" onclick="filtrar('Selecciones', this)">Selecciones</button>
+            <button class="btn-filtro" onclick="filtrar('Clubes', this)">Clubes</button>
+            <button class="btn-filtro" onclick="filtrar('Retro', this)">Retro</button>
+            <button class="btn-filtro" onclick="filtrar('Otros', this)">Otros</button>
         </div>
+    </nav>
+
+    <div class="hero-banner">
+        <h1 id="tituloCategoria">Novedades y Equipaciones</h1>
     </div>
 
-    <div class="modal" id="modalCarrito">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>🛒 Carrito de Compras</h2>
-                <button class="btn-cerrar" onclick="cerrarCarrito()">&times;</button>
-            </div>
-            <div id="cartList"></div>
-            <div class="cart-total">
-                <span>Total:</span>
-                <span id="cartTotal">0.00 €</span>
-            </div>
-            <button class="btn-comprar" style="margin-top: 20px; background-color: var(--success);" onclick="procesarPago()">Pagar Ahora</button>
-        </div>
-    </div>
+    <div class="catalogo" id="catalogoCliente"></div>
 
     <script>
         const PUBLIC_KEY = 'camisetas_public_drive';
         const LOGO_PUBLIC_KEY = 'logo_public_drive';
 
-        let carrito = [];
-        let productoSeleccionadoActual = null;
-
         document.addEventListener('DOMContentLoaded', () => {
-            cargarTiendaPublica();
+            cargarLogoPublico();
+            cargarCatalogoCliente('todas');
         });
 
-        window.addEventListener('storage', (event) => {
-            if (event.key === PUBLIC_KEY || event.key === LOGO_PUBLIC_KEY) {
-                cargarTiendaPublica();
+        function cargarLogoPublico() {
+            const logo = localStorage.getItem(LOGO_PUBLIC_KEY);
+            if (logo) {
+                document.getElementById('logoContainer').innerHTML = `<img src="${logo}" class="logo-img">`;
             }
-        });
+        }
 
-        function cargarTiendaPublica() {
-            const logoPublico = localStorage.getItem(LOGO_PUBLIC_KEY);
-            if (logoPublico) {
-                document.getElementById('logoContainer').innerHTML = `<img src="${logoPublico}" class="logo-img">`;
+        function cargarCatalogoCliente(categoriaFiltro) {
+            const contenedor = document.getElementById('catalogoCliente');
+            contenedor.innerHTML = '';
+
+            let productos = JSON.parse(localStorage.getItem(PUBLIC_KEY)) || [];
+
+            if (categoriaFiltro !== 'todas') {
+                productos = productos.filter(p => p.categoria === categoriaFiltro);
             }
 
-            const catalogo = document.getElementById('catalogoCliente');
-            catalogo.innerHTML = '';
-            const productosPublicos = JSON.parse(localStorage.getItem(PUBLIC_KEY)) || [];
-
-            if (productosPublicos.length === 0) {
-                catalogo.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">La tienda está preparando sus productos. ¡Vuelve pronto!</p>';
+            if (productos.length === 0) {
+                contenedor.innerHTML = `<div class="sin-productos">No hay productos disponibles en esta categoría actualmente.</div>`;
                 return;
             }
 
-            productosPublicos.forEach(producto => {
+            productos.forEach(producto => {
                 const tarjeta = document.createElement('div');
                 tarjeta.classList.add('tarjeta');
 
@@ -213,152 +166,43 @@
                 if (producto.imagenes && producto.imagenes.length > 1) {
                     miniaturasHTML = `<div class="miniaturas">`;
                     producto.imagenes.forEach((imgSrc, index) => {
-                        miniaturasHTML += `<img src="${imgSrc}" class="miniatura ${index === 0 ? 'activa' : ''}" onclick="cambiarImagenPrincipal(${producto.id}, '${imgSrc}', this)">`;
+                        miniaturasHTML += `<img src="${imgSrc}" class="miniatura ${index === 0 ? 'activa' : ''}" onclick="cambiarImagenPrincipalCliente(${producto.id}, '${imgSrc}', this)">`;
                     });
                     miniaturasHTML += `</div>`;
                 }
 
                 tarjeta.innerHTML = `
                     <div class="visor-imagen">
-                        <img src="${producto.imagenes[0]}" id="img-main-${producto.id}">
+                        <span class="categoria-badge">${producto.categoria}</span>
+                        <img src="${producto.imagenes[0]}" class="img-principal" id="img-main-${producto.id}">
                     </div>
                     ${miniaturasHTML}
                     <div class="tarjeta-info">
                         <h3>${producto.titulo}</h3>
-                        <div class="precio">${producto.precio} €</div>
-                        <p style="font-size:0.85rem; color: var(--text-muted); margin-bottom: 12px;">Tallas: ${producto.talla}</p>
-                        <button class="btn-comprar" onclick="prepararOpciones(${producto.id})">Añadir al Carrito</button>
+                        <div class="talla">Tallas: ${producto.talla}</div>
+                        <div class="footer-card">
+                            <div class="precio">${producto.precio} €</div>
+                            <button class="btn-comprar" onclick="alert('Redirigiendo a pasarela de compra para: ${producto.titulo}')">Ver / Comprar</button>
+                        </div>
                     </div>
                 `;
-                catalogo.appendChild(tarjeta);
+                contenedor.appendChild(tarjeta);
             });
         }
 
-        function cambiarImagenPrincipal(id, nuevaSrc, elementoThumb) {
+        function cambiarImagenPrincipalCliente(id, nuevaSrc, elementoThumb) {
             document.getElementById(`img-main-${id}`).src = nuevaSrc;
             const tarjeta = elementoThumb.closest('.tarjeta');
             tarjeta.querySelectorAll('.miniatura').forEach(thumb => thumb.classList.remove('activa'));
             elementoThumb.classList.add('activa');
         }
 
-        function prepararOpciones(id) {
-            const productosPublicos = JSON.parse(localStorage.getItem(PUBLIC_KEY)) || [];
-            productoSeleccionadoActual = productosPublicos.find(p => p.id === id);
-            if (!productoSeleccionadoActual) return;
-
-            document.getElementById('modalOpcionesTitulo').innerText = productoSeleccionadoActual.titulo;
-            const selectTalla = document.getElementById('selectTallaCliente');
-            selectTalla.innerHTML = '<option value="">-- Selecciona tu talla --</option>';
+        function filtrar(categoria, botonElemento) {
+            document.querySelectorAll('.btn-filtro').forEach(btn => btn.classList.remove('activo'));
+            botonElemento.classList.add('activo');
             
-            const tallasArray = productoSeleccionadoActual.talla.split(',').map(t => t.trim());
-            tallasArray.forEach(t => {
-                if (t) {
-                    const opt = document.createElement('option');
-                    opt.value = t; opt.innerText = t;
-                    selectTalla.appendChild(opt);
-                }
-            });
-
-            document.getElementById('customNombre').value = '';
-            document.getElementById('customNumero').value = '';
-            document.querySelectorAll('.check-patch').forEach(c => c.checked = false);
-
-            calcularPrecioCustom();
-            document.getElementById('modalOpciones').style.display = 'flex';
-        }
-
-        function cerrarModalOpciones() { document.getElementById('modalOpciones').style.display = 'none'; }
-
-        function calcularPrecioCustom() {
-            if (!productoSeleccionadoActual) return 0;
-            let base = parseFloat(productoSeleccionadoActual.precio);
-            let extra = 0;
-
-            const nombre = document.getElementById('customNombre').value.trim();
-            const numero = document.getElementById('customNumero').value.trim();
-            const tieneNombreONumero = (nombre.length > 0 || numero.length > 0);
-            const tieneParches = document.querySelectorAll('.check-patch:checked').length > 0;
-
-            if (tieneNombreONumero && tieneParches) extra = 5.00;
-            else if (tieneNombreONumero) extra = 3.00;
-            else if (tieneParches) extra = 2.00;
-
-            const total = base + extra;
-            document.getElementById('precioTotalCalculado').innerText = total.toFixed(2) + ' €';
-            return { total, extra };
-        }
-
-        function confirmarAgregarAlCarrito() {
-            const tallaElegida = document.getElementById('selectTallaCliente').value;
-            if (!tallaElegida) { alert('⚠️ Selecciona una talla.'); return; }
-
-            const { total } = calcularPrecioCustom();
-            const parchesElegidos = [];
-            document.querySelectorAll('.check-patch:checked').forEach(cb => parchesElegidos.push(cb.value));
-
-            carrito.push({
-                titulo: productoSeleccionadoActual.titulo,
-                imagen: productoSeleccionadoActual.imagenes[0],
-                precioFinal: total.toFixed(2),
-                talla: tallaElegida,
-                personalizacion: {
-                    nombre: document.getElementById('customNombre').value.trim() || null,
-                    numero: document.getElementById('customNumero').value.trim() || null,
-                    parches: parchesElegidos.length > 0 ? parchesElegidos.join(', ') : null
-                }
-            });
-
-            document.getElementById('cartCount').innerText = carrito.length;
-            cerrarModalOpciones();
-        }
-
-        function abrirCarrito() {
-            const cartList = document.getElementById('cartList');
-            cartList.innerHTML = '';
-            if (carrito.length === 0) {
-                cartList.innerHTML = '<p style="text-align: center; color: var(--text-muted); margin: 20px 0;">El carrito está vacío.</p>';
-            } else {
-                let total = 0;
-                carrito.forEach((item, index) => {
-                    total += parseFloat(item.precioFinal);
-                    let detalles = `Talla: <strong>${item.talla}</strong>`;
-                    if (item.personalizacion.nombre || item.personalizacion.numero || item.personalizacion.parches) {
-                        detalles += `<br>✨ `;
-                        if (item.personalizacion.nombre) detalles += `Nombre: ${item.personalizacion.nombre} `;
-                        if (item.personalizacion.numero) detalles += `Nº: ${item.personalizacion.numero} `;
-                        if (item.personalizacion.parches) detalles += `[${item.personalizacion.parches}]`;
-                    }
-                    cartList.innerHTML += `
-                        <div class="cart-item">
-                            <img src="${item.imagen}">
-                            <div class="cart-item-info">
-                                <div class="cart-item-title">${item.titulo}</div>
-                                <div class="cart-item-details">${detalles}</div>
-                                <div class="cart-item-price">${item.precioFinal} €</div>
-                            </div>
-                            <button onclick="quitarDelCarrito(${index})" style="border:none;background:none;cursor:pointer;">❌</button>
-                        </div>
-                    `;
-                });
-                document.getElementById('cartTotal').innerText = total.toFixed(2) + ' €';
-            }
-            document.getElementById('modalCarrito').style.display = 'flex';
-        }
-
-        function quitarDelCarrito(index) {
-            carrito.splice(index, 1);
-            document.getElementById('cartCount').innerText = carrito.length;
-            abrirCarrito();
-        }
-
-        function cerrarCarrito() { document.getElementById('modalCarrito').style.display = 'none'; }
-
-        function procesarPago() {
-            if(carrito.length === 0) return;
-            alert("✅ ¡Pago realizado con éxito! Gracias por tu compra.");
-            carrito = [];
-            document.getElementById('cartCount').innerText = 0;
-            cerrarCarrito();
+            document.getElementById('tituloCategoria').innerText = categoria === 'todas' ? 'Novedades y Equipaciones' : categoria;
+            cargarCatalogoCliente(categoria);
         }
     </script>
 </body>
