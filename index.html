@@ -118,6 +118,7 @@
         .btn-comprar:hover { background-color: #374151; }
 
         .sin-productos { text-align: center; grid-column: 1 / -1; padding: 60px; color: var(--text-muted); font-size: 1.1rem; }
+        .cargando { text-align: center; grid-column: 1 / -1; padding: 60px; font-weight: 600; color: var(--text-muted); }
     </style>
 </head>
 <body>
@@ -141,57 +142,46 @@
         <h1 id="tituloCategoria">Novedades y Equipaciones</h1>
     </div>
 
-    <div class="catalogo" id="catalogoCliente"></div>
+    <div class="catalogo" id="catalogoCliente">
+        <div class="cargando">Cargando productos desde la nube...</div>
+    </div>
 
     <script>
-        const PUBLIC_KEY = 'camisetas_public_drive';
-        const LOGO_PUBLIC_KEY = 'logo_public_drive';
-
-        // Tu enlace directo oficial de Google Drive incrustado de forma fija
-        const imagenCamisetaReal = "https://lh3.googleusercontent.com/d/1PAcIp3oDkUO9F4z8g3IrMqg-gOq1jvmx";
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxGW9FSTwk-n_kKSpuglJjEVAps2DJ7tEeoZrW823KUXTukMbNUtA3GunYn9OaTtDCcnw/exec';
+        let listaProductosGlobal = [];
 
         document.addEventListener('DOMContentLoaded', () => {
             cargarLogoPublico();
-            cargarCatalogoCliente('todas');
+            obtenerProductosDeGoogleSheets('todas');
         });
 
         function cargarLogoPublico() {
-            const logo = localStorage.getItem(LOGO_PUBLIC_KEY);
+            const logo = localStorage.getItem('logo_public_drive');
             if (logo) {
                 document.getElementById('logoContainer').innerHTML = `<img src="${logo}" class="logo-img">`;
             }
         }
 
-        function cargarCatalogoCliente(categoriaFiltro) {
+        async function obtenerProductosDeGoogleSheets(categoriaFiltro) {
+            const contenedor = document.getElementById('catalogoCliente');
+            try {
+                const respuesta = await fetch(API_URL);
+                listaProductosGlobal = await respuesta.json();
+                renderizarCatalogo(categoriaFiltro);
+            } catch (error) {
+                console.error("Error al cargar productos:", error);
+                contenedor.innerHTML = `<div class="sin-productos">Error al conectar con la base de datos de Google. Inténtalo más tarde.</div>`;
+            }
+        }
+
+        function renderizarCatalogo(categoriaFiltro) {
             const contenedor = document.getElementById('catalogoCliente');
             contenedor.innerHTML = '';
 
-            let productosGuardados = JSON.parse(localStorage.getItem(PUBLIC_KEY));
-            let productos = [];
-
-            // Forzamos que si hay productos guardados antiguos o rotos, usen tu imagen real de Google Drive
-            if (productosGuardados && productosGuardados.length > 0) {
-                productos = productosGuardados.map(p => {
-                    if (p.titulo.includes("España") || !p.imagenes || p.imagenes[0].includes('1X...') || p.imagenes[0].includes('unsplash')) {
-                        p.imagenes = [imagenCamisetaReal];
-                    }
-                    return p;
-                });
-            } else {
-                productos = [
-                    {
-                        id: 1,
-                        titulo: "España 1ª Equipación Mundial 2026",
-                        categoria: "Selecciones",
-                        precio: "25.00",
-                        talla: "XS, S, M, L, XL",
-                        imagenes: [imagenCamisetaReal]
-                    }
-                ];
-            }
+            let productos = listaProductosGlobal;
 
             if (categoriaFiltro !== 'todas') {
-                productos = productos.filter(p => p.categoria === categoriaFiltro);
+                productos = productos.filter(p => p.categoria && p.categoria.trim().toLowerCase() === categoriaFiltro.toLowerCase());
             }
 
             if (productos.length === 0) {
@@ -203,11 +193,14 @@
                 const tarjeta = document.createElement('div');
                 tarjeta.classList.add('tarjeta');
 
+                let imagenesArray = Array.isArray(producto.imagenes) ? producto.imagenes : [producto.imagenes];
+                let imagenPrincipal = imagenesArray[0] || '';
+
                 let miniaturasHTML = '';
-                if (producto.imagenes && producto.imagenes.length > 1) {
+                if (imagenesArray.length > 1) {
                     miniaturasHTML = `<div class="miniaturas">`;
-                    producto.imagenes.forEach((imgSrc, index) => {
-                        miniaturasHTML += `<img src="${imgSrc}" class="miniatura ${index === 0 ? 'activa' : ''}" onclick="cambiarImagenPrincipalCliente(${producto.id}, '${imgSrc}', this)">`;
+                    imagenesArray.forEach((imgSrc, index) => {
+                        miniaturasHTML += `<img src="${imgSrc.trim()}" class="miniatura ${index === 0 ? 'activa' : ''}" onclick="cambiarImagenPrincipalCliente('${producto.id}', '${imgSrc.trim()}', this)">`;
                     });
                     miniaturasHTML += `</div>`;
                 }
@@ -215,7 +208,7 @@
                 tarjeta.innerHTML = `
                     <div class="visor-imagen">
                         <span class="categoria-badge">${producto.categoria}</span>
-                        <img src="${producto.imagenes[0]}" class="img-principal" id="img-main-${producto.id}" onerror="this.src='${imagenCamisetaReal}'">
+                        <img src="${imagenPrincipal.trim()}" class="img-principal" id="img-main-${producto.id}">
                     </div>
                     ${miniaturasHTML}
                     <div class="tarjeta-info">
@@ -243,7 +236,7 @@
             botonElemento.classList.add('activo');
             
             document.getElementById('tituloCategoria').innerText = categoria === 'todas' ? 'Novedades y Equipaciones' : categoria;
-            cargarCatalogoCliente(categoria);
+            renderizarCatalogo(categoria);
         }
     </script>
 </body>
