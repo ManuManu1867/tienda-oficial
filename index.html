@@ -26,7 +26,6 @@
             position: sticky; top: 0; background: white; z-index: 100;
         }
         .logo { font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
-        /* Logo ajustado para que se vea limpio sin recortes extraños */
         .logo img { height: 45px; width: auto; object-fit: contain; }
 
         .cart-btn {
@@ -136,7 +135,21 @@
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
         .carrito-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
         .carrito-body { flex-grow: 1; overflow-y: auto; padding: 15px 0; }
-        .item-carrito { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding: 10px 0; font-size: 0.9rem; }
+        
+        .item-carrito {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border); padding: 12px 0; font-size: 0.9rem;
+        }
+        .controles-cantidad {
+            display: flex; align-items: center; gap: 8px; margin-top: 8px;
+        }
+        .btn-cant {
+            width: 24px; height: 24px; border: 1px solid var(--border); background: #fff;
+            border-radius: 4px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center;
+            transition: background 0.1s;
+        }
+        .btn-cant:hover { background: var(--surface); }
+
         .carrito-footer { border-top: 1px solid var(--border); padding-top: 15px; }
         .btn-cerrar-modal { background: none; border: none; font-size: 1.2rem; cursor: pointer; }
         .btn-whatsapp {
@@ -349,23 +362,38 @@
             
             let extra = calcularPrecioExtra(idProd);
             let precioFinal = parseFloat(precioBase) + extra;
+            let textoPersonalizacion = seleccion.custom ? `Nombre: ${nombreVal || 'N/A'}, Nº: ${numeroVal || 'N/A'}` : 'Sin personalización';
+            let textoParche = parcheChecked ? 'Con Parche' : 'Sin Parche';
 
-            let itemCarro = {
-                id: idProd,
-                titulo: titulo,
-                talla: seleccion.talla,
-                precio: precioFinal,
-                personalizacion: seleccion.custom ? `Nombre: ${nombreVal || 'N/A'}, Nº: ${numeroVal || 'N/A'}` : 'Sin personalización',
-                parche: parcheChecked ? 'Con Parche' : 'Sin Parche'
-            };
+            // Comprobar si ya existe el mismo artículo exacto en el carrito
+            let indexExistente = carrito.findIndex(item => 
+                item.id === idProd && 
+                item.talla === seleccion.talla && 
+                item.personalizacion === textoPersonalizacion && 
+                item.parche === textoParche
+            );
 
-            carrito.push(itemCarro);
+            if (indexExistente > -1) {
+                carrito[indexExistente].cantidad += 1;
+            } else {
+                carrito.push({
+                    id: idProd,
+                    titulo: titulo,
+                    talla: seleccion.talla,
+                    precio: precioFinal,
+                    cantidad: 1,
+                    personalizacion: textoPersonalizacion,
+                    parche: textoParche
+                });
+            }
+
             actualizarContadorCarrito();
             abrirCarrito();
         }
 
         function actualizarContadorCarrito() {
-            document.getElementById('cartCount').innerText = carrito.length;
+            let totalUnidades = carrito.reduce((sum, item) => sum + item.cantidad, 0);
+            document.getElementById('cartCount').innerText = totalUnidades;
         }
 
         function abrirCarrito() {
@@ -389,26 +417,41 @@
             }
 
             let html = '';
-            let total = 0;
+            let totalGeneral = 0;
 
             carrito.forEach((item, index) => {
-                total += item.precio;
+                let subtotal = item.precio * item.cantidad;
+                totalGeneral += subtotal;
                 html += `
                     <div class="item-carrito">
                         <div>
                             <strong>${item.titulo}</strong><br>
                             <small style="color: var(--text-muted);">Talla: ${item.talla} | ${item.personalizacion} | ${item.parche}</small>
+                            <div class="controles-cantidad">
+                                <button class="btn-cant" onclick="cambiarCantidad(${index}, -1)">-</button>
+                                <span style="font-weight: 700; font-size: 0.9rem; min-width: 20px; text-align: center;">${item.cantidad}</span>
+                                <button class="btn-cant" onclick="cambiarCantidad(${index}, 1)">+</button>
+                            </div>
                         </div>
-                        <div style="text-align: right;">
-                            <span style="font-weight: 700;">${item.precio.toFixed(2)} €</span><br>
-                            <button onclick="eliminarDelCarrito(${index})" style="background:none; border:none; color: var(--danger); cursor:pointer; font-size: 0.8rem;">Eliminar</button>
+                        <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; height: 100%;">
+                            <button onclick="eliminarDelCarrito(${index})" style="background:none; border:none; cursor:pointer; font-size: 1.1rem; padding: 0;" title="Eliminar producto">🗑️</button>
+                            <span style="font-weight: 700; margin-top: 15px;">${subtotal.toFixed(2)} €</span>
                         </div>
                     </div>
                 `;
             });
 
             lista.innerHTML = html;
-            totalEl.innerText = total.toFixed(2) + ' €';
+            totalEl.innerText = totalGeneral.toFixed(2) + ' €';
+        }
+
+        function cambiarCantidad(index, delta) {
+            carrito[index].cantidad += delta;
+            if (carrito[index].cantidad <= 0) {
+                carrito.splice(index, 1);
+            }
+            actualizarContadorCarrito();
+            renderizarListaCarrito();
         }
 
         function eliminarDelCarrito(index) {
@@ -421,18 +464,19 @@
             if (carrito.length === 0) return;
 
             let texto = "Hola, quiero realizar el siguiente pedido:\n\n";
-            let total = 0;
+            let totalGeneral = 0;
 
             carrito.forEach((item, i) => {
-                texto += `${i + 1}. *${item.titulo}*\n`;
+                let subtotal = item.precio * item.cantidad;
+                texto += `${i + 1}. *${item.titulo}* (x${item.cantidad})\n`;
                 texto += `   - Talla: ${item.talla}\n`;
                 texto += `   - Personalización: ${item.personalizacion}\n`;
                 texto += `   - Parche: ${item.parche}\n`;
-                texto += `   - Precio: ${item.precio.toFixed(2)} €\n\n`;
-                total += item.precio;
+                texto += `   - Subtotal: ${subtotal.toFixed(2)} €\n\n`;
+                totalGeneral += subtotal;
             });
 
-            texto += `*Total del pedido: ${total.toFixed(2)} €*`;
+            texto += `*Total del pedido: ${totalGeneral.toFixed(2)} €*`;
 
             let urlWap = `https://wa.me/?text=${encodeURIComponent(texto)}`;
             window.open(urlWap, '_blank');
