@@ -393,26 +393,19 @@
 
             const listaParches = datosTienda.parches || [];
 
+            // Filtrado exacto basado en lo que pongas en Google Sheets (C, I, D o palabras completas)
             let parchesCentro = listaParches.filter(pr => {
-                let pos = (pr.posicion || '').toString().toLowerCase();
-                return pos.includes('centro') || pos.includes('pecho');
+                let pos = (pr.posicion || '').toString().toLowerCase().trim();
+                return pos === 'c' || pos.includes('centro') || pos.includes('pecho');
             });
             let parchesIzquierdo = listaParches.filter(pr => {
-                let pos = (pr.posicion || '').toString().toLowerCase();
-                return pos.includes('izquierdo') || pos.includes('izq');
+                let pos = (pr.posicion || '').toString().toLowerCase().trim();
+                return pos === 'i' || pos.includes('izquierdo') || pos.includes('izq');
             });
             let parchesDerecho = listaParches.filter(pr => {
-                let pos = (pr.posicion || '').toString().toLowerCase();
-                return pos.includes('derecho') || pos.includes('der');
+                let pos = (pr.posicion || '').toString().toLowerCase().trim();
+                return pos === 'd' || pos.includes('derecho') || pos.includes('der');
             });
-
-            // Si por alguna razón el usuario guardó un parche con otra posición o sin especificar bien, 
-            // los metemos en centro para que no desaparezcan nunca de la interfaz.
-            let parchesAsignadosIds = new Set([...parchesCentro, ...parchesIzquierdo, ...parchesDerecho].map(pr => pr.id || pr.nombre));
-            let parchesOtros = listaParches.filter(pr => !parchesAsignadosIds.has(pr.id || pr.nombre));
-            if (parchesOtros.length > 0) {
-                parchesCentro = [...parchesCentro, ...parchesOtros];
-            }
 
             let zonasConfig = [
                 { key: 'centro_pecho', titulo: '⚽ Centro del Pecho', lista: parchesCentro },
@@ -563,7 +556,7 @@
 
         function abrirCarritoModal() {
             document.getElementById('modalCarrito').classList.add('open');
-            renderizarListaCarrito();
+            renderizarListaData();
         }
 
         function cerrarModal(modalId) {
