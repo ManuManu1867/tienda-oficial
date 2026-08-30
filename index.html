@@ -232,7 +232,7 @@
     </div>
 
     <script>
-        // NUEVA URL DE GOOGLE APPS SCRIPT
+        // URL DE GOOGLE APPS SCRIPT
         const API_URL = 'https://script.google.com/macros/s/AKfycbxVdpVaulwpjHZyKKPBtfN0XC_FNhZxYftW3fCqXd0JeYEASagt4duknAa0mA60uIYf8g/exec';
         
         let datosTienda = { productos: [], parches: [] };
@@ -268,11 +268,12 @@
                     estadoSelecciones[idProd] = { talla: '' };
                 }
 
+                // CORRECCIÓN DE IMÁGENES: Separación limpia por comas
                 let imgs = [];
                 if (typeof p.imagenes === 'string' && p.imagenes.trim() !== '') {
-                    imgs = p.imagenes.split(/https:\/\//).filter(Boolean).map(s => 'https://' + s.trim());
+                    imgs = p.imagenes.split(',').map(s => s.trim()).filter(Boolean);
                 }
-                if (imgs.length === 0) imgs = [p.imagenes || 'https://via.placeholder.com/300x350?text=Sin+Imagen'];
+                if (imgs.length === 0) imgs = ['https://via.placeholder.com/300x350?text=Sin+Imagen'];
 
                 let imgPrincipal = imgs[0];
                 let tallasArr = p.talla ? p.talla.split(',').map(t => t.trim()) : ['Única'];
@@ -394,9 +395,10 @@
                 let htmlGrid = '';
                 zona.lista.forEach(parche => {
                     let pid = parche.id || parche.nombre;
+                    let imgParche = parche.imagen ? parche.imagen.trim() : '';
                     htmlGrid += `
                         <div class="parche-card" id="card-${zona.key}-${pid}">
-                            <img src="${parche.imagen}" alt="${parche.nombre}">
+                            <img src="${imgParche}" alt="${parche.nombre}">
                             <h5>${parche.nombre}</h5>
                             <button class="btn-toggle-parche" onclick="toggleParcheZona('${zona.key}', '${pid}', '${parche.nombre}')">Activar</button>
                         </div>
