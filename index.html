@@ -26,8 +26,7 @@
             position: sticky; top: 0; background: white; z-index: 100;
         }
         .logo { font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
-        .logo img { height: 40px; width: auto; object-fit: contain; }
-
+        
         .cart-btn {
             background: var(--primary); color: white; border: none; padding: 8px 16px;
             border-radius: 20px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;
@@ -241,6 +240,17 @@
         let productoEnEdicion = null;
         let parchesSeleccionadosModal = {};
 
+        // Función para transformar enlaces de Google Drive en enlaces directos de imagen
+        function limpiarUrlImagen(url) {
+            if (!url) return '';
+            url = url.trim();
+            let match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) {
+                return `https://lh3.googleusercontent.com/d/${match[1]}`;
+            }
+            return url;
+        }
+
         async function cargarDatos() {
             try {
                 const response = await fetch(API_URL);
@@ -270,7 +280,7 @@
 
                 let imgs = [];
                 if (typeof p.imagenes === 'string' && p.imagenes.trim() !== '') {
-                    imgs = p.imagenes.split(',').map(s => s.trim()).filter(Boolean);
+                    imgs = p.imagenes.split(',').map(s => limpiarUrlImagen(s)).filter(Boolean);
                 }
                 if (imgs.length === 0) imgs = ['https://via.placeholder.com/300x350?text=Sin+Imagen'];
 
@@ -394,9 +404,8 @@
                 let htmlGrid = '';
                 zona.lista.forEach(parche => {
                     let pid = parche.id || parche.nombre;
-                    // COMPATIBILIDAD TOTAL DE NOMBRES DE COLUMNA PARA LA IMAGEN DEL PARCHE
-                    let imgParche = parche.imagen || parche.url || parche.foto || parche.img || '';
-                    imgParche = imgParche.trim();
+                    // AQUÍ APLICAMOS LA CONVERSIÓN DE GOOGLE DRIVE AUTOMÁTICAMENTE
+                    let imgParche = limpiarUrlImagen(parche.imagen || parche.url || parche.foto || parche.img || '');
 
                     htmlGrid += `
                         <div class="parche-card" id="card-${zona.key}-${pid}">
