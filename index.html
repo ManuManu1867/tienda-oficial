@@ -117,7 +117,6 @@
         .btn-personalizar:hover { background: #e5e7eb; border-color: #d1d5db; }
         .btn-personalizar svg { width: 14px; height: 14px; fill: currentColor; }
 
-        /* Modales */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); display: none; justify-content: flex-end; z-index: 1000;
@@ -209,7 +208,6 @@
         <div id="contenedorProductos" class="loader">Cargando productos...</div>
     </div>
 
-    <!-- Modal del Carrito -->
     <div class="modal-overlay" id="modalCarrito">
         <div class="modal-contenido">
             <div class="modal-header">
@@ -232,7 +230,6 @@
         </div>
     </div>
 
-    <!-- Modal de Personalización -->
     <div class="modal-overlay" id="modalPersonalizacion">
         <div class="modal-contenido">
             <div class="modal-header">
@@ -284,7 +281,7 @@
             contenedor.innerHTML = "";
 
             lista.forEach((p, index) => {
-                let idProd = p.id || index;
+                let idProd = p.id !== undefined ? p.id : index;
                 if (!estadoSelecciones[idProd]) {
                     estadoSelecciones[idProd] = { talla: '' };
                 }
@@ -362,11 +359,12 @@
 
         function agregarDirecto(idProd) {
             let seleccion = estadoSelecciones[idProd];
-            if (!seleccion.talla) {
+            if (!seleccion || !seleccion.talla) {
                 document.getElementById(`error-talla-${idProd}`).style.display = 'block';
                 return;
             }
-            const p = datosTienda.productos.find(prod => (prod.id || datosTienda.productos.indexOf(prod)) == idProd);
+            const p = datosTienda.productos.find((prod, index) => String(prod.id !== undefined ? prod.id : index) === String(idProd));
+            if (!p) return;
             
             agregarAlCarritoFinal({
                 id: idProd,
@@ -381,12 +379,14 @@
 
         function abrirPersonalizacion(idProd) {
             let seleccion = estadoSelecciones[idProd];
-            if (!seleccion.talla) {
+            if (!seleccion || !seleccion.talla) {
                 document.getElementById(`error-talla-${idProd}`).style.display = 'block';
                 return;
             }
 
-            const p = datosTienda.productos.find(prod => (prod.id || datosTienda.productos.indexOf(prod)) == idProd);
+            const p = datosTienda.productos.find((prod, index) => String(prod.id !== undefined ? prod.id : index) === String(idProd));
+            if (!p) return;
+
             productoEnEdicion = p;
             parchesSeleccionadosModal = {};
 
@@ -405,7 +405,7 @@
                 if (zona.lista.length === 0) return;
                 let htmlGrid = '';
                 zona.lista.forEach(parche => {
-                    let pid = parche.id || parche.nombre;
+                    let pid = parche.id !== undefined ? parche.id : parche.nombre;
                     let imgParche = limpiarUrlImagen(parche.imagen || parche.url || parche.foto || parche.img || '');
                     htmlGrid += `
                         <div class="parche-card" id="card-${zona.key}-${pid}" onclick="toggleParcheZona('${zona.key}', '${pid}', '${parche.nombre}')">
