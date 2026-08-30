@@ -26,12 +26,13 @@
             position: sticky; top: 0; background: white; z-index: 100;
         }
         .logo { font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
-        .logo img { width: 42px; height: 42px; object-fit: cover; border-radius: 50%; border: 1px solid var(--border); }
+        /* Logo ajustado para que se vea limpio sin recortes extraños */
+        .logo img { height: 45px; width: auto; object-fit: contain; }
 
         .cart-btn {
-            background: var(--primary); color: white; border: none; padding: 8px 16px;
-            border-radius: 20px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;
-            font-size: 0.9rem; transition: background 0.2s;
+            background: var(--primary); color: white; border: none; padding: 8px 14px;
+            border-radius: 20px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;
+            font-size: 1.1rem; transition: background 0.2s;
         }
         .cart-btn:hover { background: var(--accent); }
 
@@ -156,7 +157,7 @@
             <span>Tienda Oficial</span>
         </div>
         <button class="cart-btn" onclick="abrirCarrito()">
-            🛒 Carrito <span id="cartCount" style="background: white; color: var(--primary); padding: 2px 6px; border-radius: 10px; font-size: 0.75rem;">0</span>
+            🛒 <span id="cartCount" style="background: white; color: var(--primary); padding: 2px 6px; border-radius: 10px; font-size: 0.75rem;">0</span>
         </button>
     </header>
 
@@ -196,7 +197,7 @@
     <script>
         const API_URL = 'https://script.google.com/macros/s/AKfycbwi_d3Q1xsTiSxZ0WqCdOkNBjdfQh37a2BDyKnM2aoWx27dM8ZEgjKXKwvRsd3Mp26abA/exec';
         let productosGlobales = [];
-        let estadoSelecciones = {}; // Guarda la talla y personalización de cada producto
+        let estadoSelecciones = {};
         let carrito = [];
 
         async function cargarProductos() {
@@ -237,7 +238,6 @@
 
                 let imgPrincipal = imgs[0];
 
-                // Procesar tallas
                 let tallasArr = p.talla ? p.talla.split(',').map(t => t.trim()) : ['Única'];
                 let htmlTallas = '';
                 tallasArr.forEach(t => {
@@ -308,7 +308,6 @@
             const container = document.getElementById(`inputs-custom-${idProd}`);
             estadoSelecciones[idProd].custom = checkbox.checked;
             container.style.display = checkbox.checked ? 'flex' : 'none';
-            // Buscar precio base del producto
             const prod = productosGlobales.find(p => (p.id || productosGlobales.indexOf(p)) == idProd);
             actualizarPrecioCard(idProd, prod.precio);
         }
@@ -339,7 +338,6 @@
         function agregarAlCarrito(idProd, titulo, precioBase) {
             let seleccion = estadoSelecciones[idProd];
             
-            // Validar talla obligatoria
             if (!seleccion.talla) {
                 document.getElementById(`error-talla-${idProd}`).style.display = 'block';
                 return;
