@@ -26,6 +26,7 @@
             position: sticky; top: 0; background: white; z-index: 100;
         }
         .logo { font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
+        .logo img { height: 38px; width: auto; object-fit: contain; }
         
         .cart-btn {
             background: var(--primary); color: white; border: none; padding: 8px 16px;
@@ -189,7 +190,8 @@
 
     <header>
         <div class="logo">
-            <span>Tienda de Camisetas</span>
+            <img src="https://lh3.googleusercontent.com/d/1nu9bwEvAomNYNOilQ1aoIxkqUSJOcYGV" alt="Logo">
+            <span>Tienda Oficial</span>
         </div>
         <button class="cart-btn" onclick="abrirCarritoModal()">
             🛒 <span id="cartCount" style="background: white; color: var(--primary); padding: 2px 6px; border-radius: 10px; font-size: 0.75rem;">0</span>
@@ -555,7 +557,7 @@
 
         function abrirCarritoModal() {
             document.getElementById('modalCarrito').classList.add('open');
-            renderizarListaCarrito(); // <--- CORREGIDO: ahora llama a renderizarListaCarrito correctamente
+            renderizarListaCarrito();
         }
 
         function cerrarModal(modalId) {
