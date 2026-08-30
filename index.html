@@ -15,6 +15,7 @@
             --border: #e5e7eb;
             --radius: 8px;
             --danger: #ef4444;
+            --success: #10b981;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
@@ -84,10 +85,10 @@
         .miniatura.active { border-color: var(--accent); opacity: 1; }
 
         .tarjeta-info { padding: 16px; display: flex; flex-direction: column; flex-grow: 1; }
-        .tarjeta-info h3 { font-size: 1rem; font-weight: 600; margin-bottom: 8px; }
+        .tarjeta-info h3 { font-size: 1rem; font-weight: 600; margin-bottom: 12px; }
 
         /* Estilo de Tallas en Círculo */
-        .seccion-tallas { margin-bottom: 12px; }
+        .seccion-tallas { margin-bottom: 15px; }
         .label-tallas { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; display: block; }
         .circulos-tallas { display: flex; gap: 8px; flex-wrap: wrap; }
         .circulo-talla {
@@ -99,21 +100,10 @@
             background: var(--primary); color: white; border-color: var(--primary);
         }
 
-        /* Sección de Personalización */
-        .seccion-personalizacion {
-            background: #fff; border: 1px solid var(--border); border-radius: 6px;
-            padding: 10px; margin-bottom: 15px; font-size: 0.85rem;
-        }
-        .custom-checkbox-label {
-            display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; margin-bottom: 6px;
-        }
-        .custom-inputs { display: none; margin-top: 6px; gap: 6px; flex-direction: column; }
-        .custom-inputs input {
-            padding: 6px 10px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.85rem; outline: none;
-        }
-
-        .footer-card { display: flex; justify-content: space-between; align-items: center; margin-top: auto; border-top: 1px solid var(--border); padding-top: 12px; }
-        .precio { font-size: 1.15rem; font-weight: 800; }
+        .footer-card { display: flex; flex-direction: column; gap: 10px; margin-top: auto; border-top: 1px solid var(--border); padding-top: 12px; }
+        .footer-card-row { display: flex; justify-content: space-between; align-items: center; }
+        .precio { font-size: 1.2rem; font-weight: 800; }
+        
         .btn-comprar {
             background: var(--primary); color: white; border: none;
             padding: 8px 14px; border-radius: 20px; font-weight: 600; font-size: 0.8rem;
@@ -121,44 +111,70 @@
         }
         .btn-comprar:hover { background: var(--accent); }
 
-        /* Modal del Carrito */
+        .btn-personalizar {
+            background: #f3f4f6; color: var(--primary); border: 1px solid var(--border);
+            padding: 9px; border-radius: var(--radius); font-weight: 600; font-size: 0.85rem;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+            transition: all 0.2s; width: 100%;
+        }
+        .btn-personalizar:hover { background: #e5e7eb; border-color: #d1d5db; }
+
+        /* Modal Genérico / Personalización */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); display: none; justify-content: flex-end; z-index: 1000;
         }
         .modal-overlay.open { display: flex; }
-        .carrito-modal {
-            background: white; width: 100%; max-width: 400px; height: 100%;
+        
+        .modal-contenido {
+            background: white; width: 100%; max-width: 450px; height: 100%;
             padding: 20px; display: flex; flex-direction: column; box-shadow: -4px 0 15px rgba(0,0,0,0.1);
-            animation: slideIn 0.3s ease;
+            animation: slideIn 0.3s ease; overflow-y: auto;
         }
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-        .carrito-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
-        .carrito-body { flex-grow: 1; overflow-y: auto; padding: 15px 0; }
         
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 15px; }
+        .btn-cerrar-modal { background: none; border: none; font-size: 1.2rem; cursor: pointer; }
+
+        /* Estilos específicos Modal Personalización */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: var(--text); }
+        .form-group input { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; outline: none; }
+        
+        .parches-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .parche-card {
+            border: 2px solid var(--border); border-radius: 8px; padding: 10px; text-align: center;
+            background: var(--surface); display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            transition: all 0.2s;
+        }
+        .parche-card.active-parche { border-color: var(--accent); background: #eff6ff; }
+        .parche-card img { width: 60px; height: 60px; object-fit: contain; margin-bottom: 8px; background: white; border-radius: 4px; padding: 4px; border: 1px solid var(--border); }
+        .parche-card h4 { font-size: 0.8rem; margin-bottom: 4px; font-weight: 600; }
+        .parche-card span { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px; display: block; }
+        
+        .btn-toggle-parche {
+            background: #e5e7eb; color: var(--text); border: none; padding: 4px 10px;
+            border-radius: 4px; font-size: 0.75rem; font-weight: 700; cursor: pointer; width: 100%; transition: background 0.2s;
+        }
+        .parche-card.active-parche .btn-toggle-parche { background: var(--accent); color: white; }
+
         .item-carrito {
             display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1px solid var(--border); padding: 12px 0; font-size: 0.9rem;
         }
-        .controles-cantidad {
-            display: flex; align-items: center; gap: 8px; margin-top: 8px;
-        }
+        .controles-cantidad { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
         .btn-cant {
             width: 24px; height: 24px; border: 1px solid var(--border); background: #fff;
             border-radius: 4px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center;
-            transition: background 0.1s;
         }
         .btn-cant:hover { background: var(--surface); }
 
-        .carrito-footer { border-top: 1px solid var(--border); padding-top: 15px; }
-        .btn-cerrar-modal { background: none; border: none; font-size: 1.2rem; cursor: pointer; }
+        .error-talla { color: var(--danger); font-size: 0.75rem; margin-top: 4px; display: none; }
         .btn-whatsapp {
             background: #25d366; color: white; border: none; width: 100%; padding: 12px;
-            border-radius: var(--radius); font-weight: 700; font-size: 1rem; cursor: pointer; text-align: center; margin-top: 10px;
+            border-radius: var(--radius); font-weight: 700; font-size: 1rem; cursor: pointer; text-align: center; margin-top: 15px;
         }
         .btn-whatsapp:hover { background: #1ebe5d; }
-        .error-talla { color: var(--danger); font-size: 0.75rem; margin-top: 4px; display: none; }
-        
         .loader { text-align: center; padding: 40px; font-size: 1.1rem; color: var(--text-muted); }
     </style>
 </head>
@@ -169,7 +185,7 @@
             <img src="https://lh3.googleusercontent.com/d/1nu9bwEvAomNYNOilQ1aoIxkqUSJOcYGV" alt="Logo Tienda">
             <span>Tienda Oficial</span>
         </div>
-        <button class="cart-btn" onclick="abrirCarrito()">
+        <button class="cart-btn" onclick="abrirCarritoModal()">
             🛒 <span id="cartCount" style="background: white; color: var(--primary); padding: 2px 6px; border-radius: 10px; font-size: 0.75rem;">0</span>
         </button>
     </header>
@@ -189,15 +205,15 @@
 
     <!-- Modal del Carrito -->
     <div class="modal-overlay" id="modalCarrito">
-        <div class="carrito-modal">
-            <div class="carrito-header">
+        <div class="modal-contenido">
+            <div class="modal-header">
                 <h2>Tu Carrito</h2>
-                <button class="btn-cerrar-modal" onclick="cerrarCarrito()">✕</button>
+                <button class="btn-cerrar-modal" onclick="cerrarModal('modalCarrito')">✕</button>
             </div>
-            <div class="carrito-body" id="listaCarrito">
+            <div style="flex-grow: 1; overflow-y: auto;" id="listaCarrito">
                 <p style="color: var(--text-muted); text-align: center; margin-top: 20px;">El carrito está vacío</p>
             </div>
-            <div class="carrito-footer">
+            <div style="border-top: 1px solid var(--border); padding-top: 15px;">
                 <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 1.2rem; margin-bottom: 10px;">
                     <span>Total:</span>
                     <span id="totalCarrito">0.00 €</span>
@@ -207,11 +223,40 @@
         </div>
     </div>
 
+    <!-- Modal de Personalización -->
+    <div class="modal-overlay" id="modalPersonalizacion">
+        <div class="modal-contenido">
+            <div class="modal-header">
+                <h2>Personalizar Equipación</h2>
+                <button class="btn-cerrar-modal" onclick="cerrarModal('modalPersonalizacion')">✕</button>
+            </div>
+            <div id="contenidoPersonalizacion">
+                <!-- Se llena dinámicamente -->
+            </div>
+        </div>
+    </div>
+
     <script>
         const API_URL = 'https://script.google.com/macros/s/AKfycbwi_d3Q1xsTiSxZ0WqCdOkNBjdfQh37a2BDyKnM2aoWx27dM8ZEgjKXKwvRsd3Mp26abA/exec';
         let productosGlobales = [];
         let estadoSelecciones = {};
         let carrito = [];
+
+        // Parches disponibles con sus fotos de previsualización (puedes cambiar los enlaces de imagen cuando quieras)
+        const parchesDisponibles = [
+            { 
+                id: 'parche_mundial', 
+                nombre: 'Parche Mundial', 
+                precio: 2.00, 
+                imagen: 'https://cdn-icons-png.flaticon.com/512/3313/3313437.png' 
+            },
+            { 
+                id: 'parche_champions', 
+                nombre: 'Parche Champions', 
+                precio: 2.50, 
+                imagen: 'https://cdn-icons-png.flaticon.com/512/1193/1193827.png' 
+            }
+        ];
 
         async function cargarProductos() {
             try {
@@ -238,7 +283,7 @@
             lista.forEach((p, index) => {
                 let idProd = p.id || index;
                 if (!estadoSelecciones[idProd]) {
-                    estadoSelecciones[idProd] = { talla: '', custom: false, nombre: '', numero: '', parche: false };
+                    estadoSelecciones[idProd] = { talla: '' };
                 }
 
                 let imgs = [];
@@ -250,7 +295,6 @@
                 if (imgs.length === 0) imgs = ['https://via.placeholder.com/300x350?text=Sin+Imagen'];
 
                 let imgPrincipal = imgs[0];
-
                 let tallasArr = p.talla ? p.talla.split(',').map(t => t.trim()) : ['Única'];
                 let htmlTallas = '';
                 tallasArr.forEach(t => {
@@ -284,24 +328,14 @@
                             <div class="error-talla" id="error-talla-${idProd}">¡Elige una talla obligatoriamente!</div>
                         </div>
 
-                        <div class="seccion-personalizacion">
-                            <label class="custom-checkbox-label">
-                                <input type="checkbox" onchange="toggleCustom('${idProd}', this)">
-                                Personalizar Nombre/Número (+3€)
-                            </label>
-                            <div class="custom-inputs" id="inputs-custom-${idProd}">
-                                <input type="text" placeholder="Nombre para la espalda" id="nombre-${idProd}" oninput="actualizarPrecioCard('${idProd}', ${p.precio})">
-                                <input type="text" placeholder="Número para la espalda" id="numero-${idProd}" oninput="actualizarPrecioCard('${idProd}', ${p.precio})">
-                            </div>
-                            <label class="custom-checkbox-label" style="margin-top: 8px;">
-                                <input type="checkbox" id="parche-${idProd}" onchange="actualizarPrecioCard('${idProd}', ${p.precio})">
-                                Añadir Parche (+2€)
-                            </label>
-                        </div>
-
                         <div class="footer-card">
-                            <div class="precio" id="precio-card-${idProd}">${parseFloat(p.precio || 0).toFixed(2)} €</div>
-                            <button class="btn-comprar" onclick="agregarAlCarrito('${idProd}', '${p.titulo}', ${p.precio})">Añadir al Carrito</button>
+                            <button class="btn-personalizar" onclick="abrirPersonalizacion('${idProd}')">
+                                ⚙️ Personalizar y Añadir
+                            </button>
+                            <div class="footer-card-row">
+                                <div class="precio">${parseFloat(p.precio || 0).toFixed(2)} €</div>
+                                <button class="btn-comprar" onclick="agregarDirecto('${idProd}')">Añadir al Carrito</button>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -317,30 +351,6 @@
             document.getElementById(`error-talla-${idProd}`).style.display = 'none';
         }
 
-        function toggleCustom(idProd, checkbox) {
-            const container = document.getElementById(`inputs-custom-${idProd}`);
-            estadoSelecciones[idProd].custom = checkbox.checked;
-            container.style.display = checkbox.checked ? 'flex' : 'none';
-            const prod = productosGlobales.find(p => (p.id || productosGlobales.indexOf(p)) == idProd);
-            actualizarPrecioCard(idProd, prod.precio);
-        }
-
-        function calcularPrecioExtra(idProd) {
-            let extra = 0;
-            let customChecked = estadoSelecciones[idProd].custom;
-            let parcheChecked = document.getElementById(`parche-${idProd}`).checked;
-
-            if (customChecked) extra += 3;
-            if (parcheChecked) extra += 2;
-            return extra;
-        }
-
-        function actualizarPrecioCard(idProd, precioBase) {
-            let extra = calcularPrecioExtra(idProd);
-            let total = parseFloat(precioBase) + extra;
-            document.getElementById(`precio-card-${idProd}`).innerText = total.toFixed(2) + ' €';
-        }
-
         function cambiarImagen(event, idProd, nuevaUrl) {
             document.getElementById(`img-${idProd}`).src = nuevaUrl;
             const tarjeta = event.target.closest('.tarjeta');
@@ -348,47 +358,174 @@
             event.target.classList.add('active');
         }
 
-        function agregarAlCarrito(idProd, titulo, precioBase) {
+        function agregarDirecto(idProd) {
             let seleccion = estadoSelecciones[idProd];
+            if (!seleccion.talla) {
+                document.getElementById(`error-talla-${idProd}`).style.display = 'block';
+                return;
+            }
+            const p = productosGlobales.find(prod => (prod.id || productosGlobales.indexOf(prod)) == idProd);
             
+            agregarAlCarritoFinal({
+                id: idProd,
+                titulo: p.titulo,
+                precio: parseFloat(p.precio),
+                talla: seleccion.talla,
+                cantidad: 1,
+                personalizacion: 'Sin personalización',
+                parches: 'Sin parches'
+            });
+        }
+
+        // Abrir Modal de Personalización
+        let productoEnEdicion = null;
+        let parchesSeleccionadosModal = {};
+
+        function abrirPersonalizacion(idProd) {
+            let seleccion = estadoSelecciones[idProd];
             if (!seleccion.talla) {
                 document.getElementById(`error-talla-${idProd}`).style.display = 'block';
                 return;
             }
 
-            let parcheChecked = document.getElementById(`parche-${idProd}`).checked;
-            let nombreVal = seleccion.custom ? document.getElementById(`nombre-${idProd}`).value.trim() : '';
-            let numeroVal = seleccion.custom ? document.getElementById(`numero-${idProd}`).value.trim() : '';
-            
-            let extra = calcularPrecioExtra(idProd);
-            let precioFinal = parseFloat(precioBase) + extra;
-            let textoPersonalizacion = seleccion.custom ? `Nombre: ${nombreVal || 'N/A'}, Nº: ${numeroVal || 'N/A'}` : 'Sin personalización';
-            let textoParche = parcheChecked ? 'Con Parche' : 'Sin Parche';
+            const p = productosGlobales.find(prod => (prod.id || productosGlobales.indexOf(prod)) == idProd);
+            productoEnEdicion = p;
+            parchesSeleccionadosModal = {};
 
-            // Comprobar si ya existe el mismo artículo exacto en el carrito
+            let htmlParches = '';
+            parchesDisponibles.forEach(parche => {
+                htmlParches += `
+                    <div class="parche-card" id="card-parche-${parche.id}">
+                        <img src="${parche.imagen}" alt="${parche.nombre}">
+                        <div>
+                            <h4>${parche.nombre}</h4>
+                            <span>+${parche.precio.toFixed(2)} €</span>
+                        </div>
+                        <button class="btn-toggle-parche" onclick="toggleParcheModal('${parche.id}')">Activar</button>
+                    </div>
+                `;
+            });
+
+            const contenedor = document.getElementById('contenidoPersonalizacion');
+            contenedor.innerHTML = `
+                <p style="font-weight: 600; margin-bottom: 12px; font-size: 0.95rem;">${p.titulo} (Talla: ${seleccion.talla})</p>
+                
+                <div class="form-group">
+                    <label>Nombre para la espalda (+3.00 €):</label>
+                    <input type="text" id="inputNombreCustom" placeholder="Ej: GAVI">
+                </div>
+
+                <div class="form-group">
+                    <label>Número para la espalda:</label>
+                    <input type="text" id="inputNumeroCustom" placeholder="Ej: 9">
+                </div>
+
+                <div class="form-group">
+                    <label>Elige tus parches (Previsualización):</label>
+                    <div class="parches-grid">
+                        ${htmlParches}
+                    </div>
+                </div>
+
+                <div style="background: var(--surface); padding: 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                    <span style="font-weight: 700;">Precio Total Configurado:</span>
+                    <span id="precioTotalModal" style="font-size: 1.2rem; font-weight: 800; color: var(--accent);">${parseFloat(p.precio).toFixed(2)} €</span>
+                </div>
+
+                <button class="btn-whatsapp" style="background: var(--primary); margin-top: 15px;" onclick="confirmarPersonalizacion('${idProd}')">Añadir al Carrito</button>
+            `;
+
+            // Actualizar precio en tiempo real al escribir
+            document.getElementById('inputNombreCustom').addEventListener('input', calcularPrecioModal);
+            document.getElementById('inputNumeroCustom').addEventListener('input', calcularPrecioModal);
+
+            document.getElementById('modalPersonalizacion').classList.add('open');
+        }
+
+        function toggleParcheModal(parcheId) {
+            if (parchesSeleccionadosModal[parcheId]) {
+                delete parchesSeleccionadosModal[parcheId];
+                document.getElementById(`card-parche-${parcheId}`).classList.remove('active-parche');
+                document.querySelector(`#card-parche-${parcheId} .btn-toggle-parche`).innerText = 'Activar';
+            } else {
+                parchesSeleccionadosModal[parcheId] = true;
+                document.getElementById(`card-parche-${parcheId}`).classList.add('active-parche');
+                document.querySelector(`#card-parche-${parcheId} .btn-toggle-parche`).innerText = 'Activado ✓';
+            }
+            calcularPrecioModal();
+        }
+
+        function calcularPrecioModal() {
+            if (!productoEnEdicion) return;
+            let total = parseFloat(productoEnEdicion.precio);
+            let nombreVal = document.getElementById('inputNombreCustom').value.trim();
+            let numeroVal = document.getElementById('inputNumeroCustom').value.trim();
+
+            if (nombreVal !== '' || numeroVal !== '') {
+                total += 3.00; // Costo por nombre/número
+            }
+
+            Object.keys(parchesSeleccionadosModal).forEach(parcheId => {
+                let parcheObj = parchesDisponibles.find(p => p.id === parcheId);
+                if (parcheObj) total += parcheObj.precio;
+            });
+
+            document.getElementById('precioTotalModal').innerText = total.toFixed(2) + ' €';
+        }
+
+        function confirmarPersonalizacion(idProd) {
+            let nombreVal = document.getElementById('inputNombreCustom').value.trim();
+            let numeroVal = document.getElementById('inputNumeroCustom').value.trim();
+            let seleccion = estadoSelecciones[idProd];
+            let basePrecio = parseFloat(productoEnEdicion.precio);
+            
+            let costoExtra = 0;
+            let textoPersonalizacion = 'Sin personalización';
+            if (nombreVal !== '' || numeroVal !== '') {
+                costoExtra += 3.00;
+                textoPersonalizacion = `Nombre: ${nombreVal || 'N/A'}, Nº: ${numeroVal || 'N/A'}`;
+            }
+
+            let nombresParchesArr = [];
+            Object.keys(parchesSeleccionadosModal).forEach(parcheId => {
+                let parcheObj = parchesDisponibles.find(p => p.id === parcheId);
+                if (parcheObj) {
+                    costoExtra += parcheObj.precio;
+                    nombresParchesArr.push(parcheObj.nombre);
+                }
+            });
+
+            let textoParches = nombresParchesArr.length > 0 ? nombresParchesArr.join(', ') : 'Sin parches';
+
+            agregarAlCarritoFinal({
+                id: idProd,
+                titulo: productoEnEdicion.titulo,
+                precio: basePrecio + costoExtra,
+                talla: seleccion.talla,
+                cantidad: 1,
+                personalizacion: textoPersonalizacion,
+                parches: textoParches
+            });
+
+            cerrarModal('modalPersonalizacion');
+        }
+
+        function agregarAlCarritoFinal(nuevoItem) {
             let indexExistente = carrito.findIndex(item => 
-                item.id === idProd && 
-                item.talla === seleccion.talla && 
-                item.personalizacion === textoPersonalizacion && 
-                item.parche === textoParche
+                item.id === nuevoItem.id && 
+                item.talla === nuevoItem.talla && 
+                item.personalizacion === nuevoItem.personalizacion && 
+                item.parches === nuevoItem.parches
             );
 
             if (indexExistente > -1) {
                 carrito[indexExistente].cantidad += 1;
             } else {
-                carrito.push({
-                    id: idProd,
-                    titulo: titulo,
-                    talla: seleccion.talla,
-                    precio: precioFinal,
-                    cantidad: 1,
-                    personalizacion: textoPersonalizacion,
-                    parche: textoParche
-                });
+                carrito.push(nuevoItem);
             }
 
             actualizarContadorCarrito();
-            abrirCarrito();
+            abrirCarritoModal();
         }
 
         function actualizarContadorCarrito() {
@@ -396,14 +533,13 @@
             document.getElementById('cartCount').innerText = totalUnidades;
         }
 
-        function abrirCarrito() {
-            const modal = document.getElementById('modalCarrito');
-            modal.classList.add('open');
+        function abrirCarritoModal() {
+            document.getElementById('modalCarrito').classList.add('open');
             renderizarListaCarrito();
         }
 
-        function cerrarCarrito() {
-            document.getElementById('modalCarrito').classList.remove('open');
+        function cerrarModal(modalId) {
+            document.getElementById(modalId).classList.remove('open');
         }
 
         function renderizarListaCarrito() {
@@ -426,7 +562,7 @@
                     <div class="item-carrito">
                         <div>
                             <strong>${item.titulo}</strong><br>
-                            <small style="color: var(--text-muted);">Talla: ${item.talla} | ${item.personalizacion} | ${item.parche}</small>
+                            <small style="color: var(--text-muted);">Talla: ${item.talla} | ${item.personalizacion} | ${item.parches}</small>
                             <div class="controles-cantidad">
                                 <button class="btn-cant" onclick="cambiarCantidad(${index}, -1)">-</button>
                                 <span style="font-weight: 700; font-size: 0.9rem; min-width: 20px; text-align: center;">${item.cantidad}</span>
@@ -471,7 +607,7 @@
                 texto += `${i + 1}. *${item.titulo}* (x${item.cantidad})\n`;
                 texto += `   - Talla: ${item.talla}\n`;
                 texto += `   - Personalización: ${item.personalizacion}\n`;
-                texto += `   - Parche: ${item.parche}\n`;
+                texto += `   - Parches: ${item.parches}\n`;
                 texto += `   - Subtotal: ${subtotal.toFixed(2)} €\n\n`;
                 totalGeneral += subtotal;
             });
