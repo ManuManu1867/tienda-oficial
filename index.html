@@ -47,7 +47,7 @@
         }
 
         .main-container { padding: 20px 5% 60px 5%; }
-        h1.section-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 25px; }
+        h1.section-title, h2.section-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; }
 
         .grid-productos {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px;
@@ -100,7 +100,6 @@
         }
         .miniatura.active { border-color: var(--accent); opacity: 1; }
 
-        /* Botón de +X fotos adicionales */
         .miniatura-mas {
             width: 36px; height: 36px; border-radius: 4px; background: #f3f4f6;
             color: var(--text); font-size: 0.75rem; font-weight: 700;
@@ -224,15 +223,15 @@
         </button>
     </header>
 
-    <div class="filtros">
-        <button class="filtro-btn active" onclick="filtrar('Todo', this)">Todo</button>
-        <button class="filtro-btn" onclick="filtrar('Selecciones', this)">Selecciones</button>
-        <button class="filtro-btn" onclick="filtrar('Clubes', this)">Clubes</button>
-        <button class="filtro-btn" onclick="filtrar('Retro', this)">Retro</button>
+    <div class="filtros" id="contenedorFiltros">
+        <button class="filtro-btn active" onclick="filtrarCategoria('Todo', this)">Todo</button>
+        <button class="filtro-btn" onclick="filtrarCategoria('Selecciones', this)">Selecciones</button>
+        <button class="filtro-btn" onclick="filtrarCategoria('Clubes', this)">Clubes</button>
+        <button class="filtro-btn" onclick="filtrarCategoria('Retro', this)">Retro</button>
     </div>
 
     <div class="main-container">
-        <h1 class="section-title" id="tituloCategoria">Novedades y Equipaciones</h1>
+        <h1 class="section-title" id="tituloPrincipalSeccion">Novedades y Equipaciones</h1>
         <div id="contenedorProductos" class="loader">Cargando productos...</div>
     </div>
 
@@ -273,6 +272,8 @@
         
         let datosTienda = { productos: [], parches: [] };
         let estadoSelecciones = {};
+        let limitesSecciones = {}; // Controla el límite de 4 en 4 por cada categoría
+        let categoriaFiltroActiva = 'Todo';
         let carrito = [];
         let productoEnEdicion = null;
         let parchesSeleccionadosModal = {};
@@ -291,7 +292,7 @@
             try {
                 const response = await fetch(API_URL);
                 datosTienda = await response.json();
-                renderizarProductos(datosTienda.productos);
+                renderizarSecciones(datosTienda.productos);
             } catch (error) {
                 console.error("Error al cargar:", error);
                 document.getElementById('contenedorProductos').innerHTML = "Error al cargar los datos. Comprueba tu conexión.";
@@ -341,89 +342,155 @@
             }
         }
 
-        function renderizarProductos(lista) {
+        function renderizarSecciones(lista) {
             const contenedor = document.getElementById('contenedorProductos');
             if (!lista || lista.length === 0) {
-                contenedor.innerHTML = "<p style='text-align:center; color: var(--text-muted);'>No hay productos disponibles todavía.</p>";
+                contenedor.innerHTML = "<p style='text-align:center; color: var(--text-muted);'>No hay productos disponibles.</p>";
                 return;
             }
 
-            contenedor.className = "grid-productos";
+            // Filtrar si el usuario seleccionó una categoría específica desde los botones superiores
+            let listaFiltrada = lista;
+            if (categoriaFiltroActiva !== 'Todo') {
+                listaFiltrada = lista.filter(p => p.categoria && p.categoria.toLowerCase() === categoriaFiltroActiva.toLowerCase());
+            }
+
+            // Agrupar por categoría
+            let categoriasMap = {};
+            listaFiltrada.forEach((p, index) => {
+                let cat = (p.categoria || 'General').trim();
+                if (!categoriasMap[cat]) categoriasMap[cat] = [];
+                p._idReal = p.id !== undefined ? p.id : index;
+                categoriasMap[cat].push(p);
+            });
+
+            contenedor.className = "";
             contenedor.innerHTML = "";
 
-            lista.forEach((p, index) => {
-                let idProd = p.id !== undefined ? p.id : index;
-                
-                let imgs = [];
-                if (typeof p.imagenes === 'string' && p.imagenes.trim() !== '') {
-                    imgs = p.imagenes.split(',').map(s => limpiarUrlImagen(s)).filter(Boolean);
+            Object.keys(categoriasMap).forEach(cat => {
+                let productosCat = categoriasMap[cat];
+                if (!limitesSecciones[cat]) {
+                    limitesSecciones[cat] = 4; // Comienza mostrando 4 por categoría
                 }
-                if (imgs.length === 0) imgs = ['https://via.placeholder.com/300x350?text=Sin+Imagen'];
+                let limiteActual = limitesSecciones[cat];
+                let productosVisibles = productosCat.slice(0, limiteActual);
 
-                if (!estadoSelecciones[idProd]) {
-                    estadoSelecciones[idProd] = { talla: '', fotoIndex: 0, imgs: imgs, timerInactividad: null, miniaturasExpandidas: false };
-                } else {
-                    estadoSelecciones[idProd].imgs = imgs;
-                }
+                let seccionDiv = document.createElement('div');
+                seccionDiv.style.marginBottom = "40px";
 
-                let imgPrincipal = imgs[estadoSelecciones[idProd].fotoIndex];
-                let tallasArr = p.talla ? p.talla.split(',').map(t => t.trim()) : ['Única'];
-                let htmlTallas = '';
-                tallasArr.forEach(t => {
-                    let selectedClass = estadoSelecciones[idProd].talla === t ? 'selected' : '';
-                    htmlTallas += `<div class="circulo-talla ${selectedClass}" onclick="seleccionarTalla('${idProd}', '${t}', this)">${t}</div>`;
-                });
+                let tituloSec = document.createElement('h2');
+                tituloSec.className = "section-title";
+                tituloSec.innerText = cat;
+                seccionDiv.appendChild(tituloSec);
 
-                let htmlMiniaturas = obtenerHtmlMiniaturas(idProd);
+                let gridDiv = document.createElement('div');
+                gridDiv.className = "grid-productos";
 
-                const tarjeta = document.createElement('div');
-                tarjeta.className = 'tarjeta';
-                tarjeta.innerHTML = `
-                    <div class="visor-imagen" id="visor-${idProd}" 
-                         onmousemove="manejarMovimientoMouse('${idProd}')" 
-                         onmouseleave="ocultarBotonesCarrusel('${idProd}')"
-                         ontouchstart="manejarToquePantalla('${idProd}')">
-                        <span class="categoria-badge">${p.categoria || 'General'}</span>
-                        <img id="img-${idProd}" src="${imgPrincipal}" alt="${p.titulo}">
-                        ${imgs.length > 1 ? `
-                            <button class="carrusel-btn prev" onclick="cambiarFotoSlider(event, '${idProd}', -1)">&#10094;</button>
-                            <button class="carrusel-btn next" onclick="cambiarFotoSlider(event, '${idProd}', 1)">&#10095;</button>
-                        ` : ''}
-                    </div>
-                    ${htmlMiniaturas}
-                    <div class="tarjeta-info">
-                        <h3>${p.titulo || 'Sin título'}</h3>
-                        
-                        <div class="seccion-tallas">
-                            <span class="label-tallas">Selecciona tu talla: *</span>
-                            <div class="circulos-tallas" id="tallas-${idProd}">${htmlTallas}</div>
-                            <div class="error-talla" id="error-talla-${idProd}">¡Elige una talla obligatoriamente!</div>
+                productosVisibles.forEach((p) => {
+                    let idProd = p._idReal;
+                    
+                    let imgs = [];
+                    if (typeof p.imagenes === 'string' && p.imagenes.trim() !== '') {
+                        imgs = p.imagenes.split(',').map(s => limpiarUrlImagen(s)).filter(Boolean);
+                    }
+                    if (imgs.length === 0) imgs = ['https://via.placeholder.com/300x350?text=Sin+Imagen'];
+
+                    if (!estadoSelecciones[idProd]) {
+                        estadoSelecciones[idProd] = { talla: '', fotoIndex: 0, imgs: imgs, timerInactividad: null, miniaturasExpandidas: false };
+                    } else {
+                        estadoSelecciones[idProd].imgs = imgs;
+                    }
+
+                    let imgPrincipal = imgs[estadoSelecciones[idProd].fotoIndex];
+                    let tallasArr = p.talla ? p.talla.split(',').map(t => t.trim()) : ['Única'];
+                    let htmlTallas = '';
+                    tallasArr.forEach(t => {
+                        let selectedClass = estadoSelecciones[idProd].talla === t ? 'selected' : '';
+                        htmlTallas += `<div class="circulo-talla ${selectedClass}" onclick="seleccionarTalla('${idProd}', '${t}', this)">${t}</div>`;
+                    });
+
+                    let htmlMiniaturas = obtenerHtmlMiniaturas(idProd);
+
+                    const tarjeta = document.createElement('div');
+                    tarjeta.className = 'tarjeta';
+                    tarjeta.innerHTML = `
+                        <div class="visor-imagen" id="visor-${idProd}" 
+                             onmousemove="manejarMovimientoMouse('${idProd}')" 
+                             onmouseleave="ocultarBotonesCarrusel('${idProd}')"
+                             ontouchstart="manejarToquePantalla('${idProd}')">
+                            <span class="categoria-badge">${p.categoria || 'General'}</span>
+                            <img id="img-${idProd}" src="${imgPrincipal}" alt="${p.titulo}">
+                            ${imgs.length > 1 ? `
+                                <button class="carrusel-btn prev" onclick="cambiarFotoSlider(event, '${idProd}', -1)">&#10094;</button>
+                                <button class="carrusel-btn next" onclick="cambiarFotoSlider(event, '${idProd}', 1)">&#10095;</button>
+                            ` : ''}
                         </div>
+                        ${htmlMiniaturas}
+                        <div class="tarjeta-info">
+                            <h3>${p.titulo || 'Sin título'}</h3>
+                            
+                            <div class="seccion-tallas">
+                                <span class="label-tallas">Selecciona tu talla: *</span>
+                                <div class="circulos-tallas" id="tallas-${idProd}">${htmlTallas}</div>
+                                <div class="error-talla" id="error-talla-${idProd}">¡Elige una talla obligatoriamente!</div>
+                            </div>
 
-                        <div class="footer-card">
-                            <button class="btn-personalizar" onclick="abrirPersonalizacion('${idProd}')">
-                                <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-                                Personalizar Camiseta
-                            </button>
-                            <div class="footer-card-row">
-                                <div class="precio">${parseFloat(p.precio || 0).toFixed(2)} €</div>
-                                <button class="btn-comprar" onclick="agregarDirecto('${idProd}')">Añadir al Carrito</button>
+                            <div class="footer-card">
+                                <button class="btn-personalizar" onclick="abrirPersonalizacion('${idProd}')">
+                                    <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                                    Personalizar Camiseta
+                                </button>
+                                <div class="footer-card-row">
+                                    <div class="precio">${parseFloat(p.precio || 0).toFixed(2)} €</div>
+                                    <button class="btn-comprar" onclick="agregarDirecto('${idProd}')">Añadir al Carrito</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `;
-                contenedor.appendChild(tarjeta);
+                    `;
+                    gridDiv.appendChild(tarjeta);
+                });
+
+                seccionDiv.appendChild(gridDiv);
+
+                // Botón "Ver más (+4)" debajo de cada grupo de categoría si hay más productos
+                if (productosCat.length > limiteActual) {
+                    let btnVerMasContainer = document.createElement('div');
+                    btnVerMasContainer.style.textAlign = "center";
+                    btnVerMasContainer.style.marginTop = "20px";
+
+                    let btnVerMas = document.createElement('button');
+                    btnVerMas.className = "filtro-btn";
+                    btnVerMas.style.background = "var(--surface)";
+                    btnVerMas.style.color = "var(--text)";
+                    btnVerMas.style.borderColor = "var(--border)";
+                    btnVerMas.innerText = "Ver más (+4)";
+                    btnVerMas.onclick = () => {
+                        limitesSecciones[cat] += 4;
+                        renderizarSecciones(datosTienda.productos);
+                    };
+
+                    btnVerMasContainer.appendChild(btnVerMas);
+                    seccionDiv.appendChild(btnVerMasContainer);
+                }
+
+                contenedor.appendChild(seccionDiv);
             });
+        }
+
+        function filtrarCategoria(categoria, btn) {
+            document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            categoriaFiltroActiva = categoria;
+            document.getElementById('tituloPrincipalSeccion').innerText = categoria === 'Todo' ? 'Novedades y Equipaciones' : categoria;
+            renderizarSecciones(datosTienda.productos);
         }
 
         function manejarMovimientoMouse(idProd) {
             const visor = document.getElementById(`visor-${idProd}`);
             if (!visor) return;
             visor.classList.add('activo-interaccion');
-            
             let estado = estadoSelecciones[idProd];
             if (estado.timerInactividad) clearTimeout(estado.timerInactividad);
-            
             estado.timerInactividad = setTimeout(() => {
                 visor.classList.remove('activo-interaccion');
             }, 1500);
@@ -441,10 +508,8 @@
             const visor = document.getElementById(`visor-${idProd}`);
             if (!visor) return;
             visor.classList.add('activo-interaccion');
-            
             let estado = estadoSelecciones[idProd];
             if (estado.timerInactividad) clearTimeout(estado.timerInactividad);
-            
             estado.timerInactividad = setTimeout(() => {
                 visor.classList.remove('activo-interaccion');
             }, 2500);
@@ -766,19 +831,6 @@
 
             texto += `*Total del pedido: ${totalGeneral.toFixed(2)} €*`;
             window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
-        }
-
-        function filtrar(categoria, btn) {
-            document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            document.getElementById('tituloCategoria').innerText = categoria === 'Todo' ? 'Novedades y Equipaciones' : categoria;
-
-            if (categoria === 'Todo') {
-                renderizarProductos(datosTienda.productos);
-            } else {
-                const filtrados = datosTienda.productos.filter(p => p.categoria && p.categoria.toLowerCase() === categoria.toLowerCase());
-                renderizarProductos(filtrados);
-            }
         }
 
         cargarDatos();
