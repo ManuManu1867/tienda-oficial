@@ -79,7 +79,6 @@
         .carrusel-btn.prev { left: 10px; }
         .carrusel-btn.next { right: 10px; }
 
-        /* Se muestran cuando la tarjeta está activa por movimiento o toque */
         .visor-imagen.activo-interaccion .carrusel-btn {
             opacity: 1;
             visibility: visible;
@@ -97,9 +96,19 @@
         }
         .miniatura {
             width: 36px; height: 36px; border-radius: 4px; object-fit: cover;
-            cursor: pointer; border: 2px solid transparent; opacity: 0.6; transition: all 0.2s;
+            cursor: pointer; border: 2px solid transparent; opacity: 0.6; transition: all 0.2s; flex-shrink: 0;
         }
         .miniatura.active { border-color: var(--accent); opacity: 1; }
+
+        /* Botón de +X fotos adicionales */
+        .miniatura-mas {
+            width: 36px; height: 36px; border-radius: 4px; background: #f3f4f6;
+            color: var(--text); font-size: 0.75rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; border: 2px solid var(--border); transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .miniatura-mas:hover { background: #e5e7eb; border-color: #d1d5db; }
 
         .tarjeta-info { padding: 16px; display: flex; flex-direction: column; flex-grow: 1; }
         .tarjeta-info h3 { font-size: 1rem; font-weight: 600; margin-bottom: 12px; }
@@ -289,6 +298,49 @@
             }
         }
 
+        function obtenerHtmlMiniaturas(idProd) {
+            let estado = estadoSelecciones[idProd];
+            let imgs = estado.imgs;
+            if (!imgs || imgs.length <= 1) return '';
+
+            let maxVisibles = 3;
+            let expandido = estado.miniaturasExpandidas || false;
+            let totalImgs = imgs.length;
+            
+            let html = `<div class="miniaturas" id="miniaturas-${idProd}">`;
+            let limiteMostrar = (expandido || totalImgs <= 4) ? totalImgs : maxVisibles;
+            
+            for (let imgIdx = 0; imgIdx < limiteMostrar; imgIdx++) {
+                let imgUrl = imgs[imgIdx];
+                let activeClass = imgIdx === estado.fotoIndex ? 'active' : '';
+                html += `<img src="${imgUrl}" class="miniatura ${activeClass}" onclick="cambiarImagen(event, '${idProd}', '${imgUrl}', ${imgIdx})">`;
+            }
+            
+            if (!expandido && totalImgs > maxVisibles) {
+                let restas = totalImgs - maxVisibles;
+                html += `<div class="miniatura-mas" onclick="toggleExpandirMiniaturas(event, '${idProd}')">+${restas}</div>`;
+            }
+            
+            html += '</div>';
+            return html;
+        }
+
+        function toggleExpandirMiniaturas(event, idProd) {
+            event.stopPropagation();
+            if (estadoSelecciones[idProd]) {
+                estadoSelecciones[idProd].miniaturasExpandidas = true;
+                const tarjeta = event.target.closest('.tarjeta');
+                if (tarjeta) {
+                    const contenedorMin = tarjeta.querySelector('.miniaturas');
+                    if (contenedorMin) {
+                        const temp = document.createElement('div');
+                        temp.innerHTML = obtenerHtmlMiniaturas(idProd);
+                        contenedorMin.replaceWith(temp.firstElementChild);
+                    }
+                }
+            }
+        }
+
         function renderizarProductos(lista) {
             const contenedor = document.getElementById('contenedorProductos');
             if (!lista || lista.length === 0) {
@@ -309,7 +361,7 @@
                 if (imgs.length === 0) imgs = ['https://via.placeholder.com/300x350?text=Sin+Imagen'];
 
                 if (!estadoSelecciones[idProd]) {
-                    estadoSelecciones[idProd] = { talla: '', fotoIndex: 0, imgs: imgs, timerInactividad: null };
+                    estadoSelecciones[idProd] = { talla: '', fotoIndex: 0, imgs: imgs, timerInactividad: null, miniaturasExpandidas: false };
                 } else {
                     estadoSelecciones[idProd].imgs = imgs;
                 }
@@ -322,15 +374,7 @@
                     htmlTallas += `<div class="circulo-talla ${selectedClass}" onclick="seleccionarTalla('${idProd}', '${t}', this)">${t}</div>`;
                 });
 
-                let htmlMiniaturas = '';
-                if (imgs.length > 1) {
-                    htmlMiniaturas = '<div class="miniaturas">';
-                    imgs.forEach((imgUrl, imgIdx) => {
-                        let activeClass = imgIdx === estadoSelecciones[idProd].fotoIndex ? 'active' : '';
-                        htmlMiniaturas += `<img src="${imgUrl}" class="miniatura ${activeClass}" onclick="cambiarImagen(event, '${idProd}', '${imgUrl}', ${imgIdx})">`;
-                    });
-                    htmlMiniaturas += '</div>';
-                }
+                let htmlMiniaturas = obtenerHtmlMiniaturas(idProd);
 
                 const tarjeta = document.createElement('div');
                 tarjeta.className = 'tarjeta';
@@ -372,7 +416,6 @@
             });
         }
 
-        // Funciones para controlar la visibilidad de los botones del carrusel por inactividad
         function manejarMovimientoMouse(idProd) {
             const visor = document.getElementById(`visor-${idProd}`);
             if (!visor) return;
@@ -383,7 +426,7 @@
             
             estado.timerInactividad = setTimeout(() => {
                 visor.classList.remove('activo-interaccion');
-            }, 1500); // Se ocultan a los 1.5 segundos de inactividad del mouse
+            }, 1500);
         }
 
         function ocultarBotonesCarrusel(idProd) {
@@ -404,7 +447,7 @@
             
             estado.timerInactividad = setTimeout(() => {
                 visor.classList.remove('activo-interaccion');
-            }, 2500); // En móviles se quedan visibles 2.5 segundos tras tocar
+            }, 2500);
         }
 
         function cambiarFotoSlider(event, idProd, direccion) {
@@ -416,20 +459,20 @@
             if (estado.fotoIndex < 0) estado.fotoIndex = estado.imgs.length - 1;
             if (estado.fotoIndex >= estado.imgs.length) estado.fotoIndex = 0;
 
-            // Cambiar imagen principal
+            if (estado.fotoIndex >= 3 && estado.imgs.length > 4) {
+                estado.miniaturasExpandidas = true;
+            }
+
             document.getElementById(`img-${idProd}`).src = estado.imgs[estado.fotoIndex];
 
-            // Sincronizar miniaturas inferiores
             const tarjeta = event.target.closest('.tarjeta');
             if (tarjeta) {
-                const miniaturas = tarjeta.querySelectorAll('.miniatura');
-                miniaturas.forEach((m, idx) => {
-                    if (idx === estado.fotoIndex) {
-                        m.classList.add('active');
-                    } else {
-                        m.classList.remove('active');
-                    }
-                });
+                const contenedorMin = tarjeta.querySelector('.miniaturas');
+                if (contenedorMin) {
+                    const temp = document.createElement('div');
+                    temp.innerHTML = obtenerHtmlMiniaturas(idProd);
+                    contenedorMin.replaceWith(temp.firstElementChild);
+                }
             }
 
             manejarMovimientoMouse(idProd);
@@ -449,8 +492,14 @@
                 estadoSelecciones[idProd].fotoIndex = indexImg;
             }
             const tarjeta = event.target.closest('.tarjeta');
-            tarjeta.querySelectorAll('.miniatura').forEach(m => m.classList.remove('active'));
-            event.target.classList.add('active');
+            if (tarjeta) {
+                const contenedorMin = tarjeta.querySelector('.miniaturas');
+                if (contenedorMin) {
+                    const temp = document.createElement('div');
+                    temp.innerHTML = obtenerHtmlMiniaturas(idProd);
+                    contenedorMin.replaceWith(temp.firstElementChild);
+                }
+            }
         }
 
         function agregarDirecto(idProd) {
