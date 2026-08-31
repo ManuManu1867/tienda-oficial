@@ -673,7 +673,6 @@
 
             let todosLosParches = datosTienda.parches || [];
 
-            // Identificación actualizada para 'C', 'D' e 'I' de tu hoja de cálculo
             let parchesCentro = todosLosParches.filter(pr => {
                 let pos = (pr.posicion || '').toString().toLowerCase().trim();
                 return pos === 'c' || pos.includes('centro') || pos.includes('pecho');
@@ -689,10 +688,11 @@
 
             let htmlZonas = '';
 
+            // Títulos actualizados sin (C), (D) ni (I)
             let zonasConfig = [
-                { key: 'centro_pecho', titulo: '⚽ Centro del Pecho (C)', lista: parchesCentro },
-                { key: 'hombro_izquierdo', titulo: '🛡️ Hombro Izquierdo (I)', lista: parchesIzquierdo },
-                { key: 'hombro_derecho', titulo: '🛡️ Hombro Derecho (D)', lista: parchesDerecho }
+                { key: 'centro_pecho', titulo: '⚽ Centro del Pecho', lista: parchesCentro },
+                { key: 'hombro_izquierdo', titulo: '🛡️ Hombro Izquierdo', lista: parchesIzquierdo },
+                { key: 'hombro_derecho', titulo: '🛡️ Hombro Derecho', lista: parchesDerecho }
             ];
 
             zonasConfig.forEach(zona => {
@@ -717,7 +717,6 @@
                 `;
             });
 
-            // Respaldo por si acaso alguna posición no coincide exactamente con C, D o I
             let parchesAsignadosIds = [...parchesCentro, ...parchesIzquierdo, ...parchesDerecho];
             let parchesRestantes = todosLosParches.filter(pr => !parchesAsignadosIds.includes(pr));
             
@@ -816,7 +815,7 @@
             let detalleParchesArr = [];
             Object.keys(parchesSeleccionadosModal).forEach(zonaKey => {
                 let pInfo = parchesSeleccionadosModal[zonaKey];
-                let zonaNombreLindo = zonaKey === 'centro_pecho' ? 'Centro (C)' : (zonaKey === 'hombro_izquierdo' ? 'Hombro Izq (I)' : (zonaKey === 'hombro_derecho' ? 'Hombro Der (D)' : 'General'));
+                let zonaNombreLindo = zonaKey === 'centro_pecho' ? 'Centro' : (zonaKey === 'hombro_izquierdo' ? 'Hombro Izq' : (zonaKey === 'hombro_derecho' ? 'Hombro Der' : 'General'));
                 detalleParchesArr.push(`${pInfo.nombre} (${zonaNombreLindo})`);
             });
 
