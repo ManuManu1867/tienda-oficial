@@ -671,41 +671,74 @@
             productoEnEdicion = p;
             parchesSeleccionadosModal = {};
 
-            let parchesCentro = datosTienda.parches.filter(pr => (pr.posicion || '').toString().toLowerCase().includes('centro'));
-            let parchesIzquierdo = datosTienda.parches.filter(pr => (pr.posicion || '').toString().toLowerCase().includes('izquierdo'));
-            let parchesDerecho = datosTienda.parches.filter(pr => (pr.posicion || '').toString().toLowerCase().includes('derecho'));
+            let todosLosParches = datosTienda.parches || [];
 
-            let zonasConfig = [
-                { key: 'centro_pecho', titulo: '⚽ Centro del Pecho', lista: parchesCentro },
-                { key: 'hombro_izquierdo', titulo: '🛡️ Hombro Izquierdo', lista: parchesIzquierdo },
-                { key: 'hombro_derecho', titulo: '🛡️ Hombro Derecho', lista: parchesDerecho }
-            ];
+            let parchesCentro = todosLosParches.filter(pr => {
+                let pos = (pr.posicion || '').toString().toLowerCase();
+                return pos.includes('centro') || pos.includes('pecho') || pos === '';
+            });
+            let parchesIzquierdo = todosLosParches.filter(pr => {
+                let pos = (pr.posicion || '').toString().toLowerCase();
+                return pos.includes('izquierdo') || pos.includes('manga izq');
+            });
+            let parchesDerecho = todosLosParches.filter(pr => {
+                let pos = (pr.posicion || '').toString().toLowerCase();
+                return pos.includes('derecho') || pos.includes('manga der');
+            });
 
             let htmlZonas = '';
-            zonasConfig.forEach(zona => {
-                if (zona.lista.length === 0) return;
+
+            // Si hay parches pero ninguno coincidió con las etiquetas específicas, los mostramos todos de forma general
+            if (todosLosParches.length > 0 && parchesCentro.length === 0 && parchesIzquierdo.length === 0 && parchesDerecho.length === 0) {
                 let htmlGrid = '';
-                zona.lista.forEach(parche => {
+                todosLosParches.forEach(parche => {
                     let pid = parche.id !== undefined ? parche.id : parche.nombre;
                     let imgParche = limpiarUrlImagen(parche.imagen || parche.url || parche.foto || parche.img || '');
                     htmlGrid += `
-                        <div class="parche-card" id="card-${zona.key}-${pid}" onclick="toggleParcheZona('${zona.key}', '${pid}', '${parche.nombre}')">
+                        <div class="parche-card" id="card-general-${pid}" onclick="toggleParcheZona('general', '${pid}', '${parche.nombre}')">
                             <img src="${imgParche}" alt="${parche.nombre}">
                             <h5>${parche.nombre}</h5>
                         </div>
                     `;
                 });
-
-                htmlZonas += `
+                htmlZonas = `
                     <div class="zona-seccion">
-                        <div class="zona-titulo">${zona.titulo}</div>
+                        <div class="zona-titulo">⭐ Parches Disponibles</div>
                         <div class="parches-grid-zona">${htmlGrid}</div>
                     </div>
                 `;
-            });
+            } else {
+                let zonasConfig = [
+                    { key: 'centro_pecho', titulo: '⚽ Centro del Pecho', lista: parchesCentro },
+                    { key: 'hombro_izquierdo', titulo: '🛡️ Hombro Izquierdo', lista: parchesIzquierdo },
+                    { key: 'hombro_derecho', titulo: '🛡️ Hombro Derecho', lista: parchesDerecho }
+                ];
 
-            if (datosTienda.parches.length === 0) {
-                htmlZonas = "<p style='color:var(--text-muted); text-align:center; padding:15px;'>No hay parches configurados.</p>";
+                zonasConfig.forEach(zona => {
+                    if (zona.lista.length === 0) return;
+                    let htmlGrid = '';
+                    zona.lista.forEach(parche => {
+                        let pid = parche.id !== undefined ? parche.id : parche.nombre;
+                        let imgParche = limpiarUrlImagen(parche.imagen || parche.url || parche.foto || parche.img || '');
+                        htmlGrid += `
+                            <div class="parche-card" id="card-${zona.key}-${pid}" onclick="toggleParcheZona('${zona.key}', '${pid}', '${parche.nombre}')">
+                                <img src="${imgParche}" alt="${parche.nombre}">
+                                <h5>${parche.nombre}</h5>
+                            </div>
+                        `;
+                    });
+
+                    htmlZonas += `
+                        <div class="zona-seccion">
+                            <div class="zona-titulo">${zona.titulo}</div>
+                            <div class="parches-grid-zona">${htmlGrid}</div>
+                        </div>
+                    `;
+                });
+            }
+
+            if (todosLosParches.length === 0) {
+                htmlZonas = "<p style='color:var(--text-muted); text-align:center; padding:15px;'>No hay parches configurados en la base de datos.</p>";
             }
 
             const contenedor = document.getElementById('contenidoPersonalizacion');
@@ -779,7 +812,7 @@
             let detalleParchesArr = [];
             Object.keys(parchesSeleccionadosModal).forEach(zonaKey => {
                 let pInfo = parchesSeleccionadosModal[zonaKey];
-                let zonaNombreLindo = zonaKey === 'centro_pecho' ? 'Centro' : (zonaKey === 'hombro_izquierdo' ? 'Hombro Izq' : 'Hombro Der');
+                let zonaNombreLindo = zonaKey === 'centro_pecho' ? 'Centro' : (zonaKey === 'hombro_izquierdo' ? 'Hombro Izq' : (zonaKey === 'hombro_derecho' ? 'Hombro Der' : 'General'));
                 detalleParchesArr.push(`${pInfo.nombre} (${zonaNombreLindo})`);
             });
 
