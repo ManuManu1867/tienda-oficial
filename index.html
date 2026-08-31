@@ -26,6 +26,7 @@
             position: sticky; top: 0; background: white; z-index: 100;
         }
         .logo { font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
+        .logo img { height: 32px; object-fit: contain; }
         
         .cart-btn {
             background: var(--primary); color: white; border: none; padding: 8px 16px;
@@ -47,7 +48,14 @@
         }
 
         .main-container { padding: 20px 5% 60px 5%; }
-        h1.section-title, h2.section-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; }
+        h1.section-title, h2.section-title { 
+            font-size: 1.5rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+        }
 
         .grid-productos {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px;
@@ -66,7 +74,6 @@
         }
         .visor-imagen img { width: 100%; height: 100%; object-fit: cover; transition: opacity 0.3s; }
         
-        /* Botones de carrusel con difuminado y ocultación automática */
         .carrusel-btn {
             position: absolute; top: 50%; transform: translateY(-50%);
             background: rgba(0, 0, 0, 0.6); color: white; border: none;
@@ -216,6 +223,7 @@
 
     <header>
         <div class="logo">
+            <img src="https://lh3.googleusercontent.com/d/1nu9bwEvAomNYNOilQ1aoIxkqUSJOcYGV" alt="Logo">
             <span>Tienda de Camisetas</span>
         </div>
         <button class="cart-btn" onclick="abrirCarritoModal()">
@@ -231,7 +239,10 @@
     </div>
 
     <div class="main-container">
-        <h1 class="section-title" id="tituloPrincipalSeccion">Novedades y Equipaciones</h1>
+        <h1 class="section-title" id="tituloPrincipalSeccion">
+            <span style="display: inline-block; width: 6px; height: 24px; background-color: var(--accent); border-radius: 3px;"></span>
+            Novedades y Equipaciones
+        </h1>
         <div id="contenedorProductos" class="loader">Cargando productos...</div>
     </div>
 
@@ -272,11 +283,19 @@
         
         let datosTienda = { productos: [], parches: [] };
         let estadoSelecciones = {};
-        let limitesSecciones = {}; // Controla el límite de 4 en 4 por cada categoría
+        let limitesSecciones = {}; 
         let categoriaFiltroActiva = 'Todo';
         let carrito = [];
         let productoEnEdicion = null;
         let parchesSeleccionadosModal = {};
+
+        // Mapeo de colores personalizados para cada barra vertical de sección
+        const coloresCategorias = {
+            'Selecciones': '#06b6d4', // Cian
+            'Retro': '#eab308',      // Amarillo
+            'Clubes': '#8b5cf6',     // Violeta / Morado
+            'General': '#2563eb'     // Azul por defecto
+        };
 
         function limpiarUrlImagen(url) {
             if (!url) return '';
@@ -349,13 +368,11 @@
                 return;
             }
 
-            // Filtrar si el usuario seleccionó una categoría específica desde los botones superiores
             let listaFiltrada = lista;
             if (categoriaFiltroActiva !== 'Todo') {
                 listaFiltrada = lista.filter(p => p.categoria && p.categoria.toLowerCase() === categoriaFiltroActiva.toLowerCase());
             }
 
-            // Agrupar por categoría
             let categoriasMap = {};
             listaFiltrada.forEach((p, index) => {
                 let cat = (p.categoria || 'General').trim();
@@ -370,7 +387,7 @@
             Object.keys(categoriasMap).forEach(cat => {
                 let productosCat = categoriasMap[cat];
                 if (!limitesSecciones[cat]) {
-                    limitesSecciones[cat] = 4; // Comienza mostrando 4 por categoría
+                    limitesSecciones[cat] = 4; 
                 }
                 let limiteActual = limitesSecciones[cat];
                 let productosVisibles = productosCat.slice(0, limiteActual);
@@ -378,9 +395,11 @@
                 let seccionDiv = document.createElement('div');
                 seccionDiv.style.marginBottom = "40px";
 
+                let colorBarra = coloresCategorias[cat] || '#2563eb';
+
                 let tituloSec = document.createElement('h2');
                 tituloSec.className = "section-title";
-                tituloSec.innerText = cat;
+                tituloSec.innerHTML = `<span style="display: inline-block; width: 6px; height: 24px; background-color: ${colorBarra}; border-radius: 3px;"></span> ${cat}`;
                 seccionDiv.appendChild(tituloSec);
 
                 let gridDiv = document.createElement('div');
@@ -452,8 +471,9 @@
 
                 seccionDiv.appendChild(gridDiv);
 
-                // Botón "Ver más (+4)" debajo de cada grupo de categoría si hay más productos
-                if (productosCat.length > limiteActual) {
+                // Botón "Ver más (+X)" dinámico basado en los productos restantes reales
+                let restantes = productosCat.length - limiteActual;
+                if (restantes > 0) {
                     let btnVerMasContainer = document.createElement('div');
                     btnVerMasContainer.style.textAlign = "center";
                     btnVerMasContainer.style.marginTop = "20px";
@@ -463,7 +483,7 @@
                     btnVerMas.style.background = "var(--surface)";
                     btnVerMas.style.color = "var(--text)";
                     btnVerMas.style.borderColor = "var(--border)";
-                    btnVerMas.innerText = "Ver más (+4)";
+                    btnVerMas.innerText = `Ver más (+${restantes})`;
                     btnVerMas.onclick = () => {
                         limitesSecciones[cat] += 4;
                         renderizarSecciones(datosTienda.productos);
@@ -481,7 +501,15 @@
             document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             categoriaFiltroActiva = categoria;
-            document.getElementById('tituloPrincipalSeccion').innerText = categoria === 'Todo' ? 'Novedades y Equipaciones' : categoria;
+            
+            const tituloEl = document.getElementById('tituloPrincipalSeccion');
+            if (categoria === 'Todo') {
+                tituloEl.innerHTML = `<span style="display: inline-block; width: 6px; height: 24px; background-color: var(--accent); border-radius: 3px;"></span> Novedades y Equipaciones`;
+            } else {
+                let colorBarra = coloresCategorias[categoria] || '#2563eb';
+                tituloEl.innerHTML = `<span style="display: inline-block; width: 6px; height: 24px; background-color: ${colorBarra}; border-radius: 3px;"></span> ${categoria}`;
+            }
+
             renderizarSecciones(datosTienda.productos);
         }
 
