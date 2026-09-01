@@ -392,7 +392,6 @@
     </div>
 
     <script>
-        // Enlace actualizado del Apps Script
         const API_URL = 'https://script.google.com/macros/s/AKfycbwjVnpau_h-hJ7cMfQoGMDmBthVjm3oDnwuFJ4DSeSsVdm7TSSqnmOxt-kf80xoA6BtFg/exec';
         
         let datosTienda = { productos: [], parches: [] };
@@ -570,7 +569,10 @@
                     
                     let imgs = [];
                     if (typeof p.imagenes === 'string' && p.imagenes.trim() !== '') {
-                        imgs = p.imagenes.split(',').map(s => limpiarUrlImagen(s)).filter(Boolean);
+                        let urlsBrutas = p.imagenes.split(',');
+                        let urlsLimpiasMap = urlsBrutas.map(s => limpiarUrlImagen(s)).filter(Boolean);
+                        // Evita duplicados exactos en el carrusel
+                        imgs = [...new Set(urlsLimpiasMap)];
                     }
                     if (imgs.length === 0) imgs = ['https://via.placeholder.com/300x350?text=Sin+Imagen'];
 
@@ -578,6 +580,9 @@
                         estadoSelecciones[idProd] = { talla: '', fotoIndex: 0, imgs: imgs, timerInactividad: null, miniaturasExpandidas: false };
                     } else {
                         estadoSelecciones[idProd].imgs = imgs;
+                        if (estadoSelecciones[idProd].fotoIndex >= imgs.length) {
+                            estadoSelecciones[idProd].fotoIndex = 0;
+                        }
                     }
 
                     let imgPrincipal = imgs[estadoSelecciones[idProd].fotoIndex];
