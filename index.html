@@ -262,12 +262,20 @@
         }
         .btn-cant:hover { opacity: 0.8; }
 
-        .btn-eliminar {
-            background: none; border: none; cursor: pointer; color: var(--text);
-            opacity: 0.5; transition: opacity 0.2s, color 0.2s; padding: 4px; display: flex; align-items: center; justify-content: center;
+        .acciones-item-carrito {
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-        .btn-eliminar:hover { opacity: 1; color: var(--danger); }
-        .btn-eliminar svg { width: 16px; height: 16px; fill: currentColor; }
+
+        .btn-accion-carrito {
+            background: var(--surface); border: 1px solid var(--border); color: var(--text);
+            border-radius: 6px; width: 30px; height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .btn-accion-carrito:hover { opacity: 0.8; border-color: var(--primary); }
+        .btn-accion-carrito svg { width: 14px; height: 14px; fill: currentColor; }
+        .btn-eliminar:hover { color: var(--danger); border-color: var(--danger); }
 
         .error-talla, .error-custom { color: var(--danger); font-size: 0.75rem; margin-top: 4px; display: none; }
         
@@ -374,7 +382,7 @@
     <div class="modal-overlay" id="modalPersonalizacion">
         <div class="modal-contenido">
             <div class="modal-header">
-                <h2>Personalizar Equipación</h2>
+                <h2 id="tituloModalPersonalizacion">Personalizar Equipación</h2>
                 <button class="btn-cerrar-modal" onclick="cerrarModal('modalPersonalizacion')">✕</button>
             </div>
             <div id="contenidoPersonalizacion"></div>
@@ -391,6 +399,7 @@
         let textoBusqueda = '';
         let carrito = [];
         let productoEnEdicion = null;
+        let indiceItemEditando = null; // Controla si estamos editando un elemento ya existente del carrito
         let parchesSeleccionadosModal = {};
 
         const coloresCategorias = {
@@ -749,7 +758,7 @@
             agregarAlCarritoFinal({
                 id: idProd,
                 titulo: p.titulo,
-                precio: parseFloat(p.precio),
+                precioUnitarioBase: parseFloat(p.precio),
                 talla: seleccion.talla,
                 cantidad: 1,
                 personalizacion: 'Sin personalización',
@@ -757,11 +766,31 @@
             });
         }
 
-        function abrirPersonalizacion(idProd) {
-            let seleccion = estadoSelecciones[idProd];
-            if (!seleccion || !seleccion.talla) {
-                document.getElementById(`error-talla-${idProd}`).style.display = 'block';
-                return;
+        function abrirPersonalizacion(idProd, indexCarrito = null) {
+            indiceItemEditando = indexCarrito;
+            let tallaAUsar = '';
+            let nombrePrecargado = '';
+            let numeroPrecargado = '';
+            let parchesPrecargados = 'Sin parches';
+
+            if (indexCarrito !== null) {
+                let item = carrito[indexCarrito];
+                tallaAUsar = item.talla;
+                if (item.personalizacion.includes("Nombre:")) {
+                    let partes = item.personalizacion.split(", ");
+                    nombrePrecargado = partes[0] ? partes[0].replace("Nombre: ", "") : "";
+                    if (nombrePrecargado === "N/A") nombrePrecargado = "";
+                    numeroPrecargado = partes[1] ? partes[1].replace("Nº: ", "") : "";
+                    if (numeroPrecargado === "N/A") numeroPrecargado = "";
+                }
+                parchesPrecargados = item.parches;
+            } else {
+                let seleccion = estadoSelecciones[idProd];
+                if (!seleccion || !seleccion.talla) {
+                    document.getElementById(`error-talla-${idProd}`).style.display = 'block';
+                    return;
+                }
+                tallaAUsar = seleccion.talla;
             }
 
             const p = datosTienda.productos.find((prod, index) => String(prod.id !== undefined ? prod.id : index) === String(idProd));
@@ -804,8 +833,18 @@
                 zona.lista.forEach(parche => {
                     let pid = parche.id !== undefined ? parche.id : parche.nombre;
                     let imgParche = limpiarUrlImagen(parche.imagen || parche.url || parche.foto || parche.img || '');
+                    
+                    let estaSeleccionado = false;
+                    if (parchesPrecargados !== "Sin parches" && parchesPrecargados.includes(parche.nombre)) {
+                        let zonaNombreLindo = zona.key === 'centro_pecho' ? 'Centro' : (zona.key === 'hombro_izquierdo' ? 'Hombro Izq' : 'Hombro Der');
+                        if (parchesPrecargados.includes(`(${zonaNombreLindo})`)) {
+                            estaSeleccionado = true;
+                            parchesSeleccionadosModal[zona.key] = { id: pid, nombre: parche.nombre };
+                        }
+                    }
+
                     htmlGrid += `
-                        <div class="parche-card" id="card-${zona.key}-${pid}" onclick="toggleParcheZona('${zona.key}', '${pid}', '${parche.nombre}')">
+                        <div class="parche-card ${estaSeleccionado ? 'active-parche' : ''}" id="card-${zona.key}-${pid}" onclick="toggleParcheZona('${zona.key}', '${pid}', '${parche.nombre}')">
                             <img src="${imgParche}" alt="${parche.nombre}">
                             <h5>${parche.nombre}</h5>
                         </div>
@@ -824,17 +863,19 @@
                 htmlZonas = "<p style='color:var(--text-muted); text-align:center; padding:15px;'>No hay parches disponibles para esta categoría.</p>";
             }
 
+            document.getElementById('tituloModalPersonalizacion').innerText = indexCarrito !== null ? 'Editar Equipación' : 'Personalizar Equipación';
+
             const contenedor = document.getElementById('contenidoPersonalizacion');
             contenedor.innerHTML = `
-                <p style="font-weight: 600; margin-bottom: 12px; font-size: 0.95rem;">${p.titulo} (Talla: ${seleccion.talla})</p>
+                <p style="font-weight: 600; margin-bottom: 12px; font-size: 0.95rem;">${p.titulo} (Talla: <span id="tallaSeleccionadaModal">${tallaAUsar}</span>)</p>
                 <div class="form-group">
                     <label>Nombre para la espalda (+3.00 €):</label>
-                    <input type="text" id="inputNombreCustom" placeholder="Ej: GAVI" oninput="validarNombreInput()">
+                    <input type="text" id="inputNombreCustom" value="${nombrePrecargado}" placeholder="Ej: GAVI" oninput="validarNombreInput()">
                     <div class="error-custom" id="errorNombreCustom">⚠️ En el campo de nombre solo se permiten letras (no números).</div>
                 </div>
                 <div class="form-group">
                     <label>Número para la espalda:</label>
-                    <input type="text" id="inputNumeroCustom" placeholder="Ej: 9" oninput="validarNumeroInput()">
+                    <input type="text" id="inputNumeroCustom" value="${numeroPrecargado}" placeholder="Ej: 9" oninput="validarNumeroInput()">
                     <div class="error-custom" id="errorNumeroCustom">⚠️ En el campo de número solo se permiten dígitos numéricos (no letras).</div>
                 </div>
                 <div class="form-group">
@@ -845,9 +886,10 @@
                     <span style="font-weight: 700;">Precio Total Configurado:</span>
                     <span id="precioTotalModal" style="font-size: 1.2rem; font-weight: 800; color: var(--accent);">${parseFloat(p.precio).toFixed(2)} €</span>
                 </div>
-                <button class="btn-whatsapp" style="background: var(--primary); color: #fff; margin-top: 15px;" onclick="confirmarPersonalizacion('${idProd}')">Añadir al Carrito</button>
+                <button class="btn-whatsapp" style="background: var(--primary); color: #fff; margin-top: 15px;" onclick="confirmarPersonalizacion('${idProd}')">${indexCarrito !== null ? 'Guardar Cambios' : 'Añadir al Carrito'}</button>
             `;
 
+            calcularPrecioModal();
             document.getElementById('modalPersonalizacion').classList.add('open');
         }
 
@@ -927,7 +969,7 @@
                 return; 
             }
 
-            let seleccion = estadoSelecciones[idProd];
+            let tallaFinal = document.getElementById('tallaSeleccionadaModal').innerText;
             let basePrecio = parseFloat(productoEnEdicion.precio);
             
             let costoExtra = 0;
@@ -947,17 +989,27 @@
             if (detalleParchesArr.length > 0) costoExtra += 2.00;
             let textoParches = detalleParchesArr.length > 0 ? detalleParchesArr.join(' | ') : 'Sin parches';
 
-            agregarAlCarritoFinal({
-                id: idProd,
-                titulo: productoEnEdicion.titulo,
-                precio: basePrecio + costoExtra,
-                talla: seleccion.talla,
-                cantidad: 1,
-                personalizacion: textoPersonalizacion,
-                parches: textoParches
-            });
+            if (indiceItemEditando !== null) {
+                // Actualizar item existente en el carrito conservando su cantidad actual
+                carrito[indiceItemEditando].talla = tallaFinal;
+                carrito[indiceItemEditando].precio = basePrecio + costoExtra;
+                carrito[indiceItemEditando].personalizacion = textoPersonalizacion;
+                carrito[indiceItemEditando].parches = textoParches;
+                indiceItemEditando = null;
+            } else {
+                agregarAlCarritoFinal({
+                    id: idProd,
+                    titulo: productoEnEdicion.titulo,
+                    precio: basePrecio + costoExtra,
+                    talla: tallaFinal,
+                    cantidad: 1,
+                    personalizacion: textoPersonalizacion,
+                    parches: textoParches
+                });
+            }
 
             cerrarModal('modalPersonalizacion');
+            abrirCarritoModal();
         }
 
         function agregarAlCarritoFinal(nuevoItem) {
@@ -1020,9 +1072,14 @@
                             </div>
                         </div>
                         <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; height: 100%;">
-                            <button onclick="eliminarDelCarrito(${index})" class="btn-eliminar" title="Eliminar">
-                                <svg viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14V4zM6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg>
-                            </button>
+                            <div class="acciones-item-carrito">
+                                <button onclick="editarItemCarrito(${index})" class="btn-accion-carrito" title="Editar producto">
+                                    <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                                </button>
+                                <button onclick="eliminarDelCarrito(${index})" class="btn-accion-carrito btn-eliminar" title="Eliminar">
+                                    <svg viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14V4zM6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg>
+                                </button>
+                            </div>
                             <span style="font-weight: 700; margin-top: 15px;">${subtotal.toFixed(2)} €</span>
                         </div>
                     </div>
@@ -1031,6 +1088,12 @@
 
             lista.innerHTML = html;
             totalEl.innerText = totalGeneral.toFixed(2) + ' €';
+        }
+
+        function editarItemCarrito(index) {
+            let item = carrito[index];
+            cerrarModal('modalCarrito');
+            abrirPersonalizacion(item.id, index);
         }
 
         function cambiarCantidad(index, delta) {
