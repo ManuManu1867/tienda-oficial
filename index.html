@@ -416,6 +416,15 @@
         const LOGO_CLARO = 'https://lh3.googleusercontent.com/d/1nu9bwEvAomNYNOilQ1aoIxkqUSJOcYGV';
         const LOGO_OSCURO = 'https://lh3.googleusercontent.com/d/13ON8TbGswhPthbj4YuhP_-XwEyTjG97T';
 
+        // Función auxiliar para quitar acentos/tildes y pasar a minúsculas
+        function normalizarTexto(texto) {
+            if (!texto) return '';
+            return texto
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "");
+        }
+
         function toggleTema() {
             const body = document.body;
             const iconSvg = document.getElementById('themeIcon');
@@ -507,7 +516,8 @@
         }
 
         function manejarBusqueda() {
-            textoBusqueda = document.getElementById('inputBuscador').value.toLowerCase().trim();
+            // Guardamos el texto de búsqueda ya normalizado
+            textoBusqueda = normalizarTexto(document.getElementById('inputBuscador').value.trim());
             renderizarSecciones(datosTienda.productos);
         }
 
@@ -523,8 +533,13 @@
                 listaFiltrada = listaFiltrada.filter(p => p.categoria && p.categoria.toLowerCase() === categoriaFiltroActiva.toLowerCase());
             }
 
+            // Filtro actualizado ignorando tildes y mayúsculas/minúsculas
             if (textoBusqueda !== '') {
-                listaFiltrada = listaFiltrada.filter(p => (p.titulo && p.titulo.toLowerCase().includes(textoBusqueda)) || (p.categoria && p.categoria.toLowerCase().includes(textoBusqueda)));
+                listaFiltrada = listaFiltrada.filter(p => {
+                    let tituloNorm = normalizarTexto(p.titulo);
+                    let catNorm = normalizarTexto(p.categoria);
+                    return tituloNorm.includes(textoBusqueda) || catNorm.includes(textoBusqueda);
+                });
             }
 
             if (listaFiltrada.length === 0) {
@@ -571,7 +586,6 @@
                     if (typeof p.imagenes === 'string' && p.imagenes.trim() !== '') {
                         let urlsBrutas = p.imagenes.split(',');
                         let urlsLimpiasMap = urlsBrutas.map(s => limpiarUrlImagen(s)).filter(Boolean);
-                        // Evita duplicados exactos en el carrusel
                         imgs = [...new Set(urlsLimpiasMap)];
                     }
                     if (imgs.length === 0) imgs = ['https://via.placeholder.com/300x350?text=Sin+Imagen'];
