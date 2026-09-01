@@ -339,6 +339,8 @@
             <button class="filtro-btn" onclick="filtrarCategoria('Selecciones', this)">Selecciones</button>
             <button class="filtro-btn" onclick="filtrarCategoria('Clubes', this)">Clubes</button>
             <button class="filtro-btn" onclick="filtrarCategoria('Retro', this)">Retro</button>
+            <button class="filtro-btn" onclick="filtrarCategoria('Ediciones Especiales', this)">Ediciones Especiales</button>
+            <button class="filtro-btn" onclick="filtrarCategoria('Otros', this)">Otros</button>
         </div>
         <div class="search-box">
             <svg viewBox="0 0 24 24">
@@ -406,6 +408,8 @@
             'Selecciones': '#06b6d4',
             'Retro': '#eab308',
             'Clubes': '#8b5cf6',
+            'Ediciones Especiales': '#ec4899',
+            'Otros': '#64748b',
             'General': '#2563eb'
         };
 
@@ -758,7 +762,7 @@
             agregarAlCarritoFinal({
                 id: idProd,
                 titulo: p.titulo,
-                precio: parseFloat(p.precio), // CORREGIDO: Se asigna 'precio' en lugar de 'precioUnitarioBase'
+                precio: parseFloat(p.precio),
                 talla: seleccion.talla,
                 cantidad: 1,
                 personalizacion: 'Sin personalización',
