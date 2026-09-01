@@ -241,7 +241,6 @@
             <span>Tienda de Camisetas</span>
         </div>
         <button class="cart-btn" onclick="abrirCarritoModal()">
-            <!-- Carrito blanco minimalista -->
             <svg style="width: 18px; height: 18px; fill: none; stroke: white; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;" viewBox="0 0 24 24">
                 <circle cx="9" cy="21" r="1"></circle>
                 <circle cx="20" cy="21" r="1"></circle>
@@ -259,7 +258,6 @@
             <button class="filtro-btn" onclick="filtrarCategoria('Retro', this)">Retro</button>
         </div>
         <div class="search-box">
-            <!-- Lupa negra minimalista -->
             <svg viewBox="0 0 24 24">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -309,7 +307,8 @@
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwvhSUp2rDU4QjTgad2XATU7wcGe9eQDGvGafjPywVSaDtA_86QBjvu6UIZ34_d0P370Q/exec';
+        // URL NUEVA ACTUALIZADA
+        const API_URL = 'https://script.google.com/macros/s/AKfycbw1zCmdX_9q5Vmvdid3PTjJiLbc4QNKNejr6cx0KU7Ic4k_LDAcGCVUkqEUOH3usFGG3g/exec';
         
         let datosTienda = { productos: [], parches: [] };
         let estadoSelecciones = {};
@@ -687,8 +686,6 @@
             });
 
             let htmlZonas = '';
-
-            // Títulos actualizados sin (C), (D) ni (I)
             let zonasConfig = [
                 { key: 'centro_pecho', titulo: '⚽ Centro del Pecho', lista: parchesCentro },
                 { key: 'hombro_izquierdo', titulo: '🛡️ Hombro Izquierdo', lista: parchesIzquierdo },
@@ -716,29 +713,6 @@
                     </div>
                 `;
             });
-
-            let parchesAsignadosIds = [...parchesCentro, ...parchesIzquierdo, ...parchesDerecho];
-            let parchesRestantes = todosLosParches.filter(pr => !parchesAsignadosIds.includes(pr));
-            
-            if (parchesRestantes.length > 0 && parchesCentro.length === 0 && parchesIzquierdo.length === 0 && parchesDerecho.length === 0) {
-                let htmlGrid = '';
-                todosLosParches.forEach(parche => {
-                    let pid = parche.id !== undefined ? parche.id : parche.nombre;
-                    let imgParche = limpiarUrlImagen(parche.imagen || parche.url || parche.foto || parche.img || '');
-                    htmlGrid += `
-                        <div class="parche-card" id="card-general-${pid}" onclick="toggleParcheZona('general', '${pid}', '${parche.nombre}')">
-                            <img src="${imgParche}" alt="${parche.nombre}">
-                            <h5>${parche.nombre}</h5>
-                        </div>
-                    `;
-                });
-                htmlZonas = `
-                    <div class="zona-seccion">
-                        <div class="zona-titulo">⭐ Parches Disponibles</div>
-                        <div class="parches-grid-zona">${htmlGrid}</div>
-                    </div>
-                `;
-            }
 
             if (todosLosParches.length === 0) {
                 htmlZonas = "<p style='color:var(--text-muted); text-align:center; padding:15px;'>No hay parches configurados en la base de datos.</p>";
