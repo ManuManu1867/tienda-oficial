@@ -288,6 +288,13 @@
         .btn-whatsapp svg { width: 20px; height: 20px; fill: currentColor; }
         .btn-whatsapp:hover { background: #1ebe5d; }
         
+        /* Corrección específica para el botón dentro del modal de personalización en modo oscuro */
+        body.dark-mode #contenidoPersonalizacion .btn-whatsapp {
+            background: #f9fafb !important;
+            color: #111827 !important;
+            border: 1px solid var(--border);
+        }
+
         .loader { text-align: center; padding: 40px; font-size: 1.1rem; color: var(--text-muted); }
 
         body.dark-mode {
@@ -416,7 +423,6 @@
         const LOGO_CLARO = 'https://lh3.googleusercontent.com/d/1nu9bwEvAomNYNOilQ1aoIxkqUSJOcYGV';
         const LOGO_OSCURO = 'https://lh3.googleusercontent.com/d/13ON8TbGswhPthbj4YuhP_-XwEyTjG97T';
 
-        // Función auxiliar para quitar acentos/tildes y pasar a minúsculas
         function normalizarTexto(texto) {
             if (!texto) return '';
             return texto
@@ -516,7 +522,6 @@
         }
 
         function manejarBusqueda() {
-            // Guardamos el texto de búsqueda ya normalizado
             textoBusqueda = normalizarTexto(document.getElementById('inputBuscador').value.trim());
             renderizarSecciones(datosTienda.productos);
         }
@@ -533,7 +538,6 @@
                 listaFiltrada = listaFiltrada.filter(p => p.categoria && p.categoria.toLowerCase() === categoriaFiltroActiva.toLowerCase());
             }
 
-            // Filtro actualizado ignorando tildes y mayúsculas/minúsculas
             if (textoBusqueda !== '') {
                 listaFiltrada = listaFiltrada.filter(p => {
                     let tituloNorm = normalizarTexto(p.titulo);
@@ -910,7 +914,7 @@
                     <span style="font-weight: 700;">Precio Total Configurado:</span>
                     <span id="precioTotalModal" style="font-size: 1.2rem; font-weight: 800; color: var(--accent);">${parseFloat(p.precio).toFixed(2)} €</span>
                 </div>
-                <button class="btn-whatsapp" style="background: var(--primary); color: #fff; margin-top: 15px;" onclick="confirmarPersonalizacion('${idProd}')">${indexCarrito !== null ? 'Guardar Cambios' : 'Añadir al Carrito'}</button>
+                <button class="btn-whatsapp" style="margin-top: 15px;" onclick="confirmarPersonalizacion('${idProd}')">${indexCarrito !== null ? 'Guardar Cambios' : 'Añadir al Carrito'}</button>
             `;
 
             calcularPrecioModal();
