@@ -399,7 +399,7 @@
         let textoBusqueda = '';
         let carrito = [];
         let productoEnEdicion = null;
-        let indiceItemEditando = null; // Controla si estamos editando un elemento ya existente del carrito
+        let indiceItemEditando = null;
         let parchesSeleccionadosModal = {};
 
         const coloresCategorias = {
@@ -758,7 +758,7 @@
             agregarAlCarritoFinal({
                 id: idProd,
                 titulo: p.titulo,
-                precioUnitarioBase: parseFloat(p.precio),
+                precio: parseFloat(p.precio), // CORREGIDO: Se asigna 'precio' en lugar de 'precioUnitarioBase'
                 talla: seleccion.talla,
                 cantidad: 1,
                 personalizacion: 'Sin personalización',
@@ -990,7 +990,6 @@
             let textoParches = detalleParchesArr.length > 0 ? detalleParchesArr.join(' | ') : 'Sin parches';
 
             if (indiceItemEditando !== null) {
-                // Actualizar item existente en el carrito conservando su cantidad actual
                 carrito[indiceItemEditando].talla = tallaFinal;
                 carrito[indiceItemEditando].precio = basePrecio + costoExtra;
                 carrito[indiceItemEditando].personalizacion = textoPersonalizacion;
