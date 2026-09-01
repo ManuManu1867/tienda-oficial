@@ -62,9 +62,22 @@
         .cart-btn {
             background: var(--primary); color: white; border: none; padding: 8px 16px;
             border-radius: 20px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;
-            font-size: 1rem; transition: background 0.2s;
+            font-size: 1rem; transition: background 0.2s, background-color 0.3s;
         }
         .cart-btn:hover { background: var(--accent); }
+
+        body.dark-mode .cart-btn {
+            background: #000000;
+            color: #ffffff;
+            border: 1px solid var(--border);
+        }
+        body.dark-mode .cart-btn svg {
+            stroke: #ffffff;
+        }
+        body.dark-mode #cartCount {
+            background: #374151 !important;
+            color: #ffffff !important;
+        }
 
         .filtros-container {
             display: flex; justify-content: space-between; align-items: center;
@@ -82,6 +95,11 @@
         }
         .filtro-btn.active, .filtro-btn:hover {
             background: var(--primary); color: white; border-color: var(--primary);
+        }
+        body.dark-mode .filtro-btn.active {
+            background: #f9fafb;
+            color: #111827;
+            border-color: #f9fafb;
         }
 
         .search-box {
@@ -177,6 +195,11 @@
         .circulo-talla.selected {
             background: var(--primary); color: white; border-color: var(--primary);
         }
+        body.dark-mode .circulo-talla.selected {
+            background: #f9fafb;
+            color: #111827;
+            border-color: #f9fafb;
+        }
 
         .footer-card { display: flex; flex-direction: column; gap: 10px; margin-top: auto; border-top: 1px solid var(--border); padding-top: 12px; }
         .footer-card-row { display: flex; justify-content: space-between; align-items: center; }
@@ -188,6 +211,11 @@
             cursor: pointer; transition: background 0.2s;
         }
         .btn-comprar:hover { background: var(--accent); }
+        body.dark-mode .btn-comprar {
+            background: #000000;
+            color: #ffffff;
+            border: 1px solid var(--border);
+        }
 
         .btn-personalizar {
             background: var(--surface); color: var(--primary); border: 1px solid var(--border);
@@ -280,7 +308,8 @@
 
     <header>
         <div class="logo">
-            <img src="https://lh3.googleusercontent.com/d/1nu9bwEvAomNYNOilQ1aoIxkqUSJOcYGV" alt="Logo">
+            <!-- Logo dinámico con enlaces personalizados -->
+            <img id="logoImg" src="https://lh3.googleusercontent.com/d/1nu9bwEvAomNYNOilQ1aoIxkqUSJOcYGV" alt="Logo">
             <span>Tienda de Camisetas</span>
         </div>
         <div class="header-actions">
@@ -385,14 +414,19 @@
             'General': '#2563eb'
         };
 
+        const LOGO_CLARO = 'https://lh3.googleusercontent.com/d/1nu9bwEvAomNYNOilQ1aoIxkqUSJOcYGV';
+        const LOGO_OSCURO = 'https://lh3.googleusercontent.com/d/13ON8TbGswhPthbj4YuhP_-XwEyTjG97T';
+
         function toggleTema() {
             const body = document.body;
             const iconSvg = document.getElementById('themeIcon');
+            const logoImg = document.getElementById('logoImg');
             
             body.classList.toggle('dark-mode');
             
             if (body.classList.contains('dark-mode')) {
                 iconSvg.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
+                logoImg.src = LOGO_OSCURO;
             } else {
                 iconSvg.innerHTML = `
                     <circle cx="12" cy="12" r="5"></circle>
@@ -405,6 +439,7 @@
                     <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
                     <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                 `;
+                logoImg.src = LOGO_CLARO;
             }
         }
 
