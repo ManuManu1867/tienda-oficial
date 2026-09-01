@@ -154,10 +154,17 @@
 
         .visor-imagen.activo-interaccion .carrusel-btn { opacity: 1; visibility: visible; }
 
+        /* Estilo y transición dinámica para el badge de categoría */
         .categoria-badge {
             position: absolute; top: 12px; left: 12px; background: white; color: #111827;
             padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700;
             text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.05); z-index: 5;
+            opacity: 1; visibility: visible;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+        .visor-imagen.ocultar-badge .categoria-badge {
+            opacity: 0;
+            visibility: hidden;
         }
 
         .miniaturas {
@@ -288,7 +295,6 @@
         .btn-whatsapp svg { width: 20px; height: 20px; fill: currentColor; }
         .btn-whatsapp:hover { background: #1ebe5d; }
         
-        /* Corrección específica para el botón dentro del modal de personalización en modo oscuro */
         body.dark-mode #contenidoPersonalizacion .btn-whatsapp {
             background: #f9fafb !important;
             color: #111827 !important;
@@ -410,6 +416,10 @@
         let productoEnEdicion = null;
         let indiceItemEditando = null;
         let parchesSeleccionadosModal = {};
+
+        // Control global para la tarjeta interactiva activa y temporizador de retorno de badge
+        let idTarjetaInteractivaActiva = null;
+        let timerRestaurarBadge = null;
 
         const coloresCategorias = {
             'Selecciones': '#06b6d4',
@@ -617,9 +627,9 @@
                     tarjeta.className = 'tarjeta';
                     tarjeta.innerHTML = `
                         <div class="visor-imagen" id="visor-${idProd}" 
-                             onmousemove="manejarMovimientoMouse('${idProd}')" 
+                             onmousemove="manejarInteraccionCamiseta('${idProd}')" 
                              onmouseleave="ocultarBotonesCarrusel('${idProd}')"
-                             ontouchstart="manejarToquePantalla('${idProd}')">
+                             ontouchstart="manejarInteraccionCamiseta('${idProd}')">
                             <span class="categoria-badge">${p.categoria || 'General'}</span>
                             <img id="img-${idProd}" src="${imgPrincipal}" alt="${p.titulo}">
                             ${imgs.length > 1 ? `
@@ -692,15 +702,39 @@
             renderizarSecciones(datosTienda.productos);
         }
 
-        function manejarMovimientoMouse(idProd) {
+        function manejarInteraccionCamiseta(idProd) {
             const visor = document.getElementById(`visor-${idProd}`);
             if (!visor) return;
+
+            // Si el usuario cambia de camiseta (pasa a otra distinta)
+            if (idTarjetaInteractivaActiva && idTarjetaInteractivaActiva !== idProd) {
+                // Restauramos el badge de la anterior inmediatamente
+                const visorAnterior = document.getElementById(`visor-${idTarjetaInteractivaActiva}`);
+                if (visorAnterior) visorAnterior.classList.remove('ocultar-badge');
+                if (timerRestaurarBadge) clearTimeout(timerRestaurarBadge);
+            }
+
+            idTarjetaInteractivaActiva = idProd;
+            if (timerRestaurarBadge) clearTimeout(timerRestaurarBadge);
+
+            // Ocultamos el badge de la camiseta actual y mostramos botones de carrusel
+            visor.classList.add('ocultar-badge');
             visor.classList.add('activo-interaccion');
+
             let estado = estadoSelecciones[idProd];
             if (estado.timerInactividad) clearTimeout(estado.timerInactividad);
+            
             estado.timerInactividad = setTimeout(() => {
                 visor.classList.remove('activo-interaccion');
             }, 1500);
+
+            // Programamos el retorno del badge de esta camiseta tras 5 segundos de inactividad global en ella
+            timerRestaurarBadge = setTimeout(() => {
+                if (idTarjetaInteractivaActiva === idProd) {
+                    visor.classList.remove('ocultar-badge');
+                    idTarjetaInteractivaActiva = null;
+                }
+            }, 5000);
         }
 
         function ocultarBotonesCarrusel(idProd) {
@@ -711,19 +745,10 @@
             if (estado.timerInactividad) clearTimeout(estado.timerInactividad);
         }
 
-        function manejarToquePantalla(idProd) {
-            const visor = document.getElementById(`visor-${idProd}`);
-            if (!visor) return;
-            visor.classList.add('activo-interaccion');
-            let estado = estadoSelecciones[idProd];
-            if (estado.timerInactividad) clearTimeout(estado.timerInactividad);
-            estado.timerInactividad = setTimeout(() => {
-                visor.classList.remove('activo-interaccion');
-            }, 2500);
-        }
-
         function cambiarFotoSlider(event, idProd, direccion) {
             event.stopPropagation();
+            manejarInteraccionCamiseta(idProd);
+            
             let estado = estadoSelecciones[idProd];
             if (!estado || !estado.imgs || estado.imgs.length <= 1) return;
 
@@ -746,8 +771,6 @@
                     contenedorMin.replaceWith(temp.firstElementChild);
                 }
             }
-
-            manejarMovimientoMouse(idProd);
         }
 
         function seleccionarTalla(idProd, talla, elemento) {
@@ -759,6 +782,9 @@
         }
 
         function cambiarImagen(event, idProd, nuevaUrl, indexImg) {
+            event.stopPropagation();
+            manejarInteraccionCamiseta(idProd);
+            
             document.getElementById(`img-${idProd}`).src = nuevaUrl;
             if (estadoSelecciones[idProd]) {
                 estadoSelecciones[idProd].fotoIndex = indexImg;
