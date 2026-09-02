@@ -1128,7 +1128,6 @@
 
             let todosLosParches = datosTienda.parches || [];
 
-            // Filtrar parches permitidos según la configuración de la camiseta
             let parchesPermitidosIds = [];
             if (p.parchesPermitidos && p.parchesPermitidos.trim() !== '') {
                 parchesPermitidosIds = p.parchesPermitidos.split(',').map(id => id.trim());
@@ -1139,7 +1138,6 @@
                 if (parchesPermitidosIds.length > 0) {
                     return parchesPermitidosIds.includes(pid);
                 }
-                // Si no se especificó nada, por defecto se filtran por categoría de la camiseta
                 let catParche = (pr.categoria || 'General').toString().toLowerCase().trim();
                 let categoriaProducto = (p.categoria || '').toString().toLowerCase().trim();
                 return catParche === 'general' || catParche === categoriaProducto;
