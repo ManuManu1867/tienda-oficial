@@ -705,12 +705,15 @@
             }
         }
 
+        // --- CORRECCIÓN DEFINITIVA DE ENLACES DE IMAGEN DE GOOGLE DRIVE ---
         function limpiarUrlImagen(url) {
             if (!url) return '';
             url = url.trim();
-            let match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-            if (match && match[1]) {
-                return `https://lh3.googleusercontent.com/d/${match[1]}`;
+            
+            // Si es un enlace de vista de Google Drive tipo /file/d/ID/view o /open?id=ID
+            let matchDrive = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+            if (matchDrive && matchDrive[1]) {
+                return `https://lh3.googleusercontent.com/d/${matchDrive[1]}`;
             }
             return url;
         }
