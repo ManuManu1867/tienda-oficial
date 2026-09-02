@@ -705,15 +705,12 @@
             }
         }
 
-        // --- CORRECCIÓN DEFINITIVA DE ENLACES DE IMAGEN DE GOOGLE DRIVE ---
         function limpiarUrlImagen(url) {
             if (!url) return '';
             url = url.trim();
-            
-            // Si es un enlace de vista de Google Drive tipo /file/d/ID/view o /open?id=ID
-            let matchDrive = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-            if (matchDrive && matchDrive[1]) {
-                return `https://lh3.googleusercontent.com/d/${matchDrive[1]}`;
+            let match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) {
+                return `https://lh3.googleusercontent.com/d/${match[1]}`;
             }
             return url;
         }
@@ -874,10 +871,9 @@
                     let idProd = p._idReal;
                     
                     let imgs = [];
-                    if (Array.isArray(p.imagenes)) {
-                        imgs = p.imagenes.map(s => limpiarUrlImagen(s)).filter(Boolean);
-                    } else if (typeof p.imagenes === 'string' && p.imagenes.trim() !== '') {
-                        let urlsBrutas = p.imagenes.split(',');
+                    let campoImagenes = p.g !== undefined ? p.g : (p.imagenes !== undefined ? p.imagenes : '');
+                    if (typeof campoImagenes === 'string' && campoImagenes.trim() !== '') {
+                        let urlsBrutas = campoImagenes.split(',');
                         let urlsLimpiasMap = urlsBrutas.map(s => limpiarUrlImagen(s)).filter(Boolean);
                         imgs = [...new Set(urlsLimpiasMap)];
                     }
@@ -1131,20 +1127,11 @@
             productoEnEdicion = p;
             parchesSeleccionadosModal = {};
 
+            let categoriaProducto = (p.categoria || '').toString().toLowerCase().trim();
             let todosLosParches = datosTienda.parches || [];
 
-            let parchesPermitidosIds = [];
-            if (p.parches && typeof p.parches === 'string' && p.parches.trim() !== '') {
-                parchesPermitidosIds = p.parches.split(',').map(id => id.trim());
-            }
-
-            let parchesValidos = todosLosParches.filter((pr, pIndex) => {
-                let pid = pr.id !== undefined ? String(pr.id) : String(pIndex);
-                if (parchesPermitidosIds.length > 0) {
-                    return parchesPermitidosIds.includes(pid);
-                }
+            let parchesValidos = todosLosParches.filter(pr => {
                 let catParche = (pr.categoria || 'General').toString().toLowerCase().trim();
-                let categoriaProducto = (p.categoria || '').toString().toLowerCase().trim();
                 return catParche === 'general' || catParche === categoriaProducto;
             });
 
@@ -1171,8 +1158,8 @@
             zonasConfig.forEach(zona => {
                 if (zona.lista.length === 0) return;
                 let htmlGrid = '';
-                zona.lista.forEach((parche, pIndex) => {
-                    let pid = parche.id !== undefined ? parche.id : pIndex;
+                zona.lista.forEach(parche => {
+                    let pid = parche.id !== undefined ? parche.id : parche.nombre;
                     let imgParche = limpiarUrlImagen(parche.imagen || parche.url || parche.foto || parche.img || '');
                     
                     let estaSeleccionado = false;
@@ -1201,7 +1188,7 @@
             });
 
             if (parchesValidos.length === 0) {
-                htmlZonas = "<p style='color:var(--text-muted); text-align:center; padding:15px;'>No hay parches disponibles para esta camiseta.</p>";
+                htmlZonas = "<p style='color:var(--text-muted); text-align:center; padding:15px;'>No hay parches disponibles para esta categoría.</p>";
             }
 
             document.getElementById('tituloModalPersonalizacion').innerText = indexCarrito !== null ? 'Editar Equipación' : 'Personalizar Equipación';
@@ -1257,8 +1244,8 @@
             calcularPrecioModal();
         }
 
-        function toggleParcheZona(zonaKey, parcheId, parcheName) {
-            if (parchesSeleccionadosModal[zonaKey] && String(parchesSeleccionadosModal[zonaKey].id) === String(parcheId)) {
+        function toggleParcheZona(zonaKey, parcheId, parcheNombre) {
+            if (parchesSeleccionadosModal[zonaKey] && parchesSeleccionadosModal[zonaKey].id === parcheId) {
                 delete parchesSeleccionadosModal[zonaKey];
                 document.getElementById(`card-${zonaKey}-${parcheId}`).classList.remove('active-parche');
             } else {
@@ -1267,7 +1254,7 @@
                     let elemViejo = document.getElementById(`card-${zonaKey}-${viejoId}`);
                     if (elemViejo) elemViejo.classList.remove('active-parche');
                 }
-                parchesSeleccionadosModal[zonaKey] = { id: parcheId, nombre: parcheName };
+                parchesSeleccionadosModal[zonaKey] = { id: parcheId, nombre: parcheNombre };
                 document.getElementById(`card-${zonaKey}-${parcheId}`).classList.add('active-parche');
             }
             calcularPrecioModal();
