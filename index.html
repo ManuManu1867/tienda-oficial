@@ -4,1476 +4,259 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tienda Oficial de Camisetas</title>
-    <style>
-        :root {
-            --primary: #111827;
-            --accent: #2563eb;
-            --bg: #ffffff;
-            --surface: #f9fafb;
-            --text: #111827;
-            --text-muted: #6b7280;
-            --border: #e5e7eb;
-            --radius: 8px;
-            --danger: #ef4444;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
-        body { background-color: var(--bg); color: var(--text); transition: background-color 0.3s, color 0.3s; }
-
-        header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 5%; border-bottom: 1px solid var(--border);
-            position: sticky; top: 0; background: var(--bg); z-index: 100;
-            transition: background 0.3s, border-color 0.3s;
-            gap: 10px;
-        }
-        .logo { font-weight: 800; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; min-width: 0; }
-        .logo img { height: 40px; object-fit: contain; flex-shrink: 0; }
-        .logo span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
-        .header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-
-        .theme-toggle-btn {
-            background: transparent;
-            border: 1px solid var(--border);
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: #000000;
-            flex-shrink: 0;
-        }
-        body.dark-mode .theme-toggle-btn {
-            color: #ffffff;
-            border-color: var(--border);
-        }
-        .theme-toggle-btn svg {
-            width: 18px;
-            height: 18px;
-            stroke: currentColor;
-            fill: none;
-            stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
-        .cart-btn {
-            background: var(--primary); color: white; border: none; padding: 6px 12px;
-            border-radius: 20px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;
-            font-size: 0.9rem; transition: background 0.2s, background-color 0.3s;
-            flex-shrink: 0;
-        }
-        .cart-btn:hover { background: var(--accent); }
-
-        body.dark-mode .cart-btn {
-            background: #000000;
-            color: #ffffff;
-            border: 1px solid var(--border);
-        }
-        body.dark-mode .cart-btn svg {
-            stroke: #ffffff;
-        }
-        body.dark-mode #cartCount {
-            background: #374151 !important;
-            color: #ffffff !important;
-        }
-
-        @media (max-width: 480px) {
-            header { padding: 10px 3%; }
-            .logo { font-size: 0.95rem; gap: 6px; }
-            .logo img { height: 34px; }
-            .cart-btn { padding: 5px 10px; font-size: 0.85rem; }
-            .theme-toggle-btn { width: 34px; height: 34px; }
-        }
-
-        .filtros-container {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 20px 5%; background: var(--bg); gap: 15px; flex-wrap: wrap;
-            border-bottom: 1px solid var(--border);
-            transition: background 0.3s, border-color 0.3s;
-        }
-        .filtros {
-            display: flex; gap: 10px; overflow-x: auto; max-width: 100%; padding-bottom: 4px;
-        }
-        .filtro-btn {
-            background: var(--surface); border: 1px solid var(--border);
-            padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 0.9rem;
-            cursor: pointer; transition: all 0.2s; white-space: nowrap; color: var(--text);
-        }
-        .filtro-btn.active, .filtro-btn:hover {
-            background: var(--primary); color: white; border-color: var(--primary);
-        }
-        body.dark-mode .filtro-btn.active {
-            background: #f9fafb; color: #111827; border-color: #f9fafb;
-        }
-
-        .search-box {
-            display: flex; align-items: center; background: var(--surface);
-            border: 1px solid var(--border); border-radius: 20px; padding: 6px 14px; gap: 8px; width: 100%; max-width: 300px;
-        }
-        .search-box svg { width: 16px; height: 16px; stroke: var(--text); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-        .search-input { border: none; background: transparent; outline: none; font-size: 0.9rem; width: 100%; color: var(--text); }
-
-        .main-container { padding: 30px 5% 60px 5%; }
-        h1.section-title, h2.section-title { 
-            font-size: 1.3rem; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; 
-        }
-
-        .grid-productos {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px;
-        }
-
-        .tarjeta {
-            background: var(--surface); border-radius: var(--radius); overflow: hidden;
-            border: 1px solid var(--border); display: flex; flex-direction: column;
-            transition: transform 0.2s, box-shadow 0.2s, background 0.3s, border-color 0.3s;
-        }
-        .tarjeta:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-
-        .visor-imagen {
-            position: relative; background: #eee; height: 280px;
-            display: flex; align-items: center; justify-content: center; overflow: hidden;
-        }
-        .visor-imagen img { width: 100%; height: 100%; object-fit: cover; transition: opacity 0.3s; }
-        
-        .carrusel-btn {
-            position: absolute; top: 50%; transform: translateY(-50%);
-            background: rgba(0, 0, 0, 0.6); color: white; border: none;
-            width: 36px; height: 36px; border-radius: 50%; display: flex;
-            align-items: center; justify-content: center; cursor: pointer;
-            font-size: 16px; z-index: 10; opacity: 0; visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease, background 0.2s;
-        }
-        .carrusel-btn:hover { background: rgba(0, 0, 0, 0.8); }
-        .carrusel-btn.prev { left: 10px; }
-        .carrusel-btn.next { right: 10px; }
-
-        .visor-imagen.activo-interaccion .carrusel-btn { opacity: 1; visibility: visible; }
-
-        .categoria-badge {
-            position: absolute; top: 12px; left: 12px; background: white; color: #111827;
-            padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700;
-            text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.05); z-index: 5;
-            opacity: 1; visibility: visible;
-            transition: opacity 0.4s ease, visibility 0.4s ease;
-        }
-        .visor-imagen.ocultar-badge .categoria-badge {
-            opacity: 0;
-            visibility: hidden;
-        }
-
-        .miniaturas {
-            display: flex; gap: 6px; padding: 8px 12px; background: var(--bg);
-            overflow-x: auto; border-top: 1px solid var(--border);
-            transition: background 0.3s, border-color 0.3s;
-        }
-        .miniatura {
-            width: 36px; height: 36px; border-radius: 4px; object-fit: cover;
-            cursor: pointer; border: 2px solid transparent; opacity: 0.6; transition: all 0.2s; flex-shrink: 0;
-        }
-        .miniatura.active { border-color: var(--accent); opacity: 1; }
-
-        .miniatura-mas {
-            width: 36px; height: 36px; border-radius: 4px; background: var(--surface);
-            color: var(--text); font-size: 0.75rem; font-weight: 700;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; border: 2px solid var(--border); transition: all 0.2s;
-            flex-shrink: 0;
-        }
-        .miniatura-mas:hover { opacity: 0.8; }
-
-        .tarjeta-info { padding: 16px; display: flex; flex-direction: column; flex-grow: 1; }
-        .tarjeta-info h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 12px; color: var(--text); }
-
-        .seccion-tallas { margin-bottom: 15px; }
-        .header-tallas-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-        .label-tallas { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); display: block; }
-        .btn-guia-tallas {
-            background: none; border: none; color: var(--accent); font-size: 0.75rem; font-weight: 600; cursor: pointer; text-decoration: underline; padding: 0;
-        }
-        .btn-guia-tallas:hover { opacity: 0.8; }
-
-        .circulos-tallas { display: flex; gap: 8px; flex-wrap: wrap; }
-        .circulo-talla {
-            width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border);
-            background: var(--bg); color: var(--text); display: flex; align-items: center; justify-content: center;
-            font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
-        }
-        .circulo-talla.selected { background: var(--primary); color: white; border-color: var(--primary); }
-        body.dark-mode .circulo-talla.selected { background: #f9fafb; color: #111827; border-color: #f9fafb; }
-
-        .footer-card { display: flex; flex-direction: column; gap: 10px; margin-top: auto; border-top: 1px solid var(--border); padding-top: 12px; }
-        .footer-card-row { display: flex; justify-content: space-between; align-items: center; }
-        .precio { font-size: 1.1rem; font-weight: 800; color: var(--text); }
-        
-        .btn-comprar {
-            background: var(--primary); color: white; border: none;
-            padding: 8px 14px; border-radius: 20px; font-weight: 600; font-size: 0.8rem;
-            cursor: pointer; transition: background 0.2s;
-        }
-        .btn-comprar:hover { background: var(--accent); }
-        body.dark-mode .btn-comprar { background: #000000; color: #ffffff; border: 1px solid var(--border); }
-
-        .btn-personalizar {
-            background: var(--surface); color: var(--primary); border: 1px solid var(--border);
-            padding: 9px; border-radius: var(--radius); font-weight: 600; font-size: 0.85rem;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
-            transition: all 0.2s; width: 100%;
-        }
-        .btn-personalizar:hover { opacity: 0.9; }
-        .btn-personalizar svg { width: 14px; height: 14px; fill: currentColor; }
-
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); display: none; justify-content: flex-end; z-index: 1000;
-        }
-        .modal-overlay.open { display: flex; }
-        
-        .modal-contenido {
-            background: var(--bg); color: var(--text); width: 100%; max-width: 480px; height: 100%;
-            padding: 20px; display: flex; flex-direction: column; box-shadow: -4px 0 15px rgba(0,0,0,0.1);
-            animation: slideIn 0.3s ease; overflow-y: auto; transition: background 0.3s, color 0.3s;
-        }
-        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-        
-        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 15px; }
-        .btn-cerrar-modal { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text); }
-
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: var(--text); }
-        .form-group input { width: 100%; padding: 8px 12px; border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: 6px; font-size: 0.9rem; outline: none; }
-        
-        .zona-seccion { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 12px; }
-        .zona-titulo { font-size: 0.9rem; font-weight: 700; margin-bottom: 8px; color: var(--primary); display: flex; align-items: center; gap: 6px; }
-        
-        .parches-grid-zona { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
-        
-        .parche-card {
-            border: 2px solid var(--border); border-radius: 8px; padding: 10px; text-align: center;
-            background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-            cursor: pointer; transition: all 0.2s; position: relative; color: var(--text);
-        }
-        .parche-card:hover { border-color: #cbd5e1; transform: translateY(-2px); }
-        .parche-card.active-parche { border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 1px var(--accent); }
-        
-        .parche-card img { width: 65px; height: 65px; object-fit: contain; margin-bottom: 8px; background: #fff; border-radius: 6px; padding: 2px; border: 1px solid var(--border); }
-        .parche-card h5 { font-size: 0.75rem; font-weight: 600; color: var(--text); line-height: 1.2; }
-
-        .item-carrito {
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid var(--border); padding: 12px 0; font-size: 0.9rem;
-        }
-        .controles-cantidad { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
-        .btn-cant {
-            width: 24px; height: 24px; border: 1px solid var(--border); background: var(--surface); color: var(--text);
-            border-radius: 4px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center;
-        }
-        .btn-cant:hover { opacity: 0.8; }
-
-        .acciones-item-carrito {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn-accion-carrito {
-            background: var(--surface); border: 1px solid var(--border); color: var(--text);
-            border-radius: 6px; width: 30px; height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s;
-        }
-        .btn-accion-carrito:hover { opacity: 0.8; border-color: var(--primary); }
-        .btn-accion-carrito svg { width: 14px; height: 14px; fill: currentColor; }
-        .btn-eliminar:hover { color: var(--danger); border-color: var(--danger); }
-
-        .error-talla, .error-custom { color: var(--danger); font-size: 0.75rem; margin-top: 4px; display: none; }
-        
-        .btn-whatsapp {
-            background: #25d366; color: white; border: none; width: 100%; padding: 12px;
-            border-radius: var(--radius); font-weight: 700; font-size: 1rem; cursor: pointer; 
-            text-align: center; margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 8px;
-            transition: background 0.2s;
-        }
-        .btn-whatsapp svg { width: 20px; height: 20px; fill: currentColor; }
-        .btn-whatsapp:hover { background: #1ebe5d; }
-        
-        body.dark-mode #contenidoPersonalizacion .btn-whatsapp {
-            background: #f9fafb !important;
-            color: #111827 !important;
-            border: 1px solid var(--border);
-        }
-
-        .size-tabs {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
-
-        .size-tabs .tab-btn {
-            padding: 6px 10px;
-            font-size: 0.85rem;
-            border: 1px solid var(--border);
-            background: var(--surface);
-            color: var(--text);
-            cursor: pointer;
-            border-radius: 4px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-
-        .size-tabs .tab-btn.active {
-            background: var(--primary);
-            color: #fff;
-            border-color: var(--primary);
-        }
-        body.dark-mode .size-tabs .tab-btn.active {
-            background: #f9fafb;
-            color: #111827;
-            border-color: #f9fafb;
-        }
-
-        .size-tab-content {
-            display: none;
-        }
-
-        .size-tab-content.active {
-            display: block;
-        }
-
-        .size-subtitle {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-        }
-
-        .tabla-tallas { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 0.82rem; }
-        .tabla-tallas th, .tabla-tallas td { border: 1px solid var(--border); padding: 6px; text-align: center; }
-        .tabla-tallas th { background: var(--surface); font-weight: 700; }
-        
-        .tabla-tallas tbody tr.size-row {
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .tabla-tallas tbody tr.size-row:hover {
-            background-color: rgba(37, 99, 235, 0.08);
-        }
-        .tabla-tallas tbody tr.size-row.active {
-            background-color: var(--accent);
-            color: #ffffff;
-            font-weight: bold;
-        }
-        body.dark-mode .tabla-tallas tbody tr.size-row.active {
-            background-color: #f9fafb;
-            color: #111827;
-        }
-
-        .size-visual-container {
-            margin-top: 15px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 12px;
-            text-align: center;
-        }
-        .size-visual-title {
-            font-size: 0.82rem;
-            font-weight: 700;
-            color: var(--text);
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .camiseta-cotas-container {
-            position: relative;
-            display: inline-block;
-            max-width: 600px;
-            margin: 0 auto;
-            background: #000000;
-            padding: 12px;
-            border-radius: 8px;
-        }
-        .camiseta-cotas-container img {
-            width: 100%;
-            height: auto;
-            display: block;
-            border-radius: 6px;
-        }
-        
-        .cota-tag {
-            position: absolute;
-            font-size: 11px;
-            font-weight: 700;
-            color: #000;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 2px 6px;
-            border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-            pointer-events: none;
-            z-index: 5;
-        }
-        .cota-ancho {
-            top: 49%;
-            left: 54%;
-            transform: translate(-50%, -50%);
-        }
-        .cota-largo {
-            top: 66%;
-            left: 33%;
-            transform: translateY(-50%) rotate(-90deg);
-        }
-
-        .loader { text-align: center; padding: 40px; font-size: 1.1rem; color: var(--text-muted); }
-
-        body.dark-mode {
-            --primary: #f9fafb;
-            --bg: #111827;
-            --surface: #1f2937;
-            --text: #f9fafb;
-            --text-muted: #9ca3af;
-            --border: #374151;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' };
+    </script>
 </head>
-<body>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 transition-colors duration-300">
 
-    <header>
-        <div class="logo">
-            <img id="logoImg" src="https://lh3.googleusercontent.com/d/1nu9bwEvAomNYNOilQ1aoIxkqUSJOcYGV" alt="Logo">
-            <span>Tienda de Camisetas</span>
-        </div>
-        <div class="header-actions">
-            <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTema()" title="Cambiar modo">
-                <svg id="themeIcon" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="5"></circle>
-                    <line x1="12" y1="1" x2="12" y2="3"></line>
-                    <line x1="12" y1="21" x2="12" y2="23"></line>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                    <line x1="1" y1="12" x2="3" y2="12"></line>
-                    <line x1="21" y1="12" x2="23" y2="12"></line>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                </svg>
-            </button>
-
-            <button class="cart-btn" onclick="abrirCarritoModal()">
-                <svg style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;" viewBox="0 0 24 24">
-                    <circle cx="9" cy="21" r="1"></circle>
-                    <circle cx="20" cy="21" r="1"></circle>
-                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                </svg>
-                <span id="cartCount" style="background: white; color: var(--primary); padding: 2px 6px; border-radius: 10px; font-size: 0.75rem;">0</span>
-            </button>
-        </div>
+    <!-- Header & Theme Toggle -->
+    <header class="p-4 bg-white dark:bg-gray-800 shadow flex justify-between items-center">
+        <h1 class="text-xl font-bold">Tienda Oficial de Camisetas</h1>
+        <button onclick="toggleDarkMode()" class="p-2 rounded bg-gray-200 dark:bg-gray-700">🌙/☀️</button>
     </header>
 
-    <div class="filtros-container">
-        <div class="filtros" id="contenedorFiltros">
-            <button class="filtro-btn active" onclick="filtrarCategoria('Todo', this)">Todo</button>
-            <button class="filtro-btn" onclick="filtrarCategoria('Selecciones', this)">Selecciones</button>
-            <button class="filtro-btn" onclick="filtrarCategoria('Clubes', this)">Clubes</button>
-            <button class="filtro-btn" onclick="filtrarCategoria('Retro', this)">Retro</button>
-            <button class="filtro-btn" onclick="filtrarCategoria('Ediciones Especiales', this)">Ediciones Especiales</button>
-            <button class="filtro-btn" onclick="filtrarCategoria('Otros', this)">Otros</button>
-        </div>
-        <div class="search-box">
-            <svg viewBox="0 0 24 24">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <input type="text" id="inputBuscador" class="search-input" placeholder="Buscar camisetas..." oninput="manejarBusqueda()">
-        </div>
-    </div>
-
-    <div class="main-container">
-        <h1 class="section-title" id="tituloPrincipalSeccion">
-            <span style="display: inline-block; width: 6px; height: 24px; background-color: var(--accent); border-radius: 3px;"></span>
-            Novedades y Equipaciones
-        </h1>
-        <div id="contenedorProductos" class="loader">Cargando productos...</div>
-    </div>
-
-    <!-- Modal Carrito -->
-    <div class="modal-overlay" id="modalCarrito">
-        <div class="modal-contenido">
-            <div class="modal-header">
-                <h2>Tu Carrito</h2>
-                <button class="btn-cerrar-modal" onclick="cerrarModal('modalCarrito')">✕</button>
+    <main class="max-w-7xl mx-auto p-4">
+        <!-- Catálogo Dinámico: Selecciones, Clubes, Retro, Ediciones Especiales, Otros -->
+        <section id="catalog-section" class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Catálogo</h2>
+            <div id="product-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Los productos se cargan dinámicamente -->
             </div>
-            <div style="flex-grow: 1; overflow-y: auto;" id="listaCarrito">
-                <p style="color: var(--text-muted); text-align: center; margin-top: 20px;">El carrito está vacío</p>
-            </div>
-            <div style="border-top: 1px solid var(--border); padding-top: 15px;">
-                <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 1.2rem; margin-bottom: 10px;">
-                    <span>Total:</span>
-                    <span id="totalCarrito">0.00 €</span>
+        </section>
+
+        <!-- Modal de Personalización (Nombre, Número y Parches filtrados por ID de la camiseta) -->
+        <div id="customization-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg max-w-lg w-full">
+                <h3 class="text-xl font-bold mb-4">Personalizar Camiseta</h3>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-1">Nombre:</label>
+                    <input type="text" id="custom-name" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600">
                 </div>
-                <button class="btn-whatsapp" onclick="enviarWhatsApp()">
-                    <svg viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01C17.18 3.03 14.69 2 12.04 2zM12.04 20.1c-1.47 0-2.91-.4-4.16-1.16l-.3-.18-3.12.82.83-3.04-.2-.31c-.82-1.31-1.25-2.83-1.25-4.38 0-4.54 3.69-8.23 8.23-8.23 2.2 0 4.27.86 5.82 2.42 1.56 1.56 2.42 3.63 2.42 5.82 0 4.54-3.69 8.23-8.23 8.23zm4.52-6.16c-.25-.13-1.47-.72-1.7-.8s-.4-.13-.57.13-.66.82-.81.99-.3.18-.55.05c-.25-.13-1.05-.39-2-1.23-.74-.66-1.24-1.47-1.38-1.72s-.03-.39.11-.52c.11-.11.25-.29.37-.43s.16-.23.25-.38.04-.29-.02-.41c-.06-.13-.57-1.38-.79-1.89-.21-.49-.42-.42-.57-.43l-.49-.01c-.17 0-.45.06-.69.31s-.92.9-.92 2.2 0.94 2.55 1.07 2.72c.13.17 1.85 2.82 4.48 3.96.63.27 1.12.43 1.5.55.63.2 1.2.17 1.65.1.5-.08 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.11-.23-.18-.48-.31z"/></svg>
-                    Hacer pedido por WhatsApp
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Personalización -->
-    <div class="modal-overlay" id="modalPersonalizacion">
-        <div class="modal-contenido">
-            <div class="modal-header">
-                <h2 id="tituloModalPersonalizacion">Personalizar Equipación</h2>
-                <button class="btn-cerrar-modal" onclick="cerrarModal('modalPersonalizacion')">✕</button>
-            </div>
-            <div id="contenidoPersonalizacion"></div>
-        </div>
-    </div>
-
-    <!-- Modal Guía de Tallas -->
-    <div class="modal-overlay" id="modalGuiaTallas">
-        <div class="modal-contenido">
-            <div class="modal-header">
-                <h2>Guía de Tallas</h2>
-                <button class="btn-cerrar-modal" onclick="cerrarModal('modalGuiaTallas')">✕</button>
-            </div>
-            
-            <div class="size-tabs">
-                <button class="tab-btn active" onclick="switchSizeTab(event, 'player')">Jugador</button>
-                <button class="tab-btn" onclick="switchSizeTab(event, 'retro')">Retro</button>
-                <button class="tab-btn" onclick="switchSizeTab(event, 'fan-hombre')">Fan (Hombre)</button>
-                <button class="tab-btn" onclick="switchSizeTab(event, 'fan-mujer')">Fan (Mujer)</button>
-            </div>
-
-            <div id="player" class="size-tab-content active">
-                <p class="size-subtitle">Medidas aproximadas en centímetros y recomendaciones. Pincha en una talla para verla reflejada abajo.</p>
-                <table class="tabla-tallas">
-                    <thead>
-                        <tr><th>Talla</th><th>Ancho</th><th>Largo</th><th>Estatura</th><th>Peso</th></tr>
-                    </thead>
-                    <tbody id="tbody-player">
-                        <tr class="size-row active" onclick="seleccionarFilaTalla('player', 'S', 46, 68, this)"><td>S</td><td>46 cm</td><td>68 cm</td><td>160-170 cm</td><td>50-60 kg</td></tr>
-                        <tr class="size-row" onclick="seleccionarFilaTalla('player', 'M', 48, 70, this)"><td>M</td><td>48 cm</td><td>70 cm</td><td>170-175 cm</td><td>60-65 kg</td></tr>
-                        <tr class="size-row" onclick="seleccionarFilaTalla('player', 'L', 50, 72, this)"><td>L</td><td>50 cm</td><td>72 cm</td><td>175-180 cm</td><td>65-70 kg</td></tr>
-                        <tr class="size-row" onclick="seleccionarFilaTalla('player', 'XL', 52, 74, this)"><td>XL</td><td>52 cm</td><td>74 cm</td><td>180-185 cm</td><td>70-75 kg</td></tr>
-                        <tr class="size-row" onclick="seleccionarFilaTalla('player', 'XXL', 54, 76, this)"><td>XXL</td><td>54 cm</td><td>76 cm</td><td>185-190 cm</td><td>75-85 kg</td></tr>
-                        <tr class="size-row" onclick="seleccionarFilaTalla('player', '3XL', 56, 78, this)"><td>3XL</td><td>56 cm</td><td>78 cm</td><td>190-195 cm</td><td>85-90 kg</td></tr>
-                        <tr class="size-row" onclick="seleccionarFilaTalla('player', '4XL', 58, 80, this)"><td>4XL</td><td>58 cm</td><td>80 cm</td><td>195-200 cm</td><td>95-100 kg</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div id="retro" class="size-tab-content">
-                <p class="size-subtitle">Medidas aproximadas en centímetros y recomendaciones. Pincha en una fila para ver cotas.</p>
-                <table class="tabla-tallas">
-                    <thead>
-                        <tr><th>Talla</th><th>Ancho</th><th>Largo</th><th>Estatura</th><th>Peso</th></tr>
-                    </thead>
-                    <tbody id="tbody-retro">
-                        <tr class="size-row active" onclick="seleccionarFilaTalla('retro', 'S', 48, 70, this)"><td>S</td><td>48 cm</td><td>70 cm</td><td>160-170 cm</td><td>50-60 kg</td></tr>
-                        <tr class="size-row" onclick="seleccionarFilaTalla('retro', 'M', 50, 72, this)"><td>M</td><td>50 cm</td><td>72 cm</td><td>170-175 cm</td><td>60-65 kg</td></tr>
-                        <tr class="size-row" onclick="seleccionarFilaTalla('retro', 'L', 52, 74, this)"><td>L</td><td>52 cm</td><td>74 cm</td><td>175-180 cm</td><td>65-70 kg</td></tr>
-                        <tr class="size-row" onclick="seleccionarFilaTalla('retro', 'XL', 54, 76, this)"><td>XL</td><td>54 cm</td><td>76 cm</td><td>180-185 cm</td><td>70-75 kg</td></tr>
-                        <tr class="size-row" onclick="seleccionarFilaTalla('retro', 'XXL', 56, 78, this)"><td>XXL</td><td>56 cm</td><td>78 cm</td><td>185-190 cm</td><td>75-85 kg</td></tr>
-                        <tr class="size-row" onclick="seleccionarFilaTalla('retro', '3XL', 58, 80, this)"><td>3XL</td><td>58 cm</td><td>80 cm</td><td>190-195 cm</td><td>85-90 kg</td></tr>
-                        <tr class="size-row" onclick="seleccionarFilaTalla('retro', '4XL', 60, 82, this)"><td>4XL</td><td>60 cm</td><td>82 cm</td><td>195-200 cm</td><td>95-100 kg</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div id="fan-hombre" class="size-tab-content">
-                <p class="size-subtitle">Medidas aproximadas en centímetros y recomendaciones. Pincha en una fila para ver cotas.</p>
-                <table class="tabla-tallas">
-                    <thead>
-                        <tr><th>Talla</th><th>Ancho</th><th>Largo</th><th>Estatura</th><th>Peso</th></tr>
-                    </thead>
-                    <tbody id="tbody-fan-hombre">
-                        <tr class="size-row active" onclick="seleccionarFilaTalla('fan-hombre', 'S', 48, 70, this)"><td>S</td><td>48 cm</td><td>70 cm</td><td>162-170 cm</td><td>50-62 kg</td></tr>
-                        <tr class="size-row" onclick="seleccionarFilaTalla('fan-hombre', 'M', 50, 72, this)"><td>M</td><td>50 cm</td><td>72 cm</td><td>170-176 cm</td><td>62-78 kg</td></tr>
-                        <tr class="size-row" onclick="seleccionarFilaTalla('fan-hombre', 'L', 52, 74, this)"><td>L</td><td>52 cm</td><td>74 cm</td><td>176-182 cm</td><td>78-83 kg</td></tr>
-                        <tr class="size-row" onclick="seleccionarFilaTalla('fan-hombre', 'XL', 54, 76, this)"><td>XL</td><td>54 cm</td><td>76 cm</td><td>182-190 cm</td><td>83-90 kg</td></tr>
-                        <tr class="size-row" onclick="seleccionarFilaTalla('fan-hombre', 'XXL', 56, 78, this)"><td>XXL</td><td>56 cm</td><td>78 cm</td><td>190-195 cm</td><td>90-97 kg</td></tr>
-                        <tr class="size-row" onclick="seleccionarFilaTalla('fan-hombre', '3XL', 58, 80, this)"><td>3XL</td><td>58 cm</td><td>80 cm</td><td>192-197 cm</td><td>97-104 kg</td></tr>
-                        <tr class="size-row" onclick="seleccionarFilaTalla('fan-hombre', '4XL', 60, 82, this)"><td>4XL</td><td>60 cm</td><td>82 cm</td><td>197-200 cm</td><td>104-110 kg</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div id="fan-mujer" class="size-tab-content">
-                <p class="size-subtitle">Medidas aproximadas en centímetros y recomendaciones. Pincha en una fila para ver cotas.</p>
-                <table class="tabla-tallas">
-                    <thead>
-                        <tr><th>Talla</th><th>Ancho</th><th>Largo</th><th>Estatura</th><th>Peso</th></tr>
-                    </thead>
-                    <tbody id="tbody-fan-mujer">
-                        <tr class="size-row active" onclick="seleccionarFilaTalla('fan-mujer', 'S', 44, 65, this)"><td>S</td><td>44 cm</td><td>65 cm</td><td>150-160 cm</td><td>45-55 kg</td></tr>
-                        <tr class="size-row" onclick="seleccionarFilaTalla('fan-mujer', 'M', 46, 67, this)"><td>M</td><td>46 cm</td><td>67 cm</td><td>160-165 cm</td><td>50-60 kg</td></tr>
-                        <tr class="size-row" onclick="seleccionarFilaTalla('fan-mujer', 'L', 48, 69, this)"><td>L</td><td>48 cm</td><td>69 cm</td><td>165-170 cm</td><td>60-70 kg</td></tr>
-                        <tr class="size-row" onclick="seleccionarFilaTalla('fan-mujer', 'XL', 49.5, 70, this)"><td>XL</td><td>49.5 cm</td><td>70 cm</td><td>170-175 cm</td><td>65-75 kg</td></tr>
-                        <tr class="size-row" onclick="seleccionarFilaTalla('fan-mujer', 'XXL', 51, 71, this)"><td>XXL</td><td>51 cm</td><td>71 cm</td><td>175-178 cm</td><td>75-85 kg</td></tr>
-                        <tr class="size-row" onclick="seleccionarFilaTalla('fan-mujer', '3XL', '—', '—', this)"><td>3XL</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
-                        <tr class="size-row" onclick="seleccionarFilaTalla('fan-mujer', '4XL', '—', '—', this)"><td>4XL</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="size-visual-container">
-                <div class="size-visual-title">Vista previa de cotas (Selecciona talla)</div>
-                <div class="camiseta-cotas-container">
-                    <img src="https://lh3.googleusercontent.com/d/1p1JiO40x85Rq2s1l5g8aiUhdB7eRRrJs" alt="Camiseta Guía de Tallas">
-                    
-                    <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;" viewBox="0 0 200 250">
-                        <defs>
-                            <marker id="flechaCota" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-                                <path d="M 0 0 L 10 5 L 0 10 z" fill="#3b82f6"></path>
-                            </marker>
-                        </defs>
-                        <line x1="54" y1="130" x2="146" y2="130" stroke="#3b82f6" stroke-width="1.5" marker-start="url(#flechaCota)" marker-end="url(#flechaCota)"></line>
-                        <line x1="79" y1="48" x2="79" y2="200" stroke="#3b82f6" stroke-width="1.5" marker-start="url(#flechaCota)" marker-end="url(#flechaCota)"></line>
-                    </svg>
-
-                    <div id="cotaAncho" class="cota-tag cota-ancho">46 cm</div>
-                    <div id="cotaLargo" class="cota-tag cota-largo">68 cm</div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-1">Número:</label>
+                    <input type="number" id="custom-number" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-1">Parches Disponibles para este modelo:</label>
+                    <div id="allowed-patches-container" class="space-y-2 max-h-40 overflow-y-auto p-2 border rounded dark:border-gray-600">
+                        <!-- Se llenará dinámicamente con los parches cuyos IDs estén definidos en la camiseta -->
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button onclick="closeCustomizationModal()" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 rounded">Cancelar</button>
+                    <button onclick="addToCartWithCustomization()" class="px-4 py-2 bg-blue-600 text-white rounded">Añadir al Carrito</button>
                 </div>
             </div>
-
-            <button class="filtro-btn" style="width: 100%; margin-top: 20px; text-align: center;" onclick="cerrarModal('modalGuiaTallas')">Entendido</button>
         </div>
-    </div>
+
+        <!-- Guía de Tallas y Cotas (Player, Retro, Fan Hombres/Mujeres) -->
+        <section class="mb-8 bg-white dark:bg-gray-800 p-4 rounded shadow">
+            <h3 class="text-lg font-semibold mb-2">Guía de Tallas y Cotas</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Consulta las medidas exactas de ancho, largo y peso para Player, Retro y Fan.</p>
+        </section>
+    </main>
+
+    <!-- WhatsApp Checkout Carrito -->
+    <footer class="p-4 bg-white dark:bg-gray-800 shadow fixed bottom-0 left-0 right-0 flex justify-between items-center max-w-7xl mx-auto rounded-t-xl">
+        <span id="cart-summary" class="font-semibold">Carrito vacío</span>
+        <button onclick="checkoutWhatsApp()" class="bg-green-600 text-white px-4 py-2 rounded font-bold">Comprar por WhatsApp</button>
+    </footer>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbz9DbS7_o1No0_mgs-PKeE6vhanGG4whu4EuvfltEmL-BhEs1O03EUNUX9ZtmT2q3mF0w/exec';
-        
-        let datosTienda = { productos: [], parches: [] };
-        let estadoSelecciones = {};
-        let limitesSecciones = {}; 
-        let categoriaFiltroActiva = 'Todo';
-        let textoBusqueda = '';
-        let carrito = [];
-        let productoEnEdicion = null;
-        let indiceItemEditando = null;
-        let parchesSeleccionadosModal = {};
-
-        let idTarjetaInteractivaActiva = null;
-        let timerRestaurarBadge = null;
-
-        const coloresCategorias = {
-            'Selecciones': '#06b6d4',
-            'Retro': '#eab308',
-            'Clubes': '#8b5cf6',
-            'Ediciones Especiales': '#ec4899',
-            'Otros': '#64748b',
-            'General': '#2563eb'
-        };
-
-        const LOGO_CLARO = 'https://lh3.googleusercontent.com/d/1nu9bwEvAomNYNOilQ1aoIxkqUSJOcYGV';
-        const LOGO_OSCURO = 'https://lh3.googleusercontent.com/d/13ON8TbGswhPthbj4YuhP_-XwEyTjG97T';
-
-        function normalizarTexto(texto) {
-            if (!texto) return '';
-            return texto
-                .toLowerCase()
-                .normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, "");
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
         }
 
-        function toggleTema() {
-            const body = document.body;
-            const iconSvg = document.getElementById('themeIcon');
-            const logoImg = document.getElementById('logoImg');
+        // Lógica simulada de filtrado de parches por ID asignado a la camiseta
+        function openCustomizationModal(product) {
+            document.getElementById('customization-modal').classList.remove('hidden');
+            const container = document.getElementById('allowed-patches-container');
+            container.innerHTML = '';
             
-            body.classList.toggle('dark-mode');
+            // product.allowedPatches contiene los IDs definidos en la hoja CAMISETAS
+            const allowedIds = product.allowedPatches ? product.allowedPatches.split(',').map(id => id.trim()) : [];
             
-            if (body.classList.contains('dark-mode')) {
-                iconSvg.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
-                logoImg.src = LOGO_OSCURO;
+            // Suponiendo una lista global de parches cargados desde Google Sheets (sin categoría)
+            const allPatches = window.globalPatches || []; 
+            const validPatches = allPatches.filter(p => allowedIds.includes(p.id));
+
+            if(validPatches.length === 0) {
+                container.innerHTML = '<span class="text-sm text-gray-400">No hay parches disponibles para esta camiseta.</span>';
             } else {
-                iconSvg.innerHTML = `
-                    <circle cx="12" cy="12" r="5"></circle>
-                    <line x1="12" y1="1" x2="12" y2="3"></line>
-                    <line x1="12" y1="21" x2="12" y2="23"></line>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                    <line x1="1" y1="12" x2="3" y2="12"></line>
-                    <line x1="21" y1="12" x2="23" y2="12"></line>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                `;
-                logoImg.src = LOGO_CLARO;
-            }
-        }
-
-        function limpiarUrlImagen(url) {
-            if (!url) return '';
-            url = url.trim();
-            let match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-            if (match && match[1]) {
-                return `https://lh3.googleusercontent.com/d/${match[1]}`;
-            }
-            return url;
-        }
-
-        async function cargarDatos() {
-            try {
-                const response = await fetch(API_URL);
-                datosTienda = await response.json();
-                renderizarSecciones(datosTienda.productos);
-            } catch (error) {
-                console.error("Error al cargar:", error);
-                document.getElementById('contenedorProductos').innerHTML = "Error al cargar los datos. Comprueba tu conexión.";
-            }
-        }
-
-        function obtenerHtmlMiniaturas(idProd) {
-            let estado = estadoSelecciones[idProd];
-            let imgs = estado.imgs;
-            if (!imgs || imgs.length <= 1) return '';
-
-            let maxVisibles = 3;
-            let expandido = estado.miniaturasExpandidas || false;
-            let totalImgs = imgs.length;
-            
-            let html = `<div class="miniaturas" id="miniaturas-${idProd}">`;
-            let limiteMostrar = (expandido || totalImgs <= 4) ? totalImgs : maxVisibles;
-            
-            for (let imgIdx = 0; imgIdx < limiteMostrar; imgIdx++) {
-                let imgUrl = imgs[imgIdx];
-                let activeClass = imgIdx === estado.fotoIndex ? 'active' : '';
-                html += `<img src="${imgUrl}" class="miniatura ${activeClass}" onclick="cambiarImagen(event, '${idProd}', '${imgUrl}', ${imgIdx})">`;
-            }
-            
-            if (!expandido && totalImgs > maxVisibles) {
-                let restas = totalImgs - maxVisibles;
-                html += `<div class="miniatura-mas" onclick="toggleExpandirMiniaturas(event, '${idProd}')">+${restas}</div>`;
-            }
-            
-            html += '</div>';
-            return html;
-        }
-
-        function toggleExpandirMiniaturas(event, idProd) {
-            event.stopPropagation();
-            if (estadoSelecciones[idProd]) {
-                estadoSelecciones[idProd].miniaturasExpandidas = true;
-                const tarjeta = event.target.closest('.tarjeta');
-                if (tarjeta) {
-                    const contenedorMin = tarjeta.querySelector('.miniaturas');
-                    if (contenedorMin) {
-                        const temp = document.createElement('div');
-                        temp.innerHTML = obtenerHtmlMiniaturas(idProd);
-                        contenedorMin.replaceWith(temp.firstElementChild);
-                    }
-                }
-            }
-        }
-
-        function manejarBusqueda() {
-            textoBusqueda = normalizarTexto(document.getElementById('inputBuscador').value.trim());
-            renderizarSecciones(datosTienda.productos);
-        }
-
-        function abrirGuiaTallas() {
-            document.getElementById('modalGuiaTallas').classList.add('open');
-        }
-
-        function switchSizeTab(evt, tabName) {
-            const contents = document.querySelectorAll('.size-tab-content');
-            contents.forEach(content => content.classList.remove('active'));
-            
-            const buttons = document.querySelectorAll('.size-tabs .tab-btn');
-            buttons.forEach(btn => btn.classList.remove('active'));
-            
-            document.getElementById(tabName).classList.add('active');
-            evt.currentTarget.classList.add('active');
-
-            const primeraFila = document.querySelector(`#tbody-${tabName} tr.size-row`);
-            if (primeraFila) {
-                primeraFila.click();
-            }
-        }
-
-        function seleccionarFilaTalla(tabId, talla, anchoVal, largoVal, elementoRow) {
-            const cuerpoTabla = document.getElementById(`tbody-${tabId}`);
-            if (cuerpoTabla) {
-                cuerpoTabla.querySelectorAll('tr.size-row').forEach(r => r.classList.remove('active'));
-            }
-            elementoRow.classList.add('active');
-
-            const cotaAncho = document.getElementById('cotaAncho');
-            const cotaLargo = document.getElementById('cotaLargo');
-
-            if (cotaAncho && cotaLargo) {
-                cotaAncho.textContent = typeof anchoVal === 'number' ? anchoVal + ' cm' : anchoVal;
-                cotaLargo.textContent = typeof largoVal === 'number' ? largoVal + ' cm' : largoVal;
-            }
-        }
-
-        function renderizarSecciones(lista) {
-            const contenedor = document.getElementById('contenedorProductos');
-            if (!lista || lista.length === 0) {
-                contenedor.innerHTML = "<p style='text-align:center; color: var(--text-muted);'>No hay productos disponibles.</p>";
-                return;
-            }
-
-            let listaFiltrada = lista;
-            if (categoriaFiltroActiva !== 'Todo') {
-                listaFiltrada = listaFiltrada.filter(p => p.categoria && p.categoria.toLowerCase() === categoriaFiltroActiva.toLowerCase());
-            }
-
-            if (textoBusqueda !== '') {
-                listaFiltrada = listaFiltrada.filter(p => {
-                    let tituloNorm = normalizarTexto(p.titulo);
-                    let catNorm = normalizarTexto(p.categoria);
-                    return tituloNorm.includes(textoBusqueda) || catNorm.includes(textoBusqueda);
-                });
-            }
-
-            if (listaFiltrada.length === 0) {
-                contenedor.innerHTML = "<p style='text-align:center; color: var(--text-muted); padding: 40px;'>No se encontraron camisetas con ese criterio.</p>";
-                return;
-            }
-
-            let categoriasMap = {};
-            listaFiltrada.forEach((p, index) => {
-                let cat = (p.categoria || 'General').trim();
-                if (!categoriasMap[cat]) categoriasMap[cat] = [];
-                p._idReal = p.id !== undefined ? p.id : index;
-                categoriasMap[cat].push(p);
-            });
-
-            contenedor.className = "";
-            contenedor.innerHTML = "";
-
-            Object.keys(categoriasMap).forEach(cat => {
-                let productosCat = categoriasMap[cat];
-                if (!limitesSecciones[cat]) {
-                    limitesSecciones[cat] = 4; 
-                }
-                let limiteActual = limitesSecciones[cat];
-                let productosVisibles = productosCat.slice(0, limiteActual);
-
-                let seccionDiv = document.createElement('div');
-                seccionDiv.style.marginBottom = "40px";
-
-                let colorBarra = coloresCategorias[cat] || '#2563eb';
-
-                let tituloSec = document.createElement('h2');
-                tituloSec.className = "section-title";
-                tituloSec.innerHTML = `<span style="display: inline-block; width: 6px; height: 24px; background-color: ${colorBarra}; border-radius: 3px;"></span> ${cat}`;
-                seccionDiv.appendChild(tituloSec);
-
-                let gridDiv = document.createElement('div');
-                gridDiv.className = "grid-productos";
-
-                productosVisibles.forEach((p) => {
-                    let idProd = p._idReal;
-                    
-                    let imgs = [];
-                    if (typeof p.imagenes === 'string' && p.imagenes.trim() !== '') {
-                        let urlsBrutas = p.imagenes.split(',');
-                        let urlsLimpiasMap = urlsBrutas.map(s => limpiarUrlImagen(s)).filter(Boolean);
-                        imgs = [...new Set(urlsLimpiasMap)];
-                    }
-                    if (imgs.length === 0) imgs = ['https://via.placeholder.com/300x350?text=Sin+Imagen'];
-
-                    if (!estadoSelecciones[idProd]) {
-                        estadoSelecciones[idProd] = { talla: '', fotoIndex: 0, imgs: imgs, timerInactividad: null, miniaturasExpandidas: false };
-                    } else {
-                        estadoSelecciones[idProd].imgs = imgs;
-                        if (estadoSelecciones[idProd].fotoIndex >= imgs.length) {
-                            estadoSelecciones[idProd].fotoIndex = 0;
-                        }
-                    }
-
-                    let imgPrincipal = imgs[estadoSelecciones[idProd].fotoIndex];
-                    let tallasArr = p.talla ? p.talla.split(',').map(t => t.trim()) : ['Única'];
-                    let htmlTallas = '';
-                    tallasArr.forEach(t => {
-                        let selectedClass = estadoSelecciones[idProd].talla === t ? 'selected' : '';
-                        htmlTallas += `<div class="circulo-talla ${selectedClass}" onclick="seleccionarTalla('${idProd}', '${t}', this)">${t}</div>`;
-                    });
-
-                    let htmlMiniaturas = obtenerHtmlMiniaturas(idProd);
-
-                    const tarjeta = document.createElement('div');
-                    tarjeta.className = 'tarjeta';
-                    tarjeta.innerHTML = `
-                        <div class="visor-imagen" id="visor-${idProd}" 
-                             onmousemove="manejarInteraccionCamiseta('${idProd}')" 
-                             onmouseleave="ocultarBotonesCarrusel('${idProd}')"
-                             ontouchstart="manejarInteraccionCamiseta('${idProd}')">
-                            <span class="categoria-badge">${p.categoria || 'General'}</span>
-                            <img id="img-${idProd}" src="${imgPrincipal}" alt="${p.titulo}">
-                            ${imgs.length > 1 ? `
-                                <button class="carrusel-btn prev" onclick="cambiarFotoSlider(event, '${idProd}', -1)">&#10094;</button>
-                                <button class="carrusel-btn next" onclick="cambiarFotoSlider(event, '${idProd}', 1)">&#10095;</button>
-                            ` : ''}
-                        </div>
-                        ${htmlMiniaturas}
-                        <div class="tarjeta-info">
-                            <h3>${p.titulo || 'Sin título'}</h3>
-                            
-                            <div class="seccion-tallas">
-                                <div class="header-tallas-row">
-                                    <span class="label-tallas">Selecciona tu talla: *</span>
-                                    <button class="btn-guia-tallas" onclick="abrirGuiaTallas()">Guía de tallas</button>
-                                </div>
-                                <div class="circulos-tallas" id="tallas-${idProd}">${htmlTallas}</div>
-                                <div class="error-talla" id="error-talla-${idProd}">¡Elige una talla obligatoriamente!</div>
-                            </div>
-
-                            <div class="footer-card">
-                                <button class="btn-personalizar" onclick="abrirPersonalizacion('${idProd}')">
-                                    <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-                                    Personalizar Camiseta
-                                </button>
-                                <div class="footer-card-row">
-                                    <div class="precio">${parseFloat(p.precio || 0).toFixed(2)} €</div>
-                                    <button class="btn-comprar" onclick="agregarDirecto('${idProd}')">Añadir al Carrito</button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    gridDiv.appendChild(tarjeta);
-                });
-
-                seccionDiv.appendChild(gridDiv);
-
-                let restantes = productosCat.length - limiteActual;
-                if (restantes > 0) {
-                    let btnVerMasContainer = document.createElement('div');
-                    btnVerMasContainer.style.textAlign = "center";
-                    btnVerMasContainer.style.marginTop = "20px";
-
-                    let btnVerMas = document.createElement('button');
-                    btnVerMas.className = "filtro-btn";
-                    btnVerMas.innerText = `Ver más (+${restantes})`;
-                    btnVerMas.onclick = () => {
-                        limitesSecciones[cat] += 4;
-                        renderizarSecciones(datosTienda.productos);
-                    };
-
-                    btnVerMasContainer.appendChild(btnVerMas);
-                    seccionDiv.appendChild(btnVerMasContainer);
-                }
-
-                contenedor.appendChild(seccionDiv);
-            });
-        }
-
-        function filtrarCategoria(categoria, btn) {
-            document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            categoriaFiltroActiva = categoria;
-            
-            const tituloEl = document.getElementById('tituloPrincipalSeccion');
-            if (categoria === 'Todo') {
-                tituloEl.innerHTML = `<span style="display: inline-block; width: 6px; height: 24px; background-color: var(--accent); border-radius: 3px;"></span> Novedades y Equipaciones`;
-            } else {
-                let colorBarra = coloresCategorias[categoria] || '#2563eb';
-                tituloEl.innerHTML = `<span style="display: inline-block; width: 6px; height: 24px; background-color: ${colorBarra}; border-radius: 3px;"></span> ${categoria}`;
-            }
-
-            renderizarSecciones(datosTienda.productos);
-        }
-
-        function manejarInteraccionCamiseta(idProd) {
-            const visor = document.getElementById(`visor-${idProd}`);
-            if (!visor) return;
-
-            if (idTarjetaInteractivaActiva && idTarjetaInteractivaActiva !== idProd) {
-                const visorAnterior = document.getElementById(`visor-${idTarjetaInteractivaActiva}`);
-                if (visorAnterior) visorAnterior.classList.remove('ocultar-badge');
-                if (timerRestaurarBadge) clearTimeout(timerRestaurarBadge);
-            }
-
-            idTarjetaInteractivaActiva = idProd;
-            if (timerRestaurarBadge) clearTimeout(timerRestaurarBadge);
-
-            visor.classList.add('ocultar-badge');
-            visor.classList.add('activo-interaccion');
-
-            let estado = estadoSelecciones[idProd];
-            if (estado.timerInactividad) clearTimeout(estado.timerInactividad);
-            
-            estado.timerInactividad = setTimeout(() => {
-                visor.classList.remove('activo-interaccion');
-            }, 1500);
-
-            timerRestaurarBadge = setTimeout(() => {
-                if (idTarjetaInteractivaActiva === idProd) {
-                    visor.classList.remove('ocultar-badge');
-                    idTarjetaInteractivaActiva = null;
-                }
-            }, 5000);
-        }
-
-        function ocultarBotonesCarrusel(idProd) {
-            const visor = document.getElementById(`visor-${idProd}`);
-            if (!visor) return;
-            visor.classList.remove('activo-interaccion');
-            let estado = estadoSelecciones[idProd];
-            if (estado.timerInactividad) clearTimeout(estado.timerInactividad);
-        }
-
-        function cambiarFotoSlider(event, idProd, direccion) {
-            event.stopPropagation();
-            manejarInteraccionCamiseta(idProd);
-            
-            let estado = estadoSelecciones[idProd];
-            if (!estado || !estado.imgs || estado.imgs.length <= 1) return;
-
-            estado.fotoIndex += direccion;
-            if (estado.fotoIndex < 0) estado.fotoIndex = estado.imgs.length - 1;
-            if (estado.fotoIndex >= estado.imgs.length) estado.fotoIndex = 0;
-
-            if (estado.fotoIndex >= 3 && estado.imgs.length > 4) {
-                estado.miniaturasExpandidas = true;
-            }
-
-            document.getElementById(`img-${idProd}`).src = estado.imgs[estado.fotoIndex];
-
-            const tarjeta = event.target.closest('.tarjeta');
-            if (tarjeta) {
-                const contenedorMin = tarjeta.querySelector('.miniaturas');
-                if (contenedorMin) {
-                    const temp = document.createElement('div');
-                    temp.innerHTML = obtenerHtmlMiniaturas(idProd);
-                    contenedorMin.replaceWith(temp.firstElementChild);
-                }
-            }
-        }
-
-        function seleccionarTalla(idProd, talla, elemento) {
-            estadoSelecciones[idProd].talla = talla;
-            const contenedorTallas = document.getElementById(`tallas-${idProd}`);
-            contenedorTallas.querySelectorAll('.circulo-talla').forEach(c => c.classList.remove('selected'));
-            elemento.classList.add('selected');
-            document.getElementById(`error-talla-${idProd}`).style.display = 'none';
-        }
-
-        function cambiarImagen(event, idProd, nuevaUrl, indexImg) {
-            event.stopPropagation();
-            manejarInteraccionCamiseta(idProd);
-            
-            document.getElementById(`img-${idProd}`).src = nuevaUrl;
-            if (estadoSelecciones[idProd]) {
-                estadoSelecciones[idProd].fotoIndex = indexImg;
-            }
-            const tarjeta = event.target.closest('.tarjeta');
-            if (tarjeta) {
-                const contenedorMin = tarjeta.querySelector('.miniaturas');
-                if (contenedorMin) {
-                    const temp = document.createElement('div');
-                    temp.innerHTML = obtenerHtmlMiniaturas(idProd);
-                    contenedorMin.replaceWith(temp.firstElementChild);
-                }
-            }
-        }
-
-        function agregarDirecto(idProd) {
-            let seleccion = estadoSelecciones[idProd];
-            if (!seleccion || !seleccion.talla) {
-                document.getElementById(`error-talla-${idProd}`).style.display = 'block';
-                return;
-            }
-            const p = datosTienda.productos.find((prod, index) => String(prod.id !== undefined ? prod.id : index) === String(idProd));
-            if (!p) return;
-            
-            agregarAlCarritoFinal({
-                id: idProd,
-                titulo: p.titulo,
-                precio: parseFloat(p.precio),
-                talla: seleccion.talla,
-                cantidad: 1,
-                personalizacion: 'Sin personalización',
-                parches: 'Sin parches'
-            });
-        }
-
-        function abrirPersonalizacion(idProd, indexCarrito = null) {
-            indiceItemEditando = indexCarrito;
-            let tallaAUsar = '';
-            let nombrePrecargado = '';
-            let numeroPrecargado = '';
-            let parchesPrecargados = 'Sin parches';
-
-            if (indexCarrito !== null) {
-                let item = carrito[indexCarrito];
-                tallaAUsar = item.talla;
-                if (item.personalizacion.includes("Nombre:")) {
-                    let partes = item.personalizacion.split(", ");
-                    nombrePrecargado = partes[0] ? partes[0].replace("Nombre: ", "") : "";
-                    if (nombrePrecargado === "N/A") nombrePrecargado = "";
-                    numeroPrecargado = partes[1] ? partes[1].replace("Nº: ", "") : "";
-                    if (numeroPrecargado === "N/A") numeroPrecargado = "";
-                }
-                parchesPrecargados = item.parches;
-            } else {
-                let seleccion = estadoSelecciones[idProd];
-                if (!seleccion || !seleccion.talla) {
-                    document.getElementById(`error-talla-${idProd}`).style.display = 'block';
-                    return;
-                }
-                tallaAUsar = seleccion.talla;
-            }
-
-            const p = datosTienda.productos.find((prod, index) => String(prod.id !== undefined ? prod.id : index) === String(idProd));
-            if (!p) return;
-
-            productoEnEdicion = p;
-            parchesSeleccionadosModal = {};
-
-            let categoriaProducto = (p.categoria || '').toString().toLowerCase().trim();
-            let todosLosParches = datosTienda.parches || [];
-
-            let parchesValidos = todosLosParches.filter(pr => {
-                let catParche = (pr.categoria || 'General').toString().toLowerCase().trim();
-                return catParche === 'general' || catParche === categoriaProducto;
-            });
-
-            let parchesCentro = parchesValidos.filter(pr => {
-                let pos = (pr.posicion || '').toString().toLowerCase().trim();
-                return pos === 'c' || pos.includes('centro') || pos.includes('pecho');
-            });
-            let parchesIzquierdo = parchesValidos.filter(pr => {
-                let pos = (pr.posicion || '').toString().toLowerCase().trim();
-                return pos === 'i' || pos.includes('izquierdo') || pos.includes('manga izq');
-            });
-            let parchesDerecho = parchesValidos.filter(pr => {
-                let pos = (pr.posicion || '').toString().toLowerCase().trim();
-                return pos === 'd' || pos.includes('derecho') || pos.includes('manga der');
-            });
-
-            let htmlZonas = '';
-            let zonasConfig = [
-                { key: 'centro_pecho', titulo: '⚽ Centro del Pecho', lista: parchesCentro },
-                { key: 'hombro_izquierdo', titulo: '🛡️ Hombro Izquierdo', lista: parchesIzquierdo },
-                { key: 'hombro_derecho', titulo: '🛡️ Hombro Derecho', lista: parchesDerecho }
-            ];
-
-            zonasConfig.forEach(zona => {
-                if (zona.lista.length === 0) return;
-                let htmlGrid = '';
-                zona.lista.forEach(parche => {
-                    let pid = parche.id !== undefined ? parche.id : parche.nombre;
-                    let imgParche = limpiarUrlImagen(parche.imagen || parche.url || parche.foto || parche.img || '');
-                    
-                    let estaSeleccionado = false;
-                    if (parchesPrecargados !== "Sin parches" && parchesPrecargados.includes(parche.nombre)) {
-                        let zonaNombreLindo = zona.key === 'centro_pecho' ? 'Centro' : (zona.key === 'hombro_izquierdo' ? 'Hombro Izq' : 'Hombro Der');
-                        if (parchesPrecargados.includes(`(${zonaNombreLindo})`)) {
-                            estaSeleccionado = true;
-                            parchesSeleccionadosModal[zona.key] = { id: pid, nombre: parche.nombre };
-                        }
-                    }
-
-                    htmlGrid += `
-                        <div class="parche-card ${estaSeleccionado ? 'active-parche' : ''}" id="card-${zona.key}-${pid}" onclick="toggleParcheZona('${zona.key}', '${pid}', '${parche.nombre}')">
-                            <img src="${imgParche}" alt="${parche.nombre}">
-                            <h5>${parche.nombre}</h5>
-                        </div>
+                validPatches.forEach(patch => {
+                    container.innerHTML += `
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" name="selected-patch" value="${patch.id}"> ${patch.name} (${patch.price})
+                        </label>
                     `;
                 });
-
-                htmlZonas += `
-                    <div class="zona-seccion">
-                        <div class="zona-titulo">${zona.titulo}</div>
-                        <div class="parches-grid-zona">${htmlGrid}</div>
-                    </div>
-                `;
-            });
-
-            if (parchesValidos.length === 0) {
-                htmlZonas = "<p style='color:var(--text-muted); text-align:center; padding:15px;'>No hay parches disponibles para esta categoría.</p>";
             }
-
-            document.getElementById('tituloModalPersonalizacion').innerText = indexCarrito !== null ? 'Editar Equipación' : 'Personalizar Equipación';
-
-            const contenedor = document.getElementById('contenidoPersonalizacion');
-            contenedor.innerHTML = `
-                <p style="font-weight: 600; margin-bottom: 12px; font-size: 0.95rem;">${p.titulo} (Talla: <span id="tallaSeleccionadaModal">${tallaAUsar}</span>)</p>
-                <div class="form-group">
-                    <label>Nombre para la espalda (+3.00 €):</label>
-                    <input type="text" id="inputNombreCustom" value="${nombrePrecargado}" placeholder="Ej: GAVI" oninput="validarNombreInput()">
-                    <div class="error-custom" id="errorNombreCustom">⚠️ En el campo de nombre solo se permiten letras (no números).</div>
-                </div>
-                <div class="form-group">
-                    <label>Número para la espalda:</label>
-                    <input type="text" id="inputNumeroCustom" value="${numeroPrecargado}" placeholder="Ej: 9" oninput="validarNumeroInput()">
-                    <div class="error-custom" id="errorNumeroCustom">⚠️ En el campo de número solo se permiten dígitos numéricos (no letras).</div>
-                </div>
-                <div class="form-group">
-                    <label>Añadir Parches (+2 € en total):</label>
-                    ${htmlZonas}
-                </div>
-                <div style="background: var(--surface); padding: 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
-                    <span style="font-weight: 700;">Precio Total Configurado:</span>
-                    <span id="precioTotalModal" style="font-size: 1.2rem; font-weight: 800; color: var(--accent);">${parseFloat(p.precio).toFixed(2)} €</span>
-                </div>
-                <button class="btn-whatsapp" style="margin-top: 15px;" onclick="confirmarPersonalizacion('${idProd}')">${indexCarrito !== null ? 'Guardar Cambios' : 'Añadir al Carrito'}</button>
-            `;
-
-            calcularPrecioModal();
-            document.getElementById('modalPersonalizacion').classList.add('open');
         }
 
-        function validarNombreInput() {
-            let input = document.getElementById('inputNombreCustom');
-            let errorEl = document.getElementById('errorNombreCustom');
-            if (/\d/.test(input.value)) {
-                errorEl.style.display = 'block';
-            } else {
-                errorEl.style.display = 'none';
-            }
-            calcularPrecioModal();
+        function closeCustomizationModal() {
+            document.getElementById('customization-modal').classList.add('hidden');
         }
 
-        function validarNumeroInput() {
-            let input = document.getElementById('inputNumeroCustom');
-            let errorEl = document.getElementById('errorNumeroCustom');
-            let valorTrim = input.value.trim();
-            if (valorTrim !== '' && !/^\d+$/.test(valorTrim)) {
-                errorEl.style.display = 'block';
-            } else {
-                errorEl.style.display = 'none';
-            }
-            calcularPrecioModal();
+        function checkoutWhatsApp() {
+            // Genera desglose del carrito y abre enlace de WhatsApp
+            window.open('https://wa.me/?text=Hola,%20quiero%20realizar%20el%20siguiente%20pedido:', '_blank');
         }
-
-        function toggleParcheZona(zonaKey, parcheId, parcheNombre) {
-            if (parchesSeleccionadosModal[zonaKey] && parchesSeleccionadosModal[zonaKey].id === parcheId) {
-                delete parchesSeleccionadosModal[zonaKey];
-                document.getElementById(`card-${zonaKey}-${parcheId}`).classList.remove('active-parche');
-            } else {
-                if (parchesSeleccionadosModal[zonaKey]) {
-                    let viejoId = parchesSeleccionadosModal[zonaKey].id;
-                    let elemViejo = document.getElementById(`card-${zonaKey}-${viejoId}`);
-                    if (elemViejo) elemViejo.classList.remove('active-parche');
-                }
-                parchesSeleccionadosModal[zonaKey] = { id: parcheId, nombre: parcheNombre };
-                document.getElementById(`card-${zonaKey}-${parcheId}`).classList.add('active-parche');
-            }
-            calcularPrecioModal();
-        }
-
-        function calcularPrecioModal() {
-            if (!productoEnEdicion) return;
-            let total = parseFloat(productoEnEdicion.precio);
-            let nombreVal = document.getElementById('inputNombreCustom').value.trim();
-            let numeroVal = document.getElementById('inputNumeroCustom').value.trim();
-
-            if (nombreVal !== '' || numeroVal !== '') total += 3.00;
-            if (Object.keys(parchesSeleccionadosModal).length > 0) total += 2.00;
-
-            document.getElementById('precioTotalModal').innerText = total.toFixed(2) + ' €';
-        }
-
-        function confirmarPersonalizacion(idProd) {
-            let nombreInput = document.getElementById('inputNombreCustom');
-            let numeroInput = document.getElementById('inputNumeroCustom');
-            let errorNombre = document.getElementById('errorNombreCustom');
-            let errorNumero = document.getElementById('errorNumeroCustom');
-
-            let nombreVal = nombreInput.value.trim();
-            let numeroVal = numeroInput.value.trim();
-
-            let tieneError = false;
-
-            if (/\d/.test(nombreVal)) {
-                errorNombre.style.display = 'block';
-                tieneError = true;
-            }
-
-            if (numeroVal !== '' && !/^\d+$/.test(numeroVal)) {
-                errorNumero.style.display = 'block';
-                tieneError = true;
-            }
-
-            if (tieneError) return;
-
-            let tallaFinal = document.getElementById('tallaSeleccionadaModal').innerText;
-            let basePrecio = parseFloat(productoEnEdicion.precio);
-            
-            let costoExtra = 0;
-            let textoPersonalizacion = 'Sin personalización';
-            if (nombreVal !== '' || numeroVal !== '') {
-                costoExtra += 3.00;
-                textoPersonalizacion = `Nombre: ${nombreVal || 'N/A'}, Nº: ${numeroVal || 'N/A'}`;
-            }
-
-            let detalleParchesArr = [];
-            Object.keys(parchesSeleccionadosModal).forEach(zonaKey => {
-                let pInfo = parchesSeleccionadosModal[zonaKey];
-                let zonaNombreLindo = zonaKey === 'centro_pecho' ? 'Centro' : (zonaKey === 'hombro_izquierdo' ? 'Hombro Izq' : (zonaKey === 'hombro_derecho' ? 'Hombro Der' : 'General'));
-                detalleParchesArr.push(`${pInfo.nombre} (${zonaNombreLindo})`);
-            });
-
-            if (detalleParchesArr.length > 0) costoExtra += 2.00;
-            let textoParches = detalleParchesArr.length > 0 ? detalleParchesArr.join(' | ') : 'Sin parches';
-
-            if (indiceItemEditando !== null) {
-                carrito[indiceItemEditando].talla = tallaFinal;
-                carrito[indiceItemEditando].precio = basePrecio + costoExtra;
-                carrito[indiceItemEditando].personalizacion = textoPersonalizacion;
-                carrito[indiceItemEditando].parches = textoParches;
-                indiceItemEditando = null;
-            } else {
-                agregarAlCarritoFinal({
-                    id: idProd,
-                    titulo: productoEnEdicion.titulo,
-                    precio: basePrecio + costoExtra,
-                    talla: tallaFinal,
-                    cantidad: 1,
-                    personalizacion: textoPersonalizacion,
-                    parches: textoParches
-                });
-            }
-
-            cerrarModal('modalPersonalizacion');
-            abrirCarritoModal();
-        }
-
-        function agregarAlCarritoFinal(nuevoItem) {
-            let indexExistente = carrito.findIndex(item => 
-                item.id === nuevoItem.id && 
-                item.talla === nuevoItem.talla && 
-                item.personalizacion === nuevoItem.personalizacion && 
-                item.parches === nuevoItem.parches
-            );
-
-            if (indexExistente > -1) {
-                carrito[indexExistente].cantidad += 1;
-            } else {
-                carrito.push(nuevoItem);
-            }
-
-            actualizarContadorCarrito();
-            abrirCarritoModal();
-        }
-
-        function actualizarContadorCarrito() {
-            let totalUnidades = carrito.reduce((sum, item) => sum + item.cantidad, 0);
-            document.getElementById('cartCount').innerText = totalUnidades;
-        }
-
-        function abrirCarritoModal() {
-            document.getElementById('modalCarrito').classList.add('open');
-            renderizarListaCarrito();
-        }
-
-        function cerrarModal(modalId) {
-            document.getElementById(modalId).classList.remove('open');
-        }
-
-        function renderizarListaCarrito() {
-            const lista = document.getElementById('listaCarrito');
-            const totalEl = document.getElementById('totalCarrito');
-
-            if (carrito.length === 0) {
-                lista.innerHTML = "<p style='color: var(--text-muted); text-align: center; margin-top: 20px;'>El carrito está vacío</p>";
-                totalEl.innerText = "0.00 €";
-                return;
-            }
-
-            let html = '';
-            let totalGeneral = 0;
-
-            carrito.forEach((item, index) => {
-                let subtotal = item.precio * item.cantidad;
-                totalGeneral += subtotal;
-                html += `
-                    <div class="item-carrito">
-                        <div>
-                            <strong>${item.titulo}</strong><br>
-                            <small style="color: var(--text-muted);">Talla: ${item.talla}<br>Personalización: ${item.personalizacion}<br>Parches: ${item.parches}</small>
-                            <div class="controles-cantidad">
-                                <button class="btn-cant" onclick="cambiarCantidad(${index}, -1)">-</button>
-                                <span style="font-weight: 700; font-size: 0.9rem; min-width: 20px; text-align: center;">${item.cantidad}</span>
-                                <button class="btn-cant" onclick="cambiarCantidad(${index}, 1)">+</button>
-                            </div>
-                        </div>
-                        <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; height: 100%;">
-                            <div class="acciones-item-carrito">
-                                <button onclick="editarItemCarrito(${index})" class="btn-accion-carrito" title="Editar producto">
-                                    <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-                                </button>
-                                <button onclick="eliminarDelCarrito(${index})" class="btn-accion-carrito btn-eliminar" title="Eliminar">
-                                    <svg viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14V4zM6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg>
-                                </button>
-                            </div>
-                            <span style="font-weight: 700; margin-top: 15px;">${subtotal.toFixed(2)} €</span>
-                        </div>
-                    </div>
-                `;
-            });
-
-            lista.innerHTML = html;
-            totalEl.innerText = totalGeneral.toFixed(2) + ' €';
-        }
-
-        function editarItemCarrito(index) {
-            let item = carrito[index];
-            cerrarModal('modalCarrito');
-            abrirPersonalizacion(item.id, index);
-        }
-
-        function cambiarCantidad(index, delta) {
-            carrito[index].cantidad += delta;
-            if (carrito[index].cantidad <= 0) carrito.splice(index, 1);
-            actualizarContadorCarrito();
-            renderizarListaCarrito();
-        }
-
-        function eliminarDelCarrito(index) {
-            carrito.splice(index, 1);
-            actualizarContadorCarrito();
-            renderizarListaCarrito();
-        }
-
-        function enviarWhatsApp() {
-            if (carrito.length === 0) return;
-            let texto = "Hola, quiero realizar el siguiente pedido:\n\n";
-            let totalGeneral = 0;
-
-            carrito.forEach((item, i) => {
-                let subtotal = item.precio * item.cantidad;
-                texto += `${i + 1}. *${item.titulo}* (x${item.cantidad})\n`;
-                texto += `- Talla: ${item.talla}\n`;
-
-                if (item.personalizacion.includes("Nombre:")) {
-                    let partes = item.personalizacion.split(", ");
-                    let parteNombre = partes[0] ? partes[0].replace("Nombre: ", "") : "N/A";
-                    let parteNumero = partes[1] ? partes[1].replace("Nº: ", "") : "N/A";
-
-                    texto += `- Personalización:\n`;
-                    texto += `      - Nombre: ${parteNombre}\n`;
-                    texto += `      - Nº: ${parteNumero}\n`;
-                } else {
-                    texto += `- Personalización: Sin personalización\n`;
-                }
-
-                if (item.parches !== "Sin parches") {
-                    texto += `- Parches:\n`;
-                    let listaParches = item.parches.split(" | ");
-                    listaParches.forEach(parche => {
-                        texto += `      - ${parche}\n`;
-                    });
-                } else {
-                    texto += `- Parches: Sin parches\n`;
-                }
-
-                texto += `- Subtotal: ${subtotal.toFixed(2)} €\n\n`;
-                totalGeneral += subtotal;
-            });
-
-            texto += `*Total del pedido: ${totalGeneral.toFixed(2)} €*`;
-            window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
-        }
-
-        cargarDatos();
     </script>
 </body>
 </html>
+```[cite: 3]
+
+---
+
+### 2. Código Actualizado: `admin.html` (Panel de Administración)
+
+```html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' };
+    </script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 p-6">
+
+    <div class="max-w-4xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+        <h1 class="text-2xl font-bold mb-6">Panel de Administración - Google Sheets API</h1>
+
+        <!-- Selector de Modo: Producto (Camiseta) o Parche -->
+        <div class="flex gap-4 mb-6">
+            <button onclick="switchMode('product')" id="btn-mode-product" class="px-4 py-2 bg-blue-600 text-white rounded font-semibold">Agregar Camiseta</button>
+            <button onclick="switchMode('patch')" id="btn-mode-patch" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded font-semibold">Agregar Parche</button>
+        </div>
+
+        <form id="admin-form" onsubmit="submitForm(event)">
+            <!-- Campos dinámicos según el modo -->
+            <div id="form-fields" class="space-y-4">
+                <!-- Se inyecta mediante JS -->
+            </div>
+
+            <!-- Live Preview Component -->
+            <div class="mt-6 p-4 border rounded-lg bg-gray-50 dark:bg-gray-700">
+                <h3 class="text-sm font-bold uppercase tracking-wide mb-2 text-gray-500 dark:text-gray-300">Vista Previa en Vivo</h3>
+                <div id="live-preview" class="p-3 bg-white dark:bg-gray-800 rounded border dark:border-gray-600">
+                    <!-- Tarjeta de vista previa -->
+                </div>
+            </div>
+
+            <button type="submit" class="mt-6 w-full bg-green-600 text-white py-2 rounded font-bold">Enviar a Google Sheets</button>
+        </form>
+    </div>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbz9DbS7_o1No0_mgs-PKeE6vhanGG4whu4EuvfltEmL-BhEs1O03EUNUX9ZtmT2q3mF0w/exec";
+        let currentMode = 'product';
+
+        function switchMode(mode) {
+            currentMode = mode;
+            const container = document.getElementById('form-fields');
+            const btnProd = document.getElementById('btn-mode-product');
+            const btnPatch = document.getElementById('btn-mode-patch');
+
+            if (mode === 'product') {
+                btnProd.className = "px-4 py-2 bg-blue-600 text-white rounded font-semibold";
+                btnPatch.className = "px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded font-semibold";
+                
+                // Formulario de Camisetas con la nueva columna de IDs de parches permitidos
+                container.innerHTML = `
+                    <div>
+                        <label class="block text-sm font-medium">Nombre de la Camiseta:</label>
+                        <input type="text" id="p-name" required class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" oninput="updatePreview()">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Precio:</label>
+                        <input type="number" id="p-price" required class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" oninput="updatePreview()">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">IDs de Parches Permitidos (separados por comas, ej: P01,P03):</label>
+                        <input type="text" id="p-allowed-patches" placeholder="Ej: P01, P05" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" oninput="updatePreview()">
+                    </div>
+                `;
+            } else {
+                btnPatch.className = "px-4 py-2 bg-blue-600 text-white rounded font-semibold";
+                btnProd.className = "px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded font-semibold";
+                
+                // Formulario de Parches SIN la columna categoría (eliminada por tu nueva regla)
+                container.innerHTML = `
+                    <div>
+                        <label class="block text-sm font-medium">ID del Parche:</label>
+                        <input type="text" id="patch-id" required placeholder="Ej: P01" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" oninput="updatePreview()">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Nombre del Parche:</label>
+                        <input type="text" id="patch-name" required class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" oninput="updatePreview()">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Precio del Parche:</label>
+                        <input type="number" id="patch-price" required class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" oninput="updatePreview()">
+                    </div>
+                `;
+            }
+            updatePreview();
+        }
+
+        function updatePreview() {
+            const preview = document.getElementById('live-preview');
+            if (currentMode === 'product') {
+                const name = document.getElementById('p-name').value || 'Nombre de la Camiseta';
+                const price = document.getElementById('p-price').value || '0';
+                const patches = document.getElementById('p-allowed-patches').value || 'Ninguno';
+                preview.innerHTML = `<h4 class="font-bold">${name}</h4><p>Precio: $${price}</p><p class="text-sm text-gray-500">Parches permitidos (IDs): ${patches}</p>`;
+            } else {
+                const id = document.getElementById('patch-id').value || 'ID';
+                const name = document.getElementById('patch-name').value || 'Nombre del Parche';
+                const price = document.getElementById('patch-price').value || '0';
+                preview.innerHTML = `<h4 class="font-bold">[Parche ${id}] ${name}</h4><p>Precio: $${price}</p>`;
+            }
+        }
+
+        function submitForm(event) {
+            event.preventDefault();
+            let payload = { mode: currentMode };
+
+            if (currentMode === 'product') {
+                payload.name = document.getElementById('p-name').value;
+                payload.price = document.getElementById('p-price').value;
+                payload.allowedPatches = document.getElementById('p-allowed-patches').value;
+            } else {
+                payload.patchId = document.getElementById('patch-id').value;
+                payload.name = document.getElementById('patch-name').value;
+                payload.price = document.getElementById('patch-price').value;
+            }
+
+            // Envío por POST (no-cors) a Google Sheets API
+            fetch(API_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(() => {
+                alert('¡Datos enviados correctamente a Google Sheets!');
+                document.getElementById('admin-form').reset();
+                updatePreview();
+            }).catch(err => {
+                console.error(err);
+                alert('Error al enviar los datos.');
+            });
+        }
+
+        // Inicializar al cargar
+        switchMode('product');
+    </script>
+</body>
+</html>
+```[cite: 4]
+
+---
+
+¿Hay algún detalle adicional que te gustaría ajustar en la manera en que se procesan estos IDs de parches en Google Sheets?
