@@ -624,12 +624,12 @@
                 </table>
             </div>
 
-            <!-- Visor Gráfico con la Imagen Proporcionada de Google Drive y Cotas Superpuestas -->
+            <!-- Visor Gráfico con la Imagen Corregida de Google Drive y Cotas Superpuestas -->
             <div class="size-visual-container">
                 <div class="size-visual-title">Vista previa de cotas (Selecciona talla)</div>
                 <div class="camiseta-cotas-container">
-                    <!-- Imagen de la camiseta provista por enlace directo de Google Drive -->
-                    <img src="https://drive.google.com/uc?export=view&id=1p1JiO40x85Rq2s1l5g8aiUhdB7eRRrJs" alt="Camiseta Guía de Tallas">
+                    <!-- Imagen de la camiseta corregida con el formato de Googleusercontent -->
+                    <img src="https://lh3.googleusercontent.com/d/1p1JiO40x85Rq2s1l5g8aiUhdB7eRRrJs" alt="Camiseta Guía de Tallas">
                     
                     <!-- Cotas dinámicas flotantes -->
                     <div id="cotaAncho" class="cota-tag cota-ancho">46 cm</div>
@@ -776,7 +776,6 @@
             document.getElementById('modalGuiaTallas').classList.add('open');
         }
 
-        // Función para cambiar entre pestañas de la guía de tallas
         function switchSizeTab(evt, tabName) {
             const contents = document.querySelectorAll('.size-tab-content');
             contents.forEach(content => content.classList.remove('active'));
@@ -787,24 +786,19 @@
             document.getElementById(tabName).classList.add('active');
             evt.currentTarget.classList.add('active');
 
-            // Seleccionar automáticamente la primera fila de la pestaña activa para refrescar los datos
             const primeraFila = document.querySelector(`#tbody-${tabName} tr.size-row`);
             if (primeraFila) {
                 primeraFila.click();
             }
         }
 
-        // Función para seleccionar la fila de la tabla y actualizar las cotas sobre la foto
         function seleccionarFilaTalla(tabId, talla, anchoVal, largoVal, elementoRow) {
-            // Quitar clase active de todas las filas de la tabla actual
             const cuerpoTabla = document.getElementById(`tbody-${tabId}`);
             if (cuerpoTabla) {
                 cuerpoTabla.querySelectorAll('tr.size-row').forEach(r => r.classList.remove('active'));
             }
-            // Añadir clase active a la fila seleccionada
             elementoRow.classList.add('active');
 
-            // Actualizar textos de cotas flotantes
             const cotaAncho = document.getElementById('cotaAncho');
             const cotaLargo = document.getElementById('cotaLargo');
 
