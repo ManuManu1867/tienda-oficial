@@ -354,8 +354,26 @@
         .tabla-tallas { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 0.82rem; }
         .tabla-tallas th, .tabla-tallas td { border: 1px solid var(--border); padding: 6px; text-align: center; }
         .tabla-tallas th { background: var(--surface); font-weight: 700; }
+        
+        /* Filas interactivas en la tabla de tallas */
+        .tabla-tallas tbody tr.size-row {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .tabla-tallas tbody tr.size-row:hover {
+            background-color: rgba(37, 99, 235, 0.08);
+        }
+        .tabla-tallas tbody tr.size-row.active {
+            background-color: var(--accent);
+            color: #ffffff;
+            font-weight: bold;
+        }
+        body.dark-mode .tabla-tallas tbody tr.size-row.active {
+            background-color: #f9fafb;
+            color: #111827;
+        }
 
-        /* Estilos del Visor Visual de Medidas con Camiseta Minimalista */
+        /* Estilos del Visor Visual de Medidas con Imagen Real y Cotas Superpuestas */
         .size-visual-container {
             margin-top: 15px;
             background: var(--surface);
@@ -368,43 +386,45 @@
             font-size: 0.82rem;
             font-weight: 700;
             color: var(--text);
-            margin-bottom: 8px;
+            margin-bottom: 12px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        .size-selector-visual {
-            display: flex;
-            gap: 6px;
-            justify-content: center;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-        }
-        .size-pill {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            border: 1px solid var(--border);
-            background: var(--bg);
-            color: var(--text);
-            font-size: 0.72rem;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-        .size-pill.active {
-            background: var(--accent);
-            color: #fff;
-            border-color: var(--accent);
-        }
-        .t-shirt-graphic {
-            width: 100%;
-            max-width: 200px;
-            height: auto;
+        
+        .camiseta-cotas-container {
+            position: relative;
+            display: inline-block;
+            max-width: 220px;
             margin: 0 auto;
+        }
+        .camiseta-cotas-container img {
+            width: 100%;
+            height: auto;
             display: block;
+            border-radius: 6px;
+        }
+        
+        /* Líneas de cota flotantes sobre la imagen de la camiseta */
+        .cota-tag {
+            position: absolute;
+            font-size: 11px;
+            font-weight: 700;
+            color: #000;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2px 6px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            pointer-events: none;
+        }
+        .cota-ancho {
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .cota-largo {
+            top: 60%;
+            left: 15%;
+            transform: translateY(-50%);
         }
 
         .loader { text-align: center; padding: 40px; font-size: 1.1rem; color: var(--text-muted); }
@@ -512,7 +532,7 @@
         </div>
     </div>
 
-    <!-- Modal Guía de Tallas con Visor Visual de Cotas -->
+    <!-- Modal Guía de Tallas con Imagen Real y Cotas Dinámicas -->
     <div class="modal-overlay" id="modalGuiaTallas">
         <div class="modal-contenido">
             <div class="modal-header">
@@ -530,196 +550,90 @@
 
             <!-- Pestaña 1: Jugador (Player) -->
             <div id="player" class="size-tab-content active">
-                <p class="size-subtitle">Medidas aproximadas en centímetros y recomendaciones.</p>
+                <p class="size-subtitle">Medidas aproximadas en centímetros y recomendaciones. Pincha en una fila para ver cotas.</p>
                 <table class="tabla-tallas">
                     <thead>
                         <tr><th>Talla</th><th>Ancho</th><th>Largo</th><th>Estatura</th><th>Peso</th></tr>
                     </thead>
-                    <tbody>
-                        <tr><td>S</td><td>46 cm</td><td>68 cm</td><td>160-170 cm</td><td>50-60 kg</td></tr>
-                        <tr><td>M</td><td>48 cm</td><td>70 cm</td><td>170-175 cm</td><td>60-65 kg</td></tr>
-                        <tr><td>L</td><td>50 cm</td><td>72 cm</td><td>175-180 cm</td><td>65-70 kg</td></tr>
-                        <tr><td>XL</td><td>52 cm</td><td>74 cm</td><td>180-185 cm</td><td>70-75 kg</td></tr>
-                        <tr><td>XXL</td><td>54 cm</td><td>76 cm</td><td>185-190 cm</td><td>75-85 kg</td></tr>
-                        <tr><td>3XL</td><td>56 cm</td><td>78 cm</td><td>190-195 cm</td><td>85-90 kg</td></tr>
-                        <tr><td>4XL</td><td>58 cm</td><td>80 cm</td><td>195-200 cm</td><td>95-100 kg</td></tr>
+                    <tbody id="tbody-player">
+                        <tr class="size-row active" onclick="seleccionarFilaTalla('player', 'S', 46, 68, this)"><td>S</td><td>46 cm</td><td>68 cm</td><td>160-170 cm</td><td>50-60 kg</td></tr>
+                        <tr class="size-row" onclick="seleccionarFilaTalla('player', 'M', 48, 70, this)"><td>M</td><td>48 cm</td><td>70 cm</td><td>170-175 cm</td><td>60-65 kg</td></tr>
+                        <tr class="size-row" onclick="seleccionarFilaTalla('player', 'L', 50, 72, this)"><td>L</td><td>50 cm</td><td>72 cm</td><td>175-180 cm</td><td>65-70 kg</td></tr>
+                        <tr class="size-row" onclick="seleccionarFilaTalla('player', 'XL', 52, 74, this)"><td>XL</td><td>52 cm</td><td>74 cm</td><td>180-185 cm</td><td>70-75 kg</td></tr>
+                        <tr class="size-row" onclick="seleccionarFilaTalla('player', 'XXL', 54, 76, this)"><td>XXL</td><td>54 cm</td><td>76 cm</td><td>185-190 cm</td><td>75-85 kg</td></tr>
+                        <tr class="size-row" onclick="seleccionarFilaTalla('player', '3XL', 56, 78, this)"><td>3XL</td><td>56 cm</td><td>78 cm</td><td>190-195 cm</td><td>85-90 kg</td></tr>
+                        <tr class="size-row" onclick="seleccionarFilaTalla('player', '4XL', 58, 80, this)"><td>4XL</td><td>58 cm</td><td>80 cm</td><td>195-200 cm</td><td>95-100 kg</td></tr>
                     </tbody>
                 </table>
-                <!-- Visor Gráfico de Cotas -->
-                <div class="size-visual-container">
-                    <div class="size-visual-title">Vista previa de cotas (Selecciona talla)</div>
-                    <div class="size-selector-visual" id="pills-player">
-                        <button class="size-pill active" onclick="seleccionarTallaVisual('player', 'S', this)">S</button>
-                        <button class="size-pill" onclick="seleccionarTallaVisual('player', 'M', this)">M</button>
-                        <button class="size-pill" onclick="seleccionarTallaVisual('player', 'L', this)">L</button>
-                        <button class="size-pill" onclick="seleccionarTallaVisual('player', 'XL', this)">XL</button>
-                        <button class="size-pill" onclick="seleccionarTallaVisual('player', 'XXL', this)">XXL</button>
-                        <button class="size-pill" onclick="seleccionarTallaVisual('player', '3XL', this)">3XL</button>
-                        <button class="size-pill" onclick="seleccionarTallaVisual('player', '4XL', this)">4XL</button>
-                    </div>
-                    <svg class="t-shirt-graphic" viewBox="0 0 200 180">
-                        <defs>
-                            <marker id="arrow-player" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                                <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text)"/>
-                            </marker>
-                        </defs>
-                        <!-- Silueta de camiseta minimalista -->
-                        <path d="M 65 20 Q 100 35 135 20 L 165 45 L 140 70 L 130 65 L 130 160 L 70 160 L 70 65 L 60 70 L 35 45 Z" fill="none" stroke="var(--text)" stroke-width="2" stroke-linejoin="round"/>
-                        <path d="M 75 22 Q 100 38 125 22" fill="none" stroke="var(--text)" stroke-width="1.5"/>
-                        <!-- Flecha Width (Ancho) -->
-                        <line x1="70" y1="95" x2="130" y2="95" stroke="var(--text)" stroke-width="1.5" marker-start="url(#arrow-player)" marker-end="url(#arrow-player)"/>
-                        <rect x="85" y="86" width="30" height="16" fill="var(--surface)" rx="3"/>
-                        <text id="val-width-player" x="100" y="97" font-size="11" font-weight="700" fill="var(--text)" text-anchor="middle">46 cm</text>
-                        <!-- Flecha Length (Largo) -->
-                        <line x1="52" y1="35" x2="52" y2="160" stroke="var(--text)" stroke-width="1.5" marker-start="url(#arrow-player)" marker-end="url(#arrow-player)"/>
-                        <rect x="25" y="90" width="36" height="16" fill="var(--surface)" rx="3"/>
-                        <text id="val-length-player" x="43" y="101" font-size="11" font-weight="700" fill="var(--text)" text-anchor="middle">68 cm</text>
-                        <text x="43" y="112" font-size="8" fill="var(--text-muted)" text-anchor="middle">Length</text>
-                    </svg>
-                </div>
             </div>
 
             <!-- Pestaña 2: Retro -->
             <div id="retro" class="size-tab-content">
-                <p class="size-subtitle">Medidas aproximadas en centímetros y recomendaciones.</p>
+                <p class="size-subtitle">Medidas aproximadas en centímetros y recomendaciones. Pincha en una fila para ver cotas.</p>
                 <table class="tabla-tallas">
                     <thead>
                         <tr><th>Talla</th><th>Ancho</th><th>Largo</th><th>Estatura</th><th>Peso</th></tr>
                     </thead>
-                    <tbody>
-                        <tr><td>S</td><td>48 cm</td><td>70 cm</td><td>160-170 cm</td><td>50-60 kg</td></tr>
-                        <tr><td>M</td><td>50 cm</td><td>72 cm</td><td>170-175 cm</td><td>60-65 kg</td></tr>
-                        <tr><td>L</td><td>52 cm</td><td>74 cm</td><td>175-180 cm</td><td>65-70 kg</td></tr>
-                        <tr><td>XL</td><td>54 cm</td><td>76 cm</td><td>180-185 cm</td><td>70-75 kg</td></tr>
-                        <tr><td>XXL</td><td>56 cm</td><td>78 cm</td><td>185-190 cm</td><td>75-85 kg</td></tr>
-                        <tr><td>3XL</td><td>58 cm</td><td>80 cm</td><td>190-195 cm</td><td>85-90 kg</td></tr>
-                        <tr><td>4XL</td><td>60 cm</td><td>82 cm</td><td>195-200 cm</td><td>95-100 kg</td></tr>
+                    <tbody id="tbody-retro">
+                        <tr class="size-row active" onclick="seleccionarFilaTalla('retro', 'S', 48, 70, this)"><td>S</td><td>48 cm</td><td>70 cm</td><td>160-170 cm</td><td>50-60 kg</td></tr>
+                        <tr class="size-row" onclick="seleccionarFilaTalla('retro', 'M', 50, 72, this)"><td>M</td><td>50 cm</td><td>72 cm</td><td>170-175 cm</td><td>60-65 kg</td></tr>
+                        <tr class="size-row" onclick="seleccionarFilaTalla('retro', 'L', 52, 74, this)"><td>L</td><td>52 cm</td><td>74 cm</td><td>175-180 cm</td><td>65-70 kg</td></tr>
+                        <tr class="size-row" onclick="seleccionarFilaTalla('retro', 'XL', 54, 76, this)"><td>XL</td><td>54 cm</td><td>76 cm</td><td>180-185 cm</td><td>70-75 kg</td></tr>
+                        <tr class="size-row" onclick="seleccionarFilaTalla('retro', 'XXL', 56, 78, this)"><td>XXL</td><td>56 cm</td><td>78 cm</td><td>185-190 cm</td><td>75-85 kg</td></tr>
+                        <tr class="size-row" onclick="seleccionarFilaTalla('retro', '3XL', 58, 80, this)"><td>3XL</td><td>58 cm</td><td>80 cm</td><td>190-195 cm</td><td>85-90 kg</td></tr>
+                        <tr class="size-row" onclick="seleccionarFilaTalla('retro', '4XL', 60, 82, this)"><td>4XL</td><td>60 cm</td><td>82 cm</td><td>195-200 cm</td><td>95-100 kg</td></tr>
                     </tbody>
                 </table>
-                <!-- Visor Gráfico de Cotas -->
-                <div class="size-visual-container">
-                    <div class="size-visual-title">Vista previa de cotas (Selecciona talla)</div>
-                    <div class="size-selector-visual" id="pills-retro">
-                        <button class="size-pill active" onclick="seleccionarTallaVisual('retro', 'S', this)">S</button>
-                        <button class="size-pill" onclick="seleccionarTallaVisual('retro', 'M', this)">M</button>
-                        <button class="size-pill" onclick="seleccionarTallaVisual('retro', 'L', this)">L</button>
-                        <button class="size-pill" onclick="seleccionarTallaVisual('retro', 'XL', this)">XL</button>
-                        <button class="size-pill" onclick="seleccionarTallaVisual('retro', 'XXL', this)">XXL</button>
-                        <button class="size-pill" onclick="seleccionarTallaVisual('retro', '3XL', this)">3XL</button>
-                        <button class="size-pill" onclick="seleccionarTallaVisual('retro', '4XL', this)">4XL</button>
-                    </div>
-                    <svg class="t-shirt-graphic" viewBox="0 0 200 180">
-                        <defs>
-                            <marker id="arrow-retro" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                                <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text)"/>
-                            </marker>
-                        </defs>
-                        <path d="M 65 20 Q 100 35 135 20 L 165 45 L 140 70 L 130 65 L 130 160 L 70 160 L 70 65 L 60 70 L 35 45 Z" fill="none" stroke="var(--text)" stroke-width="2" stroke-linejoin="round"/>
-                        <path d="M 75 22 Q 100 38 125 22" fill="none" stroke="var(--text)" stroke-width="1.5"/>
-                        <line x1="70" y1="95" x2="130" y2="95" stroke="var(--text)" stroke-width="1.5" marker-start="url(#arrow-retro)" marker-end="url(#arrow-retro)"/>
-                        <rect x="85" y="86" width="30" height="16" fill="var(--surface)" rx="3"/>
-                        <text id="val-width-retro" x="100" y="97" font-size="11" font-weight="700" fill="var(--text)" text-anchor="middle">48 cm</text>
-                        <line x1="52" y1="35" x2="52" y2="160" stroke="var(--text)" stroke-width="1.5" marker-start="url(#arrow-retro)" marker-end="url(#arrow-retro)"/>
-                        <rect x="25" y="90" width="36" height="16" fill="var(--surface)" rx="3"/>
-                        <text id="val-length-retro" x="43" y="101" font-size="11" font-weight="700" fill="var(--text)" text-anchor="middle">70 cm</text>
-                        <text x="43" y="112" font-size="8" fill="var(--text-muted)" text-anchor="middle">Length</text>
-                    </svg>
-                </div>
             </div>
 
             <!-- Pestaña 3: Fan (Hombre) -->
             <div id="fan-hombre" class="size-tab-content">
-                <p class="size-subtitle">Medidas aproximadas en centímetros y recomendaciones.</p>
+                <p class="size-subtitle">Medidas aproximadas en centímetros y recomendaciones. Pincha en una fila para ver cotas.</p>
                 <table class="tabla-tallas">
                     <thead>
                         <tr><th>Talla</th><th>Ancho</th><th>Largo</th><th>Estatura</th><th>Peso</th></tr>
                     </thead>
-                    <tbody>
-                        <tr><td>S</td><td>48 cm</td><td>70 cm</td><td>162-170 cm</td><td>50-62 kg</td></tr>
-                        <tr><td>M</td><td>50 cm</td><td>72 cm</td><td>170-176 cm</td><td>62-78 kg</td></tr>
-                        <tr><td>L</td><td>52 cm</td><td>74 cm</td><td>176-182 cm</td><td>78-83 kg</td></tr>
-                        <tr><td>XL</td><td>54 cm</td><td>76 cm</td><td>182-190 cm</td><td>83-90 kg</td></tr>
-                        <tr><td>XXL</td><td>56 cm</td><td>78 cm</td><td>190-195 cm</td><td>90-97 kg</td></tr>
-                        <tr><td>3XL</td><td>58 cm</td><td>80 cm</td><td>192-197 cm</td><td>97-104 kg</td></tr>
-                        <tr><td>4XL</td><td>60 cm</td><td>82 cm</td><td>197-200 cm</td><td>104-110 kg</td></tr>
+                    <tbody id="tbody-fan-hombre">
+                        <tr class="size-row active" onclick="seleccionarFilaTalla('fan-hombre', 'S', 48, 70, this)"><td>S</td><td>48 cm</td><td>70 cm</td><td>162-170 cm</td><td>50-62 kg</td></tr>
+                        <tr class="size-row" onclick="seleccionarFilaTalla('fan-hombre', 'M', 50, 72, this)"><td>M</td><td>50 cm</td><td>72 cm</td><td>170-176 cm</td><td>62-78 kg</td></tr>
+                        <tr class="size-row" onclick="seleccionarFilaTalla('fan-hombre', 'L', 52, 74, this)"><td>L</td><td>52 cm</td><td>74 cm</td><td>176-182 cm</td><td>78-83 kg</td></tr>
+                        <tr class="size-row" onclick="seleccionarFilaTalla('fan-hombre', 'XL', 54, 76, this)"><td>XL</td><td>54 cm</td><td>76 cm</td><td>182-190 cm</td><td>83-90 kg</td></tr>
+                        <tr class="size-row" onclick="seleccionarFilaTalla('fan-hombre', 'XXL', 56, 78, this)"><td>XXL</td><td>56 cm</td><td>78 cm</td><td>190-195 cm</td><td>90-97 kg</td></tr>
+                        <tr class="size-row" onclick="seleccionarFilaTalla('fan-hombre', '3XL', 58, 80, this)"><td>3XL</td><td>58 cm</td><td>80 cm</td><td>192-197 cm</td><td>97-104 kg</td></tr>
+                        <tr class="size-row" onclick="seleccionarFilaTalla('fan-hombre', '4XL', 60, 82, this)"><td>4XL</td><td>60 cm</td><td>82 cm</td><td>197-200 cm</td><td>104-110 kg</td></tr>
                     </tbody>
                 </table>
-                <!-- Visor Gráfico de Cotas -->
-                <div class="size-visual-container">
-                    <div class="size-visual-title">Vista previa de cotas (Selecciona talla)</div>
-                    <div class="size-selector-visual" id="pills-fan-hombre">
-                        <button class="size-pill active" onclick="seleccionarTallaVisual('fan-hombre', 'S', this)">S</button>
-                        <button class="size-pill" onclick="seleccionarTallaVisual('fan-hombre', 'M', this)">M</button>
-                        <button class="size-pill" onclick="seleccionarTallaVisual('fan-hombre', 'L', this)">L</button>
-                        <button class="size-pill" onclick="seleccionarTallaVisual('fan-hombre', 'XL', this)">XL</button>
-                        <button class="size-pill" onclick="seleccionarTallaVisual('fan-hombre', 'XXL', this)">XXL</button>
-                        <button class="size-pill" onclick="seleccionarTallaVisual('fan-hombre', '3XL', this)">3XL</button>
-                        <button class="size-pill" onclick="seleccionarTallaVisual('fan-hombre', '4XL', this)">4XL</button>
-                    </div>
-                    <svg class="t-shirt-graphic" viewBox="0 0 200 180">
-                        <defs>
-                            <marker id="arrow-fan-hombre" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                                <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text)"/>
-                            </marker>
-                        </defs>
-                        <path d="M 65 20 Q 100 35 135 20 L 165 45 L 140 70 L 130 65 L 130 160 L 70 160 L 70 65 L 60 70 L 35 45 Z" fill="none" stroke="var(--text)" stroke-width="2" stroke-linejoin="round"/>
-                        <path d="M 75 22 Q 100 38 125 22" fill="none" stroke="var(--text)" stroke-width="1.5"/>
-                        <line x1="70" y1="95" x2="130" y2="95" stroke="var(--text)" stroke-width="1.5" marker-start="url(#arrow-fan-hombre)" marker-end="url(#arrow-fan-hombre)"/>
-                        <rect x="85" y="86" width="30" height="16" fill="var(--surface)" rx="3"/>
-                        <text id="val-width-fan-hombre" x="100" y="97" font-size="11" font-weight="700" fill="var(--text)" text-anchor="middle">48 cm</text>
-                        <line x1="52" y1="35" x2="52" y2="160" stroke="var(--text)" stroke-width="1.5" marker-start="url(#arrow-fan-hombre)" marker-end="url(#arrow-fan-hombre)"/>
-                        <rect x="25" y="90" width="36" height="16" fill="var(--surface)" rx="3"/>
-                        <text id="val-length-fan-hombre" x="43" y="101" font-size="11" font-weight="700" fill="var(--text)" text-anchor="middle">70 cm</text>
-                        <text x="43" y="112" font-size="8" fill="var(--text-muted)" text-anchor="middle">Length</text>
-                    </svg>
-                </div>
             </div>
 
             <!-- Pestaña 4: Fan (Mujer) -->
             <div id="fan-mujer" class="size-tab-content">
-                <p class="size-subtitle">Medidas aproximadas en centímetros y recomendaciones.</p>
+                <p class="size-subtitle">Medidas aproximadas en centímetros y recomendaciones. Pincha en una fila para ver cotas.</p>
                 <table class="tabla-tallas">
                     <thead>
                         <tr><th>Talla</th><th>Ancho</th><th>Largo</th><th>Estatura</th><th>Peso</th></tr>
                     </thead>
-                    <tbody>
-                        <tr><td>S</td><td>44 cm</td><td>65 cm</td><td>150-160 cm</td><td>45-55 kg</td></tr>
-                        <tr><td>M</td><td>46 cm</td><td>67 cm</td><td>160-165 cm</td><td>50-60 kg</td></tr>
-                        <tr><td>L</td><td>48 cm</td><td>69 cm</td><td>165-170 cm</td><td>60-70 kg</td></tr>
-                        <tr><td>XL</td><td>49.5 cm</td><td>70 cm</td><td>170-175 cm</td><td>65-75 kg</td></tr>
-                        <tr><td>XXL</td><td>51 cm</td><td>71 cm</td><td>175-178 cm</td><td>75-85 kg</td></tr>
-                        <tr><td>3XL</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
-                        <tr><td>4XL</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+                    <tbody id="tbody-fan-mujer">
+                        <tr class="size-row active" onclick="seleccionarFilaTalla('fan-mujer', 'S', 44, 65, this)"><td>S</td><td>44 cm</td><td>65 cm</td><td>150-160 cm</td><td>45-55 kg</td></tr>
+                        <tr class="size-row" onclick="seleccionarFilaTalla('fan-mujer', 'M', 46, 67, this)"><td>M</td><td>46 cm</td><td>67 cm</td><td>160-165 cm</td><td>50-60 kg</td></tr>
+                        <tr class="size-row" onclick="seleccionarFilaTalla('fan-mujer', 'L', 48, 69, this)"><td>L</td><td>48 cm</td><td>69 cm</td><td>165-170 cm</td><td>60-70 kg</td></tr>
+                        <tr class="size-row" onclick="seleccionarFilaTalla('fan-mujer', 'XL', 49.5, 70, this)"><td>XL</td><td>49.5 cm</td><td>70 cm</td><td>170-175 cm</td><td>65-75 kg</td></tr>
+                        <tr class="size-row" onclick="seleccionarFilaTalla('fan-mujer', 'XXL', 51, 71, this)"><td>XXL</td><td>51 cm</td><td>71 cm</td><td>175-178 cm</td><td>75-85 kg</td></tr>
+                        <tr class="size-row" onclick="seleccionarFilaTalla('fan-mujer', '3XL', '—', '—', this)"><td>3XL</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+                        <tr class="size-row" onclick="seleccionarFilaTalla('fan-mujer', '4XL', '—', '—', this)"><td>4XL</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
                     </tbody>
                 </table>
-                <!-- Visor Gráfico de Cotas -->
-                <div class="size-visual-container">
-                    <div class="size-visual-title">Vista previa de cotas (Selecciona talla)</div>
-                    <div class="size-selector-visual" id="pills-fan-mujer">
-                        <button class="size-pill active" onclick="seleccionarTallaVisual('fan-mujer', 'S', this)">S</button>
-                        <button class="size-pill" onclick="seleccionarTallaVisual('fan-mujer', 'M', this)">M</button>
-                        <button class="size-pill" onclick="seleccionarTallaVisual('fan-mujer', 'L', this)">L</button>
-                        <button class="size-pill" onclick="seleccionarTallaVisual('fan-mujer', 'XL', this)">XL</button>
-                        <button class="size-pill" onclick="seleccionarTallaVisual('fan-mujer', 'XXL', this)">XXL</button>
-                        <button class="size-pill" onclick="seleccionarTallaVisual('fan-mujer', '3XL', this)">3XL</button>
-                        <button class="size-pill" onclick="seleccionarTallaVisual('fan-mujer', '4XL', this)">4XL</button>
-                    </div>
-                    <svg class="t-shirt-graphic" viewBox="0 0 200 180">
-                        <defs>
-                            <marker id="arrow-fan-mujer" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                                <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text)"/>
-                            </marker>
-                        </defs>
-                        <path d="M 65 20 Q 100 35 135 20 L 165 45 L 140 70 L 130 65 L 130 160 L 70 160 L 70 65 L 60 70 L 35 45 Z" fill="none" stroke="var(--text)" stroke-width="2" stroke-linejoin="round"/>
-                        <path d="M 75 22 Q 100 38 125 22" fill="none" stroke="var(--text)" stroke-width="1.5"/>
-                        <line x1="70" y1="95" x2="130" y2="95" stroke="var(--text)" stroke-width="1.5" marker-start="url(#arrow-fan-mujer)" marker-end="url(#arrow-fan-mujer)"/>
-                        <rect x="85" y="86" width="30" height="16" fill="var(--surface)" rx="3"/>
-                        <text id="val-width-fan-mujer" x="100" y="97" font-size="11" font-weight="700" fill="var(--text)" text-anchor="middle">44 cm</text>
-                        <line x1="52" y1="35" x2="52" y2="160" stroke="var(--text)" stroke-width="1.5" marker-start="url(#arrow-fan-mujer)" marker-end="url(#arrow-fan-mujer)"/>
-                        <rect x="25" y="90" width="36" height="16" fill="var(--surface)" rx="3"/>
-                        <text id="val-length-fan-mujer" x="43" y="101" font-size="11" font-weight="700" fill="var(--text)" text-anchor="middle">65 cm</text>
-                        <text x="43" y="112" font-size="8" fill="var(--text-muted)" text-anchor="middle">Length</text>
-                    </svg>
+            </div>
+
+            <!-- Visor Gráfico con la Imagen Proporcionada de Google Drive y Cotas Superpuestas -->
+            <div class="size-visual-container">
+                <div class="size-visual-title">Vista previa de cotas (Selecciona talla)</div>
+                <div class="camiseta-cotas-container">
+                    <!-- Imagen de la camiseta provista por enlace directo de Google Drive -->
+                    <img src="https://drive.google.com/uc?export=view&id=1p1JiO40x85Rq2s1l5g8aiUhdB7eRRrJs" alt="Camiseta Guía de Tallas">
+                    
+                    <!-- Cotas dinámicas flotantes -->
+                    <div id="cotaAncho" class="cota-tag cota-ancho">46 cm</div>
+                    <div id="cotaLargo" class="cota-tag cota-largo">68 cm</div>
                 </div>
             </div>
 
@@ -754,46 +668,6 @@
 
         const LOGO_CLARO = 'https://lh3.googleusercontent.com/d/1nu9bwEvAomNYNOilQ1aoIxkqUSJOcYGV';
         const LOGO_OSCURO = 'https://lh3.googleusercontent.com/d/13ON8TbGswhPthbj4YuhP_-XwEyTjG97T';
-
-        // Base de datos de medidas por categoría y talla para el visor visual
-        const medidasVisuales = {
-            player: {
-                'S': { width: '46 cm', length: '68 cm' },
-                'M': { width: '48 cm', length: '70 cm' },
-                'L': { width: '50 cm', length: '72 cm' },
-                'XL': { width: '52 cm', length: '74 cm' },
-                'XXL': { width: '54 cm', length: '76 cm' },
-                '3XL': { width: '56 cm', length: '78 cm' },
-                '4XL': { width: '58 cm', length: '80 cm' }
-            },
-            retro: {
-                'S': { width: '48 cm', length: '70 cm' },
-                'M': { width: '50 cm', length: '72 cm' },
-                'L': { width: '52 cm', length: '74 cm' },
-                'XL': { width: '54 cm', length: '76 cm' },
-                'XXL': { width: '56 cm', length: '78 cm' },
-                '3XL': { width: '58 cm', length: '80 cm' },
-                '4XL': { width: '60 cm', length: '82 cm' }
-            },
-            'fan-hombre': {
-                'S': { width: '48 cm', length: '70 cm' },
-                'M': { width: '50 cm', length: '72 cm' },
-                'L': { width: '52 cm', length: '74 cm' },
-                'XL': { width: '54 cm', length: '76 cm' },
-                'XXL': { width: '56 cm', length: '78 cm' },
-                '3XL': { width: '58 cm', length: '80 cm' },
-                '4XL': { width: '60 cm', length: '82 cm' }
-            },
-            'fan-mujer': {
-                'S': { width: '44 cm', length: '65 cm' },
-                'M': { width: '46 cm', length: '67 cm' },
-                'L': { width: '48 cm', length: '69 cm' },
-                'XL': { width: '49.5 cm', length: '70 cm' },
-                'XXL': { width: '51 cm', length: '71 cm' },
-                '3XL': { width: '—', length: '—' },
-                '4XL': { width: '—', length: '—' }
-            }
-        };
 
         function normalizarTexto(texto) {
             if (!texto) return '';
@@ -912,18 +786,31 @@
             
             document.getElementById(tabName).classList.add('active');
             evt.currentTarget.classList.add('active');
+
+            // Seleccionar automáticamente la primera fila de la pestaña activa para refrescar los datos
+            const primeraFila = document.querySelector(`#tbody-${tabName} tr.size-row`);
+            if (primeraFila) {
+                primeraFila.click();
+            }
         }
 
-        // Función para actualizar las medidas en el visor gráfico al hacer clic en una talla
-        function seleccionarTallaVisual(tabId, talla, btnElement) {
-            const contenedorPills = document.getElementById(`pills-${tabId}`);
-            contenedorPills.querySelectorAll('.size-pill').forEach(p => p.classList.remove('active'));
-            btnElement.classList.add('active');
+        // Función para seleccionar la fila de la tabla y actualizar las cotas sobre la foto
+        function seleccionarFilaTalla(tabId, talla, anchoVal, largoVal, elementoRow) {
+            // Quitar clase active de todas las filas de la tabla actual
+            const cuerpoTabla = document.getElementById(`tbody-${tabId}`);
+            if (cuerpoTabla) {
+                cuerpoTabla.querySelectorAll('tr.size-row').forEach(r => r.classList.remove('active'));
+            }
+            // Añadir clase active a la fila seleccionada
+            elementoRow.classList.add('active');
 
-            const medidas = medidasVisuales[tabId][talla];
-            if (medidas) {
-                document.getElementById(`val-width-${tabId}`).textContent = medidas.width;
-                document.getElementById(`val-length-${tabId}`).textContent = medidas.length;
+            // Actualizar textos de cotas flotantes
+            const cotaAncho = document.getElementById('cotaAncho');
+            const cotaLargo = document.getElementById('cotaLargo');
+
+            if (cotaAncho && cotaLargo) {
+                cotaAncho.textContent = typeof anchoVal === 'number' ? anchoVal + ' cm' : anchoVal;
+                cotaLargo.textContent = typeof largoVal === 'number' ? largoVal + ' cm' : largoVal;
             }
         }
 
