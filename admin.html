@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Tienda</title>
+    <style>
+        :root {
+            --primary: #111827;
+            --accent: #2563eb;
+            --bg: #f3f4f6;
+            --surface: #ffffff;
+            --text: #111827;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --radius: 8px;
+            --success: #16a34a;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); min-height: 100vh; padding: 30px 20px; display: flex; justify-content: center; align-items: center; }
+
+        .admin-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 30px;
+            width: 100%;
+            max-width: 960px;
+        }
+        @media (max-width: 850px) {
+            .admin-wrapper { grid-template-columns: 1fr; }
+        }
+
+        .admin-card {
+            background: var(--surface);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid var(--border);
+        }
+
+        h1 { font-size: 1.4rem; font-weight: 800; margin-bottom: 20px; color: var(--primary); text-align: center; }
+
+        .tabs-tipo {
+            display: flex; gap: 6px; margin-bottom: 20px; background: var(--bg); padding: 4px; border-radius: 8px;
+        }
+        .tab-btn {
+            flex: 1; padding: 8px; border: none; background: transparent; font-weight: 700; font-size: 0.85rem;
+            border-radius: 6px; cursor: pointer; color: var(--text-muted); transition: all 0.2s;
+        }
+        .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+        .form-group input, .form-group select {
+            width: 100%; padding: 10px 12px; border: 1px solid var(--border);
+            border-radius: 6px; font-size: 0.95rem; outline: none; background: #fff;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+
+        .btn-guardar {
+            background: var(--success); color: white; border: none; width: 100%; padding: 12px;
+            border-radius: var(--radius); font-weight: 700; font-size: 1rem; cursor: pointer; 
+            text-align: center; margin-top: 10px; transition: background 0.2s;
+        }
+        .btn-guardar:hover { background: #15803d; }
+
+        .preview-container {
+            display: flex; flex-direction: column; gap: 15px; justify-content: center;
+        }
+        .preview-title { font-size: 1rem; font-weight: 700; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+        
+        .tarjeta-preview {
+            background: var(--surface); border-radius: var(--radius); overflow: hidden;
+            border: 1px solid var(--border); display: flex; flex-direction: column;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); pointer-events: none;
+        }
+        .visor-imagen-prev {
+            position: relative; background: #f3f4f6; height: 220px;
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
+        }
+        .visor-imagen-prev img { width: 100%; height: 100%; object-fit: cover; }
+        .badge-prev {
+            position: absolute; top: 10px; left: 10px; background: white;
+            padding: 3px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700;
+            text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .tarjeta-info-prev { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+        .tarjeta-info-prev h3 { font-size: 0.95rem; font-weight: 600; }
+        .precio-prev { font-size: 1.1rem; font-weight: 800; }
+        
+        .parche-card-prev {
+            border: 2px solid var(--accent); border-radius: 8px; padding: 20px; text-align: center;
+            background: #eff6ff; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .parche-card-prev img { width: 80px; height: 80px; object-fit: contain; margin-bottom: 10px; background: #fff; border-radius: 6px; padding: 4px; border: 1px solid var(--border); }
+        .parche-card-prev h5 { font-size: 0.9rem; font-weight: 700; color: var(--text); }
+        .parche-card-prev span { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+    </style>
+</head>
+<body>
+
+    <div class="admin-wrapper">
+        <div class="admin-card">
+            <h1>Panel de Administración</h1>
+            
+            <div class="tabs-tipo">
+                <button class="tab-btn active" id="btnTabCamiseta" onclick="cambiarModoForm('camiseta')">⚽ Producto / Camiseta</button>
+                <button class="tab-btn" id="btnTabParche" onclick="cambiarModoForm('parche')">🛡️ Parche</button>
+            </div>
+
+            <form onsubmit="guardarElemento(event)">
+                <!-- CAMPOS PRODUCTO / CAMISETA -->
+                <div id="camposCamiseta">
+                    <div class="form-group">
+                        <label>Título del Producto:</label>
+                        <input type="text" id="adminTitulo" placeholder="Ej: Argentina 1ª Equipación 2026" oninput="actualizarPreview()">
+                    </div>
+                    <div class="form-group">
+                        <label>Categoría / Sección:</label>
+                        <select id="adminCategoria" onchange="actualizarPreview()">
+                            <option value="Selecciones">Selecciones</option>
+                            <option value="Clubes">Clubes</option>
+                            <option value="Retro">Retro</option>
+                            <option value="Ediciones Especiales">Ediciones Especiales</option>
+                            <option value="Otros">Otros</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Precio (€):</label>
+                        <input type="number" step="0.01" id="adminPrecio" placeholder="24.99" oninput="actualizarPreview()">
+                    </div>
+                    <div class="form-group">
+                        <label>Tallas (separadas por comas):</label>
+                        <input type="text" id="adminTalla" value="XS, S, M, L, XL" placeholder="XS, S, M, L, XL">
+                    </div>
+                    <div class="form-group">
+                        <label>IDs de Parches Permitidos (separados por comas o vacío para todos):</label>
+                        <input type="text" id="adminParchesPermitidos" placeholder="Ej: 1, 2, 5 o dejar vacío">
+                    </div>
+                    <div class="form-group">
+                        <label>Enlace de la Imagen:</label>
+                        <input type="text" id="adminImagen" placeholder="https://..." oninput="actualizarPreview()">
+                    </div>
+                </div>
+
+                <!-- CAMPOS PARCHE -->
+                <div id="camposParche" style="display: none;">
+                    <div class="form-group">
+                        <label>Nombre del Parche:</label>
+                        <input type="text" id="parcheNombre" placeholder="Ej: Parche Campeón del Mundo" oninput="actualizarPreview()">
+                    </div>
+                    <div class="form-group">
+                        <label>Categoría:</label>
+                        <select id="parcheCategoria" onchange="actualizarPreview()">
+                            <option value="Selecciones">Selecciones</option>
+                            <option value="Clubes">Clubes</option>
+                            <option value="Retro">Retro</option>
+                            <option value="General">General</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Posición:</label>
+                        <select id="parchePosicion" onchange="actualizarPreview()">
+                            <option value="Centro del Pecho">Centro del Pecho</option>
+                            <option value="Hombro Izquierdo">Hombro Izquierdo</option>
+                            <option value="Hombro Derecho">Hombro Derecho</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Enlace de la Imagen del Parche:</label>
+                        <input type="text" id="parcheImagen" placeholder="https://..." oninput="actualizarPreview()">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-guardar" id="btnGuardarAdmin">Añadir a Google Sheets</button>
+            </form>
+        </div>
+
+        <div class="preview-container">
+            <div class="preview-title">👁️ Previsualización en vivo</div>
+            <div id="previewBox"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyYgAzHCuGxqhMryR6bSbjjJ-UP1SZ_4rusgoR0cz1ctErm7KDGUj7iAoKBJDG2Y1MoNg/exec';
+        let modoActual = 'camiseta';
+
+        function limpiarUrlImagen(url) {
+            if (!url) return '';
+            url = url.trim();
+            let match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) {
+                return `https://lh3.googleusercontent.com/d/${match[1]}`;
+            }
+            return url;
+        }
+
+        function cambiarModoForm(modo) {
+            modoActual = modo;
+            
+            document.getElementById('btnTabCamiseta').classList.remove('active');
+            document.getElementById('btnTabParche').classList.remove('active');
+            document.getElementById('camposCamiseta').style.display = 'none';
+            document.getElementById('camposParche').style.display = 'none';
+
+            if (modo === 'camiseta') {
+                document.getElementById('btnTabCamiseta').classList.add('active');
+                document.getElementById('camposCamiseta').style.display = 'block';
+                document.getElementById('btnGuardarAdmin').innerText = 'Añadir a Google Sheets';
+            } else if (modo === 'parche') {
+                document.getElementById('btnTabParche').classList.add('active');
+                document.getElementById('camposParche').style.display = 'block';
+                document.getElementById('btnGuardarAdmin').innerText = 'Añadir Parche a Google Sheets';
+            }
+            actualizarPreview();
+        }
+
+        function actualizarPreview() {
+            const previewBox = document.getElementById('previewBox');
+            
+            if (modoActual === 'camiseta') {
+                let titulo = document.getElementById('adminTitulo').value || 'Título de ejemplo';
+                let categoria = document.getElementById('adminCategoria').value;
+                let precio = parseFloat(document.getElementById('adminPrecio').value || 24.99).toFixed(2);
+                let imgInputVal = document.getElementById('adminImagen').value;
+                let primeraUrl = imgInputVal.split(',')[0] || '';
+                let imgUrl = limpiarUrlImagen(primeraUrl);
+
+                let contenidoImagen = imgUrl ? 
+                    `<img src="${imgUrl}" alt="Preview" onerror="this.parentElement.innerHTML='<div style=\'color:#6b7280; font-size:0.85rem; font-weight:600;\'>Error al cargar imagen</div>'">` : 
+                    `<div style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600;">Sin imagen de vista previa</div>`;
+
+                previewBox.innerHTML = `
+                    <div class="tarjeta-preview">
+                        <div class="visor-imagen-prev">
+                            <span class="badge-prev">${categoria}</span>
+                            ${contenidoImagen}
+                        </div>
+                        <div class="tarjeta-info-prev">
+                            <h3>${titulo}</h3>
+                            <div style="display: flex; gap: 6px; margin: 4px 0;">
+                                <div style="width:24px; height:24px; border-radius:50%; background:#111827; color:white; font-size:10px; display:flex; align-items:center; justify-content:center; font-weight:700;">S</div>
+                                <div style="width:24px; height:24px; border-radius:50%; background:#fff; border:1px solid #ccc; font-size:10px; display:flex; align-items:center; justify-content:center; font-weight:700;">M</div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+                                <div class="precio-prev">${precio} €</div>
+                                <div style="background:#111827; color:white; padding:6px 12px; border-radius:15px; font-size:0.75rem; font-weight:600;">Comprar</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (modoActual === 'parche') {
+                let nombre = document.getElementById('parcheNombre').value || 'Nombre del Parche';
+                let categoria = document.getElementById('parcheCategoria').value;
+                let posicion = document.getElementById('parchePosicion').value;
+                let imgUrl = limpiarUrlImagen(document.getElementById('parcheImagen').value);
+
+                let contenidoImagenParche = imgUrl ? 
+                    `<img src="${imgUrl}" alt="Parche Preview" onerror="this.parentElement.innerHTML='<div style=\'color:#6b7280; font-size:0.8rem;\'>Sin imagen</div>'">` : 
+                    `<div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 8px;">🛡️</div>`;
+
+                previewBox.innerHTML = `
+                    <div class="parche-card-prev">
+                        ${contenidoImagenParche}
+                        <h5>${nombre}</h5>
+                        <span>Cat: ${categoria} | Pos: ${posicion}</span>
+                    </div>
+                `;
+            }
+        }
+
+        async function guardarElemento(event) {
+            event.preventDefault();
+            const btn = document.getElementById('btnGuardarAdmin');
+            btn.innerText = "Guardando...";
+            btn.disabled = true;
+
+            let payload = {};
+            if (modoActual === 'camiseta') {
+                let rawImagenes = document.getElementById('adminImagen').value;
+                let imagenesLimpias = rawImagenes.split(',').map(url => url.trim()).filter(Boolean).join(',');
+
+                payload = {
+                    tipo: 'camiseta',
+                    titulo: document.getElementById('adminTitulo').value,
+                    categoria: document.getElementById('adminCategoria').value,
+                    precio: document.getElementById('adminPrecio').value,
+                    talla: document.getElementById('adminTalla').value,
+                    parchesPermitidos: document.getElementById('adminParchesPermitidos').value.trim(),
+                    imagenes: imagenesLimpias
+                };
+            } else if (modoActual === 'parche') {
+                payload = {
+                    tipo: 'parche',
+                    nombre: document.getElementById('parcheNombre').value,
+                    categoria: document.getElementById('parcheCategoria').value,
+                    posicion: document.getElementById('parchePosicion').value,
+                    imagen: document.getElementById('parcheImagen').value.trim()
+                };
+            }
+
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify(payload)
+                });
+
+                alert("¡Elemento añadido correctamente a Google Sheets!");
+                
+                if (modoActual === 'camiseta') {
+                    document.getElementById('adminTitulo').value = '';
+                    document.getElementById('adminPrecio').value = '';
+                    document.getElementById('adminParchesPermitidos').value = '';
+                    document.getElementById('adminImagen').value = '';
+                } else if (modoActual === 'parche') {
+                    document.getElementById('parcheNombre').value = '';
+                    document.getElementById('parcheImagen').value = '';
+                }
+                actualizarPreview();
+            } catch (error) {
+                console.error("Error al guardar:", error);
+                alert("Hubo un error al guardar.");
+            } finally {
+                btn.innerText = modoActual === 'camiseta' ? 'Añadir a Google Sheets' : 'Añadir Parche a Google Sheets';
+                btn.disabled = false;
+            }
+        }
+
+        actualizarPreview();
+    </script>
+</body>
+</html>
