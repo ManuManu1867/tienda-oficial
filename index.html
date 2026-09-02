@@ -641,7 +641,7 @@
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbz9VD-Fko_5XLUGCHlc9YGGUi3V5JxhPxGqXfzcraO0iZF0McsyAkML54W94oCcmMx3NA/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzgcO1JKv_enQUSZbrD9YJfVSBQz29CPdBGaZDGddZlvrekkE9aVjJIV1itHLLRdzfb/exec';
         
         let datosTienda = { productos: [], parches: [] };
         let estadoSelecciones = {};
@@ -1035,7 +1035,7 @@
                             <div class="footer-card">
                                 <button class="btn-personalizar" onclick="abrirPersonalizacion('${idProd}')">
                                     <svg viewBox="0 0 24 24">
-                                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
                                     </svg>
                                     Personalizar Camiseta
                                 </button>
@@ -1328,13 +1328,39 @@
 
             let todosLosParches = datosTienda.parches || [];
 
-            let parchesValidos = todosLosParches.filter(pr => {
+            // 🆕 NUEVA LÓGICA DE FILTRADO POR IDS
+            let parchesIdsPermitidos = p.parchesIds || [];
+
+            // Si la camiseta tiene IDs definidos, filtramos por ellos
+            // Si no tiene IDs (array vacío), NO mostramos ningún parche
+            let parchesFiltrados = [];
+
+            if (parchesIdsPermitidos.length > 0) {
+                // Solo mostrar parches cuyo ID esté en la lista
+                parchesFiltrados = todosLosParches.filter(pr => {
+                    let idParche = pr.id !== undefined ? String(pr.id) : '';
+                    return parchesIdsPermitidos.includes(idParche);
+                });
+            } else {
+                // Si no tiene IDs permitidos, no mostramos parches
+                parchesFiltrados = [];
+            }
+
+            // Ahora filtramos por categoría (manteniendo compatibilidad)
+            let parchesValidos = parchesFiltrados.filter(pr => {
                 let catParche =
                     (pr.categoria || 'General').toString().toLowerCase().trim();
 
                 return catParche === 'general' ||
                        catParche === categoriaProducto;
             });
+
+            // Si no hay parches válidos, mostramos mensaje
+            if (parchesValidos.length === 0 && parchesIdsPermitidos.length > 0) {
+                // Hay IDs pero no coinciden con la categoría
+                // Mostramos los que coinciden por ID aunque no coincidan por categoría
+                parchesValidos = parchesFiltrados;
+            }
 
             let parchesCentro = parchesValidos.filter(pr => {
                 let pos =
@@ -1452,9 +1478,19 @@
                 `;
             });
 
+            // Mensaje si no hay parches disponibles para esta camiseta
             if (parchesValidos.length === 0) {
-                htmlZonas =
-                    "<p style='color:var(--text-muted); text-align:center; padding:15px;'>No hay parches disponibles para esta categoría.</p>";
+                let mensaje = '';
+                if (parchesIdsPermitidos.length > 0) {
+                    mensaje = "⚠️ No hay parches disponibles para esta camiseta (los IDs especificados no coinciden con ningún parche existente).";
+                } else {
+                    mensaje = "ℹ️ Esta camiseta no tiene parches disponibles.";
+                }
+                htmlZonas = `
+                    <p style='color:var(--text-muted); text-align:center; padding:15px;'>
+                        ${mensaje}
+                    </p>
+                `;
             }
 
             document.getElementById('tituloModalPersonalizacion').innerText =
@@ -1827,7 +1863,7 @@
                                     title="Editar producto"
                                 >
                                     <svg viewBox="0 0 24 24">
-                                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0-1.83 1.83 3.75 3.75 1.83 1.83z"/>
                                     </svg>
                                 </button>
 
