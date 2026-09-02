@@ -154,7 +154,6 @@
 
         .visor-imagen.activo-interaccion .carrusel-btn { opacity: 1; visibility: visible; }
 
-        /* Estilo y transición dinámica para el badge de categoría */
         .categoria-badge {
             position: absolute; top: 12px; left: 12px; background: white; color: #111827;
             padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700;
@@ -191,7 +190,13 @@
         .tarjeta-info h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 12px; color: var(--text); }
 
         .seccion-tallas { margin-bottom: 15px; }
-        .label-tallas { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; display: block; }
+        .header-tallas-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .label-tallas { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); display: block; }
+        .btn-guia-tallas {
+            background: none; border: none; color: var(--accent); font-size: 0.75rem; font-weight: 600; cursor: pointer; text-decoration: underline; padding: 0;
+        }
+        .btn-guia-tallas:hover { opacity: 0.8; }
+
         .circulos-tallas { display: flex; gap: 8px; flex-wrap: wrap; }
         .circulo-talla {
             width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border);
@@ -301,6 +306,11 @@
             border: 1px solid var(--border);
         }
 
+        /* Tabla de guía de tallas */
+        .tabla-tallas { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.85rem; }
+        .tabla-tallas th, .tabla-tallas td { border: 1px solid var(--border); padding: 8px; text-align: center; }
+        .tabla-tallas th { background: var(--surface); font-weight: 700; }
+
         .loader { text-align: center; padding: 40px; font-size: 1.1rem; color: var(--text-muted); }
 
         body.dark-mode {
@@ -372,6 +382,7 @@
         <div id="contenedorProductos" class="loader">Cargando productos...</div>
     </div>
 
+    <!-- Modal Carrito -->
     <div class="modal-overlay" id="modalCarrito">
         <div class="modal-contenido">
             <div class="modal-header">
@@ -394,6 +405,7 @@
         </div>
     </div>
 
+    <!-- Modal Personalización -->
     <div class="modal-overlay" id="modalPersonalizacion">
         <div class="modal-contenido">
             <div class="modal-header">
@@ -401,6 +413,34 @@
                 <button class="btn-cerrar-modal" onclick="cerrarModal('modalPersonalizacion')">✕</button>
             </div>
             <div id="contenidoPersonalizacion"></div>
+        </div>
+    </div>
+
+    <!-- Modal Guía de Tallas -->
+    <div class="modal-overlay" id="modalGuiaTallas">
+        <div class="modal-contenido">
+            <div class="modal-header">
+                <h2>Guía de Tallas</h2>
+                <button class="btn-cerrar-modal" onclick="cerrarModal('modalGuiaTallas')">✕</button>
+            </div>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">Medidas aproximadas en centímetros (Versión estándar de aficionado):</p>
+            <table class="tabla-tallas">
+                <thead>
+                    <tr>
+                        <th>Talla</th>
+                        <th>Ancho (Pecho)</th>
+                        <th>Largo (Espalda)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>S</td><td>48-50 cm</td><td>69-71 cm</td></tr>
+                    <tr><td>M</td><td>50-52 cm</td><td>71-73 cm</td></tr>
+                    <tr><td>L</td><td>53-55 cm</td><td>73-75 cm</td></tr>
+                    <tr><td>XL</td><td>56-58 cm</td><td>75-77 cm</td></tr>
+                    <tr><td>XXL</td><td>59-61 cm</td><td>77-79 cm</td></tr>
+                </tbody>
+            </table>
+            <button class="filtro-btn" style="width: 100%; margin-top: 20px; text-align: center;" onclick="cerrarModal('modalGuiaTallas')">Entendido</button>
         </div>
     </div>
 
@@ -417,7 +457,6 @@
         let indiceItemEditando = null;
         let parchesSeleccionadosModal = {};
 
-        // Control global para la tarjeta interactiva activa y temporizador de retorno de badge
         let idTarjetaInteractivaActiva = null;
         let timerRestaurarBadge = null;
 
@@ -536,6 +575,10 @@
             renderizarSecciones(datosTienda.productos);
         }
 
+        function abrirGuiaTallas() {
+            document.getElementById('modalGuiaTallas').classList.add('open');
+        }
+
         function renderizarSecciones(lista) {
             const contenedor = document.getElementById('contenedorProductos');
             if (!lista || lista.length === 0) {
@@ -642,7 +685,10 @@
                             <h3>${p.titulo || 'Sin título'}</h3>
                             
                             <div class="seccion-tallas">
-                                <span class="label-tallas">Selecciona tu talla: *</span>
+                                <div class="header-tallas-row">
+                                    <span class="label-tallas">Selecciona tu talla: *</span>
+                                    <button class="btn-guia-tallas" onclick="abrirGuiaTallas()">Guía de tallas</button>
+                                </div>
                                 <div class="circulos-tallas" id="tallas-${idProd}">${htmlTallas}</div>
                                 <div class="error-talla" id="error-talla-${idProd}">¡Elige una talla obligatoriamente!</div>
                             </div>
@@ -706,9 +752,7 @@
             const visor = document.getElementById(`visor-${idProd}`);
             if (!visor) return;
 
-            // Si el usuario cambia de camiseta (pasa a otra distinta)
             if (idTarjetaInteractivaActiva && idTarjetaInteractivaActiva !== idProd) {
-                // Restauramos el badge de la anterior inmediatamente
                 const visorAnterior = document.getElementById(`visor-${idTarjetaInteractivaActiva}`);
                 if (visorAnterior) visorAnterior.classList.remove('ocultar-badge');
                 if (timerRestaurarBadge) clearTimeout(timerRestaurarBadge);
@@ -717,7 +761,6 @@
             idTarjetaInteractivaActiva = idProd;
             if (timerRestaurarBadge) clearTimeout(timerRestaurarBadge);
 
-            // Ocultamos el badge de la camiseta actual y mostramos botones de carrusel
             visor.classList.add('ocultar-badge');
             visor.classList.add('activo-interaccion');
 
@@ -728,7 +771,6 @@
                 visor.classList.remove('activo-interaccion');
             }, 1500);
 
-            // Programamos el retorno del badge de esta camiseta tras 5 segundos de inactividad global en ella
             timerRestaurarBadge = setTimeout(() => {
                 if (idTarjetaInteractivaActiva === idProd) {
                     visor.classList.remove('ocultar-badge');
@@ -1019,9 +1061,7 @@
                 tieneError = true;
             }
 
-            if (tieneError) {
-                return; 
-            }
+            if (tieneError) return;
 
             let tallaFinal = document.getElementById('tallaSeleccionadaModal').innerText;
             let basePrecio = parseFloat(productoEnEdicion.precio);
