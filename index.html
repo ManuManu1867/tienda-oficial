@@ -871,7 +871,9 @@
                     let idProd = p._idReal;
                     
                     let imgs = [];
-                    if (typeof p.imagenes === 'string' && p.imagenes.trim() !== '') {
+                    if (Array.isArray(p.imagenes)) {
+                        imgs = p.imagenes.map(s => limpiarUrlImagen(s)).filter(Boolean);
+                    } else if (typeof p.imagenes === 'string' && p.imagenes.trim() !== '') {
                         let urlsBrutas = p.imagenes.split(',');
                         let urlsLimpiasMap = urlsBrutas.map(s => limpiarUrlImagen(s)).filter(Boolean);
                         imgs = [...new Set(urlsLimpiasMap)];
@@ -1129,8 +1131,8 @@
             let todosLosParches = datosTienda.parches || [];
 
             let parchesPermitidosIds = [];
-            if (p.parchesPermitidos && p.parchesPermitidos.trim() !== '') {
-                parchesPermitidosIds = p.parchesPermitidos.split(',').map(id => id.trim());
+            if (p.parches && typeof p.parches === 'string' && p.parches.trim() !== '') {
+                parchesPermitidosIds = p.parches.split(',').map(id => id.trim());
             }
 
             let parchesValidos = todosLosParches.filter((pr, pIndex) => {
