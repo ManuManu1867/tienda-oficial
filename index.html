@@ -871,12 +871,16 @@
                     let idProd = p._idReal;
                     
                     let imgs = [];
-                    let campoImagenes = p.g !== undefined ? p.g : (p.imagenes !== undefined ? p.imagenes : '');
-                    if (typeof campoImagenes === 'string' && campoImagenes.trim() !== '') {
-                        let urlsBrutas = campoImagenes.split(',');
+                    let campoImagenes = p.imagenes !== undefined ? p.imagenes : (p.g !== undefined ? p.g : '');
+                    
+                    if (Array.isArray(campoImagenes)) {
+                        imgs = campoImagenes.map(s => limpiarUrlImagen(s)).filter(Boolean);
+                    } else if (typeof campoImagenes === 'string' && campoImagenes.trim() !== '') {
+                        let urlsBrutas = campoImagenes.split(/[\s,]+/);
                         let urlsLimpiasMap = urlsBrutas.map(s => limpiarUrlImagen(s)).filter(Boolean);
                         imgs = [...new Set(urlsLimpiasMap)];
                     }
+
                     if (imgs.length === 0) imgs = ['https://via.placeholder.com/300x350?text=Sin+Imagen'];
 
                     if (!estadoSelecciones[idProd]) {
