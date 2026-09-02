@@ -306,9 +306,53 @@
             border: 1px solid var(--border);
         }
 
-        /* Tabla de guía de tallas */
-        .tabla-tallas { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.85rem; }
-        .tabla-tallas th, .tabla-tallas td { border: 1px solid var(--border); padding: 8px; text-align: center; }
+        /* Estilos y pestañas de la guía de tallas */
+        .size-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .size-tabs .tab-btn {
+            padding: 6px 10px;
+            font-size: 0.85rem;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .size-tabs .tab-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+        body.dark-mode .size-tabs .tab-btn.active {
+            background: #f9fafb;
+            color: #111827;
+            border-color: #f9fafb;
+        }
+
+        .size-tab-content {
+            display: none;
+        }
+
+        .size-tab-content.active {
+            display: block;
+        }
+
+        .size-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .tabla-tallas { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 0.82rem; }
+        .tabla-tallas th, .tabla-tallas td { border: 1px solid var(--border); padding: 6px; text-align: center; }
         .tabla-tallas th { background: var(--surface); font-weight: 700; }
 
         .loader { text-align: center; padding: 40px; font-size: 1.1rem; color: var(--text-muted); }
@@ -416,30 +460,98 @@
         </div>
     </div>
 
-    <!-- Modal Guía de Tallas -->
+    <!-- Modal Guía de Tallas con Pestañas -->
     <div class="modal-overlay" id="modalGuiaTallas">
         <div class="modal-contenido">
             <div class="modal-header">
                 <h2>Guía de Tallas</h2>
                 <button class="btn-cerrar-modal" onclick="cerrarModal('modalGuiaTallas')">✕</button>
             </div>
-            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">Medidas aproximadas en centímetros (Versión estándar de aficionado):</p>
-            <table class="tabla-tallas">
-                <thead>
-                    <tr>
-                        <th>Talla</th>
-                        <th>Ancho (Pecho)</th>
-                        <th>Largo (Espalda)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td>S</td><td>48-50 cm</td><td>69-71 cm</td></tr>
-                    <tr><td>M</td><td>50-52 cm</td><td>71-73 cm</td></tr>
-                    <tr><td>L</td><td>53-55 cm</td><td>73-75 cm</td></tr>
-                    <tr><td>XL</td><td>56-58 cm</td><td>75-77 cm</td></tr>
-                    <tr><td>XXL</td><td>59-61 cm</td><td>77-79 cm</td></tr>
-                </tbody>
-            </table>
+            
+            <!-- Pestañas de Versiones -->
+            <div class="size-tabs">
+                <button class="tab-btn active" onclick="switchSizeTab(event, 'retro')">Retro</button>
+                <button class="tab-btn" onclick="switchSizeTab(event, 'fan-hombre')">Fan (Hombre)</button>
+                <button class="tab-btn" onclick="switchSizeTab(event, 'player')">Jugador</button>
+                <button class="tab-btn" onclick="switchSizeTab(event, 'fan-mujer')">Fan (Mujer)</button>
+            </div>
+
+            <!-- Pestaña 1: Retro -->
+            <div id="retro" class="size-tab-content active">
+                <p class="size-subtitle">Medidas aproximadas en centímetros y recomendaciones.</p>
+                <table class="tabla-tallas">
+                    <thead>
+                        <tr><th>Talla</th><th>Ancho</th><th>Largo</th><th>Estatura</th><th>Peso</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>S</td><td>48 cm</td><td>70 cm</td><td>160-170 cm</td><td>50-60 kg</td></tr>
+                        <tr><td>M</td><td>50 cm</td><td>72 cm</td><td>170-175 cm</td><td>60-65 kg</td></tr>
+                        <tr><td>L</td><td>52 cm</td><td>74 cm</td><td>175-180 cm</td><td>65-70 kg</td></tr>
+                        <tr><td>XL</td><td>54 cm</td><td>76 cm</td><td>180-185 cm</td><td>70-75 kg</td></tr>
+                        <tr><td>XXL</td><td>56 cm</td><td>78 cm</td><td>185-190 cm</td><td>75-85 kg</td></tr>
+                        <tr><td>3XL</td><td>58 cm</td><td>80 cm</td><td>190-195 cm</td><td>85-90 kg</td></tr>
+                        <tr><td>4XL</td><td>60 cm</td><td>82 cm</td><td>195-200 cm</td><td>95-100 kg</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pestaña 2: Fan (Hombre) -->
+            <div id="fan-hombre" class="size-tab-content">
+                <p class="size-subtitle">Medidas aproximadas en centímetros y recomendaciones.</p>
+                <table class="tabla-tallas">
+                    <thead>
+                        <tr><th>Talla</th><th>Ancho</th><th>Largo</th><th>Estatura</th><th>Peso</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>S</td><td>48 cm</td><td>70 cm</td><td>162-170 cm</td><td>50-62 kg</td></tr>
+                        <tr><td>M</td><td>50 cm</td><td>72 cm</td><td>170-176 cm</td><td>62-78 kg</td></tr>
+                        <tr><td>L</td><td>52 cm</td><td>74 cm</td><td>176-182 cm</td><td>78-83 kg</td></tr>
+                        <tr><td>XL</td><td>54 cm</td><td>76 cm</td><td>182-190 cm</td><td>83-90 kg</td></tr>
+                        <tr><td>XXL</td><td>56 cm</td><td>78 cm</td><td>190-195 cm</td><td>90-97 kg</td></tr>
+                        <tr><td>3XL</td><td>58 cm</td><td>80 cm</td><td>192-197 cm</td><td>97-104 kg</td></tr>
+                        <tr><td>4XL</td><td>60 cm</td><td>82 cm</td><td>197-200 cm</td><td>104-110 kg</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pestaña 3: Jugador (Player) -->
+            <div id="player" class="size-tab-content">
+                <p class="size-subtitle">Medidas aproximadas en centímetros y recomendaciones.</p>
+                <table class="tabla-tallas">
+                    <thead>
+                        <tr><th>Talla</th><th>Ancho</th><th>Largo</th><th>Estatura</th><th>Peso</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>S</td><td>46 cm</td><td>68 cm</td><td>160-170 cm</td><td>50-60 kg</td></tr>
+                        <tr><td>M</td><td>48 cm</td><td>70 cm</td><td>170-175 cm</td><td>60-65 kg</td></tr>
+                        <tr><td>L</td><td>50 cm</td><td>72 cm</td><td>175-180 cm</td><td>65-70 kg</td></tr>
+                        <tr><td>XL</td><td>52 cm</td><td>74 cm</td><td>180-185 cm</td><td>70-75 kg</td></tr>
+                        <tr><td>XXL</td><td>54 cm</td><td>76 cm</td><td>185-190 cm</td><td>75-85 kg</td></tr>
+                        <tr><td>3XL</td><td>56 cm</td><td>78 cm</td><td>190-195 cm</td><td>85-90 kg</td></tr>
+                        <tr><td>4XL</td><td>58 cm</td><td>80 cm</td><td>195-200 cm</td><td>95-100 kg</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pestaña 4: Fan (Mujer) -->
+            <div id="fan-mujer" class="size-tab-content">
+                <p class="size-subtitle">Medidas aproximadas en centímetros y recomendaciones.</p>
+                <table class="tabla-tallas">
+                    <thead>
+                        <tr><th>Talla</th><th>Ancho</th><th>Largo</th><th>Estatura</th><th>Peso</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>S</td><td>44 cm</td><td>65 cm</td><td>150-160 cm</td><td>45-55 kg</td></tr>
+                        <tr><td>M</td><td>46 cm</td><td>67 cm</td><td>160-165 cm</td><td>50-60 kg</td></tr>
+                        <tr><td>L</td><td>48 cm</td><td>69 cm</td><td>165-170 cm</td><td>60-70 kg</td></tr>
+                        <tr><td>XL</td><td>49.5 cm</td><td>70 cm</td><td>170-175 cm</td><td>65-75 kg</td></tr>
+                        <tr><td>XXL</td><td>51 cm</td><td>71 cm</td><td>175-178 cm</td><td>75-85 kg</td></tr>
+                        <tr><td>3XL</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+                        <tr><td>4XL</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
             <button class="filtro-btn" style="width: 100%; margin-top: 20px; text-align: center;" onclick="cerrarModal('modalGuiaTallas')">Entendido</button>
         </div>
     </div>
@@ -577,6 +689,18 @@
 
         function abrirGuiaTallas() {
             document.getElementById('modalGuiaTallas').classList.add('open');
+        }
+
+        // Función para cambiar entre pestañas de la guía de tallas
+        function switchSizeTab(evt, tabName) {
+            const contents = document.querySelectorAll('.size-tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+            
+            const buttons = document.querySelectorAll('.size-tabs .tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.add('active');
         }
 
         function renderizarSecciones(lista) {
