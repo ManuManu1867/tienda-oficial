@@ -498,7 +498,6 @@
         <div id="contenedorProductos" class="loader">Cargando productos...</div>
     </div>
 
-    <!-- Modal Carrito -->
     <div class="modal-overlay" id="modalCarrito">
         <div class="modal-contenido">
             <div class="modal-header">
@@ -521,7 +520,6 @@
         </div>
     </div>
 
-    <!-- Modal Personalización -->
     <div class="modal-overlay" id="modalPersonalizacion">
         <div class="modal-contenido">
             <div class="modal-header">
@@ -532,7 +530,6 @@
         </div>
     </div>
 
-    <!-- Modal Guía de Tallas -->
     <div class="modal-overlay" id="modalGuiaTallas">
         <div class="modal-contenido">
             <div class="modal-header">
@@ -706,13 +703,81 @@
         }
 
         function limpiarUrlImagen(url) {
+            if (url === null || url === undefined) return '';
+
+            url = String(url).trim();
             if (!url) return '';
-            url = url.trim();
-            let match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+
+            let match = url.match(
+                /(?:drive\.google\.com|docs\.google\.com)\/file\/d\/([a-zA-Z0-9_-]+)/i
+            );
+
             if (match && match[1]) {
                 return `https://lh3.googleusercontent.com/d/${match[1]}`;
             }
+
+            match = url.match(/[?&]id=([a-zA-Z0-9_-]+)/i);
+
+            if (match && match[1] && /drive\.google\.com/i.test(url)) {
+                return `https://lh3.googleusercontent.com/d/${match[1]}`;
+            }
+
             return url;
+        }
+
+        function normalizarImagenes(campoImagenes) {
+            if (campoImagenes === null || campoImagenes === undefined) return [];
+
+            let valores = [];
+
+            if (Array.isArray(campoImagenes)) {
+                valores = campoImagenes;
+
+            } else if (typeof campoImagenes === 'string') {
+                const texto = campoImagenes.trim();
+
+                if (!texto) return [];
+
+                try {
+                    const parseado = JSON.parse(texto);
+
+                    if (Array.isArray(parseado)) {
+                        valores = parseado;
+                    } else {
+                        valores = [texto];
+                    }
+
+                } catch (e) {
+                    valores = [texto];
+                }
+
+            } else {
+                valores = [campoImagenes];
+            }
+
+            let urls = [];
+
+            valores.forEach(valor => {
+                if (valor === null || valor === undefined) return;
+
+                const texto = String(valor).trim();
+
+                if (!texto) return;
+
+                const coincidencias = texto.match(/https?:\/\/[^\s,]+/g);
+
+                if (coincidencias && coincidencias.length) {
+                    urls.push(...coincidencias);
+                } else {
+                    urls.push(...texto.split(/[\s,]+/).filter(Boolean));
+                }
+            });
+
+            return [...new Set(
+                urls
+                    .map(limpiarUrlImagen)
+                    .filter(Boolean)
+            )];
         }
 
         async function cargarDatos() {
@@ -818,8 +883,12 @@
             }
 
             let listaFiltrada = lista;
+
             if (categoriaFiltroActiva !== 'Todo') {
-                listaFiltrada = listaFiltrada.filter(p => p.categoria && p.categoria.toLowerCase() === categoriaFiltroActiva.toLowerCase());
+                listaFiltrada = listaFiltrada.filter(p =>
+                    p.categoria &&
+                    p.categoria.toLowerCase() === categoriaFiltroActiva.toLowerCase()
+                );
             }
 
             if (textoBusqueda !== '') {
@@ -836,9 +905,14 @@
             }
 
             let categoriasMap = {};
+
             listaFiltrada.forEach((p, index) => {
                 let cat = (p.categoria || 'General').trim();
-                if (!categoriasMap[cat]) categoriasMap[cat] = [];
+
+                if (!categoriasMap[cat]) {
+                    categoriasMap[cat] = [];
+                }
+
                 p._idReal = p.id !== undefined ? p.id : index;
                 categoriasMap[cat].push(p);
             });
@@ -848,9 +922,11 @@
 
             Object.keys(categoriasMap).forEach(cat => {
                 let productosCat = categoriasMap[cat];
+
                 if (!limitesSecciones[cat]) {
-                    limitesSecciones[cat] = 4; 
+                    limitesSecciones[cat] = 4;
                 }
+
                 let limiteActual = limitesSecciones[cat];
                 let productosVisibles = productosCat.slice(0, limiteActual);
 
@@ -869,41 +945,61 @@
 
                 productosVisibles.forEach((p) => {
                     let idProd = p._idReal;
-                    
-                    let imgs = [];
-                    let campoImagenes = p.imagenes !== undefined ? p.imagenes : (p.g !== undefined ? p.g : '');
-                    
-                    if (Array.isArray(campoImagenes)) {
-                        imgs = campoImagenes.map(s => limpiarUrlImagen(s)).filter(Boolean);
-                    } else if (typeof campoImagenes === 'string' && campoImagenes.trim() !== '') {
-                        let urlsBrutas = campoImagenes.split(/[\s,]+/);
-                        let urlsLimpiasMap = urlsBrutas.map(s => limpiarUrlImagen(s)).filter(Boolean);
-                        imgs = [...new Set(urlsLimpiasMap)];
+
+                    let campoImagenes =
+                        p.imagenes !== undefined
+                            ? p.imagenes
+                            : (p.g !== undefined ? p.g : '');
+
+                    let imgs = normalizarImagenes(campoImagenes);
+
+                    if (imgs.length === 0) {
+                        imgs = ['https://via.placeholder.com/300x350?text=Sin+Imagen'];
                     }
 
-                    if (imgs.length === 0) imgs = ['https://via.placeholder.com/300x350?text=Sin+Imagen'];
-
                     if (!estadoSelecciones[idProd]) {
-                        estadoSelecciones[idProd] = { talla: '', fotoIndex: 0, imgs: imgs, timerInactividad: null, miniaturasExpandidas: false };
+                        estadoSelecciones[idProd] = {
+                            talla: '',
+                            fotoIndex: 0,
+                            imgs: imgs,
+                            timerInactividad: null,
+                            miniaturasExpandidas: false
+                        };
                     } else {
                         estadoSelecciones[idProd].imgs = imgs;
+
                         if (estadoSelecciones[idProd].fotoIndex >= imgs.length) {
                             estadoSelecciones[idProd].fotoIndex = 0;
                         }
                     }
 
                     let imgPrincipal = imgs[estadoSelecciones[idProd].fotoIndex];
-                    let tallasArr = p.talla ? p.talla.split(',').map(t => t.trim()) : ['Única'];
+
+                    let tallasArr = p.talla
+                        ? p.talla.split(',').map(t => t.trim())
+                        : ['Única'];
+
                     let htmlTallas = '';
+
                     tallasArr.forEach(t => {
-                        let selectedClass = estadoSelecciones[idProd].talla === t ? 'selected' : '';
-                        htmlTallas += `<div class="circulo-talla ${selectedClass}" onclick="seleccionarTalla('${idProd}', '${t}', this)">${t}</div>`;
+                        let selectedClass =
+                            estadoSelecciones[idProd].talla === t
+                                ? 'selected'
+                                : '';
+
+                        htmlTallas += `
+                            <div
+                                class="circulo-talla ${selectedClass}"
+                                onclick="seleccionarTalla('${idProd}', '${t}', this)"
+                            >${t}</div>
+                        `;
                     });
 
                     let htmlMiniaturas = obtenerHtmlMiniaturas(idProd);
 
                     const tarjeta = document.createElement('div');
                     tarjeta.className = 'tarjeta';
+
                     tarjeta.innerHTML = `
                         <div class="visor-imagen" id="visor-${idProd}" 
                              onmousemove="manejarInteraccionCamiseta('${idProd}')" 
@@ -917,36 +1013,53 @@
                             ` : ''}
                         </div>
                         ${htmlMiniaturas}
+
                         <div class="tarjeta-info">
                             <h3>${p.titulo || 'Sin título'}</h3>
-                            
+
                             <div class="seccion-tallas">
                                 <div class="header-tallas-row">
                                     <span class="label-tallas">Selecciona tu talla: *</span>
                                     <button class="btn-guia-tallas" onclick="abrirGuiaTallas()">Guía de tallas</button>
                                 </div>
-                                <div class="circulos-tallas" id="tallas-${idProd}">${htmlTallas}</div>
-                                <div class="error-talla" id="error-talla-${idProd}">¡Elige una talla obligatoriamente!</div>
+
+                                <div class="circulos-tallas" id="tallas-${idProd}">
+                                    ${htmlTallas}
+                                </div>
+
+                                <div class="error-talla" id="error-talla-${idProd}">
+                                    ¡Elige una talla obligatoriamente!
+                                </div>
                             </div>
 
                             <div class="footer-card">
                                 <button class="btn-personalizar" onclick="abrirPersonalizacion('${idProd}')">
-                                    <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                    </svg>
                                     Personalizar Camiseta
                                 </button>
+
                                 <div class="footer-card-row">
-                                    <div class="precio">${parseFloat(p.precio || 0).toFixed(2)} €</div>
-                                    <button class="btn-comprar" onclick="agregarDirecto('${idProd}')">Añadir al Carrito</button>
+                                    <div class="precio">
+                                        ${parseFloat(p.precio || 0).toFixed(2)} €
+                                    </div>
+
+                                    <button class="btn-comprar" onclick="agregarDirecto('${idProd}')">
+                                        Añadir al Carrito
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     `;
+
                     gridDiv.appendChild(tarjeta);
                 });
 
                 seccionDiv.appendChild(gridDiv);
 
                 let restantes = productosCat.length - limiteActual;
+
                 if (restantes > 0) {
                     let btnVerMasContainer = document.createElement('div');
                     btnVerMasContainer.style.textAlign = "center";
@@ -955,6 +1068,7 @@
                     let btnVerMas = document.createElement('button');
                     btnVerMas.className = "filtro-btn";
                     btnVerMas.innerText = `Ver más (+${restantes})`;
+
                     btnVerMas.onclick = () => {
                         limitesSecciones[cat] += 4;
                         renderizarSecciones(datosTienda.productos);
@@ -971,14 +1085,19 @@
         function filtrarCategoria(categoria, btn) {
             document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+
             categoriaFiltroActiva = categoria;
-            
+
             const tituloEl = document.getElementById('tituloPrincipalSeccion');
+
             if (categoria === 'Todo') {
-                tituloEl.innerHTML = `<span style="display: inline-block; width: 6px; height: 24px; background-color: var(--accent); border-radius: 3px;"></span> Novedades y Equipaciones`;
+                tituloEl.innerHTML =
+                    `<span style="display: inline-block; width: 6px; height: 24px; background-color: var(--accent); border-radius: 3px;"></span> Novedades y Equipaciones`;
             } else {
                 let colorBarra = coloresCategorias[categoria] || '#2563eb';
-                tituloEl.innerHTML = `<span style="display: inline-block; width: 6px; height: 24px; background-color: ${colorBarra}; border-radius: 3px;"></span> ${categoria}`;
+
+                tituloEl.innerHTML =
+                    `<span style="display: inline-block; width: 6px; height: 24px; background-color: ${colorBarra}; border-radius: 3px;"></span> ${categoria}`;
             }
 
             renderizarSecciones(datosTienda.productos);
@@ -988,21 +1107,37 @@
             const visor = document.getElementById(`visor-${idProd}`);
             if (!visor) return;
 
-            if (idTarjetaInteractivaActiva && idTarjetaInteractivaActiva !== idProd) {
-                const visorAnterior = document.getElementById(`visor-${idTarjetaInteractivaActiva}`);
-                if (visorAnterior) visorAnterior.classList.remove('ocultar-badge');
-                if (timerRestaurarBadge) clearTimeout(timerRestaurarBadge);
+            if (
+                idTarjetaInteractivaActiva &&
+                idTarjetaInteractivaActiva !== idProd
+            ) {
+                const visorAnterior =
+                    document.getElementById(`visor-${idTarjetaInteractivaActiva}`);
+
+                if (visorAnterior) {
+                    visorAnterior.classList.remove('ocultar-badge');
+                }
+
+                if (timerRestaurarBadge) {
+                    clearTimeout(timerRestaurarBadge);
+                }
             }
 
             idTarjetaInteractivaActiva = idProd;
-            if (timerRestaurarBadge) clearTimeout(timerRestaurarBadge);
+
+            if (timerRestaurarBadge) {
+                clearTimeout(timerRestaurarBadge);
+            }
 
             visor.classList.add('ocultar-badge');
             visor.classList.add('activo-interaccion');
 
             let estado = estadoSelecciones[idProd];
-            if (estado.timerInactividad) clearTimeout(estado.timerInactividad);
-            
+
+            if (estado.timerInactividad) {
+                clearTimeout(estado.timerInactividad);
+            }
+
             estado.timerInactividad = setTimeout(() => {
                 visor.classList.remove('activo-interaccion');
             }, 1500);
@@ -1018,31 +1153,48 @@
         function ocultarBotonesCarrusel(idProd) {
             const visor = document.getElementById(`visor-${idProd}`);
             if (!visor) return;
+
             visor.classList.remove('activo-interaccion');
+
             let estado = estadoSelecciones[idProd];
-            if (estado.timerInactividad) clearTimeout(estado.timerInactividad);
+
+            if (estado.timerInactividad) {
+                clearTimeout(estado.timerInactividad);
+            }
         }
 
         function cambiarFotoSlider(event, idProd, direccion) {
             event.stopPropagation();
             manejarInteraccionCamiseta(idProd);
-            
+
             let estado = estadoSelecciones[idProd];
-            if (!estado || !estado.imgs || estado.imgs.length <= 1) return;
+
+            if (!estado || !estado.imgs || estado.imgs.length <= 1) {
+                return;
+            }
 
             estado.fotoIndex += direccion;
-            if (estado.fotoIndex < 0) estado.fotoIndex = estado.imgs.length - 1;
-            if (estado.fotoIndex >= estado.imgs.length) estado.fotoIndex = 0;
+
+            if (estado.fotoIndex < 0) {
+                estado.fotoIndex = estado.imgs.length - 1;
+            }
+
+            if (estado.fotoIndex >= estado.imgs.length) {
+                estado.fotoIndex = 0;
+            }
 
             if (estado.fotoIndex >= 3 && estado.imgs.length > 4) {
                 estado.miniaturasExpandidas = true;
             }
 
-            document.getElementById(`img-${idProd}`).src = estado.imgs[estado.fotoIndex];
+            document.getElementById(`img-${idProd}`).src =
+                estado.imgs[estado.fotoIndex];
 
             const tarjeta = event.target.closest('.tarjeta');
+
             if (tarjeta) {
                 const contenedorMin = tarjeta.querySelector('.miniaturas');
+
                 if (contenedorMin) {
                     const temp = document.createElement('div');
                     temp.innerHTML = obtenerHtmlMiniaturas(idProd);
@@ -1053,23 +1205,34 @@
 
         function seleccionarTalla(idProd, talla, elemento) {
             estadoSelecciones[idProd].talla = talla;
-            const contenedorTallas = document.getElementById(`tallas-${idProd}`);
-            contenedorTallas.querySelectorAll('.circulo-talla').forEach(c => c.classList.remove('selected'));
+
+            const contenedorTallas =
+                document.getElementById(`tallas-${idProd}`);
+
+            contenedorTallas
+                .querySelectorAll('.circulo-talla')
+                .forEach(c => c.classList.remove('selected'));
+
             elemento.classList.add('selected');
+
             document.getElementById(`error-talla-${idProd}`).style.display = 'none';
         }
 
         function cambiarImagen(event, idProd, nuevaUrl, indexImg) {
             event.stopPropagation();
             manejarInteraccionCamiseta(idProd);
-            
+
             document.getElementById(`img-${idProd}`).src = nuevaUrl;
+
             if (estadoSelecciones[idProd]) {
                 estadoSelecciones[idProd].fotoIndex = indexImg;
             }
+
             const tarjeta = event.target.closest('.tarjeta');
+
             if (tarjeta) {
                 const contenedorMin = tarjeta.querySelector('.miniaturas');
+
                 if (contenedorMin) {
                     const temp = document.createElement('div');
                     temp.innerHTML = obtenerHtmlMiniaturas(idProd);
@@ -1080,13 +1243,18 @@
 
         function agregarDirecto(idProd) {
             let seleccion = estadoSelecciones[idProd];
+
             if (!seleccion || !seleccion.talla) {
                 document.getElementById(`error-talla-${idProd}`).style.display = 'block';
                 return;
             }
-            const p = datosTienda.productos.find((prod, index) => String(prod.id !== undefined ? prod.id : index) === String(idProd));
+
+            const p = datosTienda.productos.find((prod, index) =>
+                String(prod.id !== undefined ? prod.id : index) === String(idProd)
+            );
+
             if (!p) return;
-            
+
             agregarAlCarritoFinal({
                 id: idProd,
                 titulo: p.titulo,
@@ -1100,6 +1268,7 @@
 
         function abrirPersonalizacion(idProd, indexCarrito = null) {
             indiceItemEditando = indexCarrito;
+
             let tallaAUsar = '';
             let nombrePrecargado = '';
             let numeroPrecargado = '';
@@ -1107,76 +1276,168 @@
 
             if (indexCarrito !== null) {
                 let item = carrito[indexCarrito];
+
                 tallaAUsar = item.talla;
+
                 if (item.personalizacion.includes("Nombre:")) {
                     let partes = item.personalizacion.split(", ");
-                    nombrePrecargado = partes[0] ? partes[0].replace("Nombre: ", "") : "";
-                    if (nombrePrecargado === "N/A") nombrePrecargado = "";
-                    numeroPrecargado = partes[1] ? partes[1].replace("Nº: ", "") : "";
-                    if (numeroPrecargado === "N/A") numeroPrecargado = "";
+
+                    nombrePrecargado =
+                        partes[0]
+                            ? partes[0].replace("Nombre: ", "")
+                            : "";
+
+                    if (nombrePrecargado === "N/A") {
+                        nombrePrecargado = "";
+                    }
+
+                    numeroPrecargado =
+                        partes[1]
+                            ? partes[1].replace("Nº: ", "")
+                            : "";
+
+                    if (numeroPrecargado === "N/A") {
+                        numeroPrecargado = "";
+                    }
                 }
+
                 parchesPrecargados = item.parches;
+
             } else {
                 let seleccion = estadoSelecciones[idProd];
+
                 if (!seleccion || !seleccion.talla) {
                     document.getElementById(`error-talla-${idProd}`).style.display = 'block';
                     return;
                 }
+
                 tallaAUsar = seleccion.talla;
             }
 
-            const p = datosTienda.productos.find((prod, index) => String(prod.id !== undefined ? prod.id : index) === String(idProd));
+            const p = datosTienda.productos.find((prod, index) =>
+                String(prod.id !== undefined ? prod.id : index) === String(idProd)
+            );
+
             if (!p) return;
 
             productoEnEdicion = p;
             parchesSeleccionadosModal = {};
 
-            let categoriaProducto = (p.categoria || '').toString().toLowerCase().trim();
+            let categoriaProducto =
+                (p.categoria || '').toString().toLowerCase().trim();
+
             let todosLosParches = datosTienda.parches || [];
 
             let parchesValidos = todosLosParches.filter(pr => {
-                let catParche = (pr.categoria || 'General').toString().toLowerCase().trim();
-                return catParche === 'general' || catParche === categoriaProducto;
+                let catParche =
+                    (pr.categoria || 'General').toString().toLowerCase().trim();
+
+                return catParche === 'general' ||
+                       catParche === categoriaProducto;
             });
 
             let parchesCentro = parchesValidos.filter(pr => {
-                let pos = (pr.posicion || '').toString().toLowerCase().trim();
-                return pos === 'c' || pos.includes('centro') || pos.includes('pecho');
+                let pos =
+                    (pr.posicion || '').toString().toLowerCase().trim();
+
+                return pos === 'c' ||
+                       pos.includes('centro') ||
+                       pos.includes('pecho');
             });
+
             let parchesIzquierdo = parchesValidos.filter(pr => {
-                let pos = (pr.posicion || '').toString().toLowerCase().trim();
-                return pos === 'i' || pos.includes('izquierdo') || pos.includes('manga izq');
+                let pos =
+                    (pr.posicion || '').toString().toLowerCase().trim();
+
+                return pos === 'i' ||
+                       pos.includes('izquierdo') ||
+                       pos.includes('manga izq');
             });
+
             let parchesDerecho = parchesValidos.filter(pr => {
-                let pos = (pr.posicion || '').toString().toLowerCase().trim();
-                return pos === 'd' || pos.includes('derecho') || pos.includes('manga der');
+                let pos =
+                    (pr.posicion || '').toString().toLowerCase().trim();
+
+                return pos === 'd' ||
+                       pos.includes('derecho') ||
+                       pos.includes('manga der');
             });
 
             let htmlZonas = '';
+
             let zonasConfig = [
-                { key: 'centro_pecho', titulo: '⚽ Centro del Pecho', lista: parchesCentro },
-                { key: 'hombro_izquierdo', titulo: '🛡️ Hombro Izquierdo', lista: parchesIzquierdo },
-                { key: 'hombro_derecho', titulo: '🛡️ Hombro Derecho', lista: parchesDerecho }
+                {
+                    key: 'centro_pecho',
+                    titulo: '⚽ Centro del Pecho',
+                    lista: parchesCentro
+                },
+                {
+                    key: 'hombro_izquierdo',
+                    titulo: '🛡️ Hombro Izquierdo',
+                    lista: parchesIzquierdo
+                },
+                {
+                    key: 'hombro_derecho',
+                    titulo: '🛡️ Hombro Derecho',
+                    lista: parchesDerecho
+                }
             ];
 
             zonasConfig.forEach(zona => {
                 if (zona.lista.length === 0) return;
+
                 let htmlGrid = '';
+
                 zona.lista.forEach(parche => {
-                    let pid = parche.id !== undefined ? parche.id : parche.nombre;
-                    let imgParche = limpiarUrlImagen(parche.imagen || parche.url || parche.foto || parche.img || '');
-                    
+                    let pid =
+                        parche.id !== undefined
+                            ? parche.id
+                            : parche.nombre;
+
+                    let imgParche =
+                        limpiarUrlImagen(
+                            parche.imagen ||
+                            parche.url ||
+                            parche.foto ||
+                            parche.img ||
+                            ''
+                        );
+
                     let estaSeleccionado = false;
-                    if (parchesPrecargados !== "Sin parches" && parchesPrecargados.includes(parche.nombre)) {
-                        let zonaNombreLindo = zona.key === 'centro_pecho' ? 'Centro' : (zona.key === 'hombro_izquierdo' ? 'Hombro Izq' : 'Hombro Der');
-                        if (parchesPrecargados.includes(`(${zonaNombreLindo})`)) {
+
+                    if (
+                        parchesPrecargados !== "Sin parches" &&
+                        parchesPrecargados.includes(parche.nombre)
+                    ) {
+                        let zonaNombreLindo =
+                            zona.key === 'centro_pecho'
+                                ? 'Centro'
+                                : (
+                                    zona.key === 'hombro_izquierdo'
+                                        ? 'Hombro Izq'
+                                        : 'Hombro Der'
+                                );
+
+                        if (
+                            parchesPrecargados.includes(
+                                `(${zonaNombreLindo})`
+                            )
+                        ) {
                             estaSeleccionado = true;
-                            parchesSeleccionadosModal[zona.key] = { id: pid, nombre: parche.nombre };
+
+                            parchesSeleccionadosModal[zona.key] = {
+                                id: pid,
+                                nombre: parche.nombre
+                            };
                         }
                     }
 
                     htmlGrid += `
-                        <div class="parche-card ${estaSeleccionado ? 'active-parche' : ''}" id="card-${zona.key}-${pid}" onclick="toggleParcheZona('${zona.key}', '${pid}', '${parche.nombre}')">
+                        <div
+                            class="parche-card ${estaSeleccionado ? 'active-parche' : ''}"
+                            id="card-${zona.key}-${pid}"
+                            onclick="toggleParcheZona('${zona.key}', '${pid}', '${parche.nombre}')"
+                        >
                             <img src="${imgParche}" alt="${parche.nombre}">
                             <h5>${parche.nombre}</h5>
                         </div>
@@ -1192,33 +1453,72 @@
             });
 
             if (parchesValidos.length === 0) {
-                htmlZonas = "<p style='color:var(--text-muted); text-align:center; padding:15px;'>No hay parches disponibles para esta categoría.</p>";
+                htmlZonas =
+                    "<p style='color:var(--text-muted); text-align:center; padding:15px;'>No hay parches disponibles para esta categoría.</p>";
             }
 
-            document.getElementById('tituloModalPersonalizacion').innerText = indexCarrito !== null ? 'Editar Equipación' : 'Personalizar Equipación';
+            document.getElementById('tituloModalPersonalizacion').innerText =
+                indexCarrito !== null
+                    ? 'Editar Equipación'
+                    : 'Personalizar Equipación';
 
-            const contenedor = document.getElementById('contenidoPersonalizacion');
+            const contenedor =
+                document.getElementById('contenidoPersonalizacion');
+
             contenedor.innerHTML = `
-                <p style="font-weight: 600; margin-bottom: 12px; font-size: 0.95rem;">${p.titulo} (Talla: <span id="tallaSeleccionadaModal">${tallaAUsar}</span>)</p>
+                <p style="font-weight: 600; margin-bottom: 12px; font-size: 0.95rem;">
+                    ${p.titulo}
+                    (Talla:
+                    <span id="tallaSeleccionadaModal">${tallaAUsar}</span>)
+                </p>
+
                 <div class="form-group">
                     <label>Nombre para la espalda (+3.00 €):</label>
-                    <input type="text" id="inputNombreCustom" value="${nombrePrecargado}" placeholder="Ej: GAVI" oninput="validarNombreInput()">
-                    <div class="error-custom" id="errorNombreCustom">⚠️ En el campo de nombre solo se permiten letras (no números).</div>
+                    <input
+                        type="text"
+                        id="inputNombreCustom"
+                        value="${nombrePrecargado}"
+                        placeholder="Ej: GAVI"
+                        oninput="validarNombreInput()"
+                    >
+                    <div class="error-custom" id="errorNombreCustom">
+                        ⚠️ En el campo de nombre solo se permiten letras (no números).
+                    </div>
                 </div>
+
                 <div class="form-group">
                     <label>Número para la espalda:</label>
-                    <input type="text" id="inputNumeroCustom" value="${numeroPrecargado}" placeholder="Ej: 9" oninput="validarNumeroInput()">
-                    <div class="error-custom" id="errorNumeroCustom">⚠️ En el campo de número solo se permiten dígitos numéricos (no letras).</div>
+                    <input
+                        type="text"
+                        id="inputNumeroCustom"
+                        value="${numeroPrecargado}"
+                        placeholder="Ej: 9"
+                        oninput="validarNumeroInput()"
+                    >
+                    <div class="error-custom" id="errorNumeroCustom">
+                        ⚠️ En el campo de número solo se permiten dígitos numéricos (no letras).
+                    </div>
                 </div>
+
                 <div class="form-group">
                     <label>Añadir Parches (+2 € en total):</label>
                     ${htmlZonas}
                 </div>
+
                 <div style="background: var(--surface); padding: 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
                     <span style="font-weight: 700;">Precio Total Configurado:</span>
-                    <span id="precioTotalModal" style="font-size: 1.2rem; font-weight: 800; color: var(--accent);">${parseFloat(p.precio).toFixed(2)} €</span>
+                    <span id="precioTotalModal" style="font-size: 1.2rem; font-weight: 800; color: var(--accent);">
+                        ${parseFloat(p.precio).toFixed(2)} €
+                    </span>
                 </div>
-                <button class="btn-whatsapp" style="margin-top: 15px;" onclick="confirmarPersonalizacion('${idProd}')">${indexCarrito !== null ? 'Guardar Cambios' : 'Añadir al Carrito'}</button>
+
+                <button
+                    class="btn-whatsapp"
+                    style="margin-top: 15px;"
+                    onclick="confirmarPersonalizacion('${idProd}')"
+                >
+                    ${indexCarrito !== null ? 'Guardar Cambios' : 'Añadir al Carrito'}
+                </button>
             `;
 
             calcularPrecioModal();
@@ -1228,11 +1528,13 @@
         function validarNombreInput() {
             let input = document.getElementById('inputNombreCustom');
             let errorEl = document.getElementById('errorNombreCustom');
+
             if (/\d/.test(input.value)) {
                 errorEl.style.display = 'block';
             } else {
                 errorEl.style.display = 'none';
             }
+
             calcularPrecioModal();
         }
 
@@ -1240,47 +1542,91 @@
             let input = document.getElementById('inputNumeroCustom');
             let errorEl = document.getElementById('errorNumeroCustom');
             let valorTrim = input.value.trim();
+
             if (valorTrim !== '' && !/^\d+$/.test(valorTrim)) {
                 errorEl.style.display = 'block';
             } else {
                 errorEl.style.display = 'none';
             }
+
             calcularPrecioModal();
         }
 
         function toggleParcheZona(zonaKey, parcheId, parcheNombre) {
-            if (parchesSeleccionadosModal[zonaKey] && parchesSeleccionadosModal[zonaKey].id === parcheId) {
+            if (
+                parchesSeleccionadosModal[zonaKey] &&
+                parchesSeleccionadosModal[zonaKey].id === parcheId
+            ) {
                 delete parchesSeleccionadosModal[zonaKey];
-                document.getElementById(`card-${zonaKey}-${parcheId}`).classList.remove('active-parche');
+
+                document
+                    .getElementById(`card-${zonaKey}-${parcheId}`)
+                    .classList.remove('active-parche');
+
             } else {
+
                 if (parchesSeleccionadosModal[zonaKey]) {
-                    let viejoId = parchesSeleccionadosModal[zonaKey].id;
-                    let elemViejo = document.getElementById(`card-${zonaKey}-${viejoId}`);
-                    if (elemViejo) elemViejo.classList.remove('active-parche');
+                    let viejoId =
+                        parchesSeleccionadosModal[zonaKey].id;
+
+                    let elemViejo =
+                        document.getElementById(
+                            `card-${zonaKey}-${viejoId}`
+                        );
+
+                    if (elemViejo) {
+                        elemViejo.classList.remove('active-parche');
+                    }
                 }
-                parchesSeleccionadosModal[zonaKey] = { id: parcheId, nombre: parcheNombre };
-                document.getElementById(`card-${zonaKey}-${parcheId}`).classList.add('active-parche');
+
+                parchesSeleccionadosModal[zonaKey] = {
+                    id: parcheId,
+                    nombre: parcheNombre
+                };
+
+                document
+                    .getElementById(`card-${zonaKey}-${parcheId}`)
+                    .classList.add('active-parche');
             }
+
             calcularPrecioModal();
         }
 
         function calcularPrecioModal() {
             if (!productoEnEdicion) return;
+
             let total = parseFloat(productoEnEdicion.precio);
-            let nombreVal = document.getElementById('inputNombreCustom').value.trim();
-            let numeroVal = document.getElementById('inputNumeroCustom').value.trim();
 
-            if (nombreVal !== '' || numeroVal !== '') total += 3.00;
-            if (Object.keys(parchesSeleccionadosModal).length > 0) total += 2.00;
+            let nombreVal =
+                document.getElementById('inputNombreCustom').value.trim();
 
-            document.getElementById('precioTotalModal').innerText = total.toFixed(2) + ' €';
+            let numeroVal =
+                document.getElementById('inputNumeroCustom').value.trim();
+
+            if (nombreVal !== '' || numeroVal !== '') {
+                total += 3.00;
+            }
+
+            if (Object.keys(parchesSeleccionadosModal).length > 0) {
+                total += 2.00;
+            }
+
+            document.getElementById('precioTotalModal').innerText =
+                total.toFixed(2) + ' €';
         }
 
         function confirmarPersonalizacion(idProd) {
-            let nombreInput = document.getElementById('inputNombreCustom');
-            let numeroInput = document.getElementById('inputNumeroCustom');
-            let errorNombre = document.getElementById('errorNombreCustom');
-            let errorNumero = document.getElementById('errorNumeroCustom');
+            let nombreInput =
+                document.getElementById('inputNombreCustom');
+
+            let numeroInput =
+                document.getElementById('inputNumeroCustom');
+
+            let errorNombre =
+                document.getElementById('errorNombreCustom');
+
+            let errorNumero =
+                document.getElementById('errorNumeroCustom');
 
             let nombreVal = nombreInput.value.trim();
             let numeroVal = numeroInput.value.trim();
@@ -1292,40 +1638,80 @@
                 tieneError = true;
             }
 
-            if (numeroVal !== '' && !/^\d+$/.test(numeroVal)) {
+            if (
+                numeroVal !== '' &&
+                !/^\d+$/.test(numeroVal)
+            ) {
                 errorNumero.style.display = 'block';
                 tieneError = true;
             }
 
             if (tieneError) return;
 
-            let tallaFinal = document.getElementById('tallaSeleccionadaModal').innerText;
-            let basePrecio = parseFloat(productoEnEdicion.precio);
-            
+            let tallaFinal =
+                document.getElementById('tallaSeleccionadaModal').innerText;
+
+            let basePrecio =
+                parseFloat(productoEnEdicion.precio);
+
             let costoExtra = 0;
             let textoPersonalizacion = 'Sin personalización';
+
             if (nombreVal !== '' || numeroVal !== '') {
                 costoExtra += 3.00;
-                textoPersonalizacion = `Nombre: ${nombreVal || 'N/A'}, Nº: ${numeroVal || 'N/A'}`;
+
+                textoPersonalizacion =
+                    `Nombre: ${nombreVal || 'N/A'}, Nº: ${numeroVal || 'N/A'}`;
             }
 
             let detalleParchesArr = [];
+
             Object.keys(parchesSeleccionadosModal).forEach(zonaKey => {
                 let pInfo = parchesSeleccionadosModal[zonaKey];
-                let zonaNombreLindo = zonaKey === 'centro_pecho' ? 'Centro' : (zonaKey === 'hombro_izquierdo' ? 'Hombro Izq' : (zonaKey === 'hombro_derecho' ? 'Hombro Der' : 'General'));
-                detalleParchesArr.push(`${pInfo.nombre} (${zonaNombreLindo})`);
+
+                let zonaNombreLindo =
+                    zonaKey === 'centro_pecho'
+                        ? 'Centro'
+                        : (
+                            zonaKey === 'hombro_izquierdo'
+                                ? 'Hombro Izq'
+                                : (
+                                    zonaKey === 'hombro_derecho'
+                                        ? 'Hombro Der'
+                                        : 'General'
+                                )
+                        );
+
+                detalleParchesArr.push(
+                    `${pInfo.nombre} (${zonaNombreLindo})`
+                );
             });
 
-            if (detalleParchesArr.length > 0) costoExtra += 2.00;
-            let textoParches = detalleParchesArr.length > 0 ? detalleParchesArr.join(' | ') : 'Sin parches';
+            if (detalleParchesArr.length > 0) {
+                costoExtra += 2.00;
+            }
+
+            let textoParches =
+                detalleParchesArr.length > 0
+                    ? detalleParchesArr.join(' | ')
+                    : 'Sin parches';
 
             if (indiceItemEditando !== null) {
+
                 carrito[indiceItemEditando].talla = tallaFinal;
-                carrito[indiceItemEditando].precio = basePrecio + costoExtra;
-                carrito[indiceItemEditando].personalizacion = textoPersonalizacion;
-                carrito[indiceItemEditando].parches = textoParches;
+                carrito[indiceItemEditando].precio =
+                    basePrecio + costoExtra;
+
+                carrito[indiceItemEditando].personalizacion =
+                    textoPersonalizacion;
+
+                carrito[indiceItemEditando].parches =
+                    textoParches;
+
                 indiceItemEditando = null;
+
             } else {
+
                 agregarAlCarritoFinal({
                     id: idProd,
                     titulo: productoEnEdicion.titulo,
@@ -1342,10 +1728,10 @@
         }
 
         function agregarAlCarritoFinal(nuevoItem) {
-            let indexExistente = carrito.findIndex(item => 
-                item.id === nuevoItem.id && 
-                item.talla === nuevoItem.talla && 
-                item.personalizacion === nuevoItem.personalizacion && 
+            let indexExistente = carrito.findIndex(item =>
+                item.id === nuevoItem.id &&
+                item.talla === nuevoItem.talla &&
+                item.personalizacion === nuevoItem.personalizacion &&
                 item.parches === nuevoItem.parches
             );
 
@@ -1360,8 +1746,14 @@
         }
 
         function actualizarContadorCarrito() {
-            let totalUnidades = carrito.reduce((sum, item) => sum + item.cantidad, 0);
-            document.getElementById('cartCount').innerText = totalUnidades;
+            let totalUnidades =
+                carrito.reduce(
+                    (sum, item) => sum + item.cantidad,
+                    0
+                );
+
+            document.getElementById('cartCount').innerText =
+                totalUnidades;
         }
 
         function abrirCarritoModal() {
@@ -1374,11 +1766,16 @@
         }
 
         function renderizarListaCarrito() {
-            const lista = document.getElementById('listaCarrito');
-            const totalEl = document.getElementById('totalCarrito');
+            const lista =
+                document.getElementById('listaCarrito');
+
+            const totalEl =
+                document.getElementById('totalCarrito');
 
             if (carrito.length === 0) {
-                lista.innerHTML = "<p style='color: var(--text-muted); text-align: center; margin-top: 20px;'>El carrito está vacío</p>";
+                lista.innerHTML =
+                    "<p style='color: var(--text-muted); text-align: center; margin-top: 20px;'>El carrito está vacío</p>";
+
                 totalEl.innerText = "0.00 €";
                 return;
             }
@@ -1387,36 +1784,76 @@
             let totalGeneral = 0;
 
             carrito.forEach((item, index) => {
-                let subtotal = item.precio * item.cantidad;
+                let subtotal =
+                    item.precio * item.cantidad;
+
                 totalGeneral += subtotal;
+
                 html += `
                     <div class="item-carrito">
                         <div>
                             <strong>${item.titulo}</strong><br>
-                            <small style="color: var(--text-muted);">Talla: ${item.talla}<br>Personalización: ${item.personalizacion}<br>Parches: ${item.parches}</small>
+
+                            <small style="color: var(--text-muted);">
+                                Talla: ${item.talla}<br>
+                                Personalización: ${item.personalizacion}<br>
+                                Parches: ${item.parches}
+                            </small>
+
                             <div class="controles-cantidad">
-                                <button class="btn-cant" onclick="cambiarCantidad(${index}, -1)">-</button>
-                                <span style="font-weight: 700; font-size: 0.9rem; min-width: 20px; text-align: center;">${item.cantidad}</span>
-                                <button class="btn-cant" onclick="cambiarCantidad(${index}, 1)">+</button>
+                                <button
+                                    class="btn-cant"
+                                    onclick="cambiarCantidad(${index}, -1)"
+                                >-</button>
+
+                                <span style="font-weight: 700; font-size: 0.9rem; min-width: 20px; text-align: center;">
+                                    ${item.cantidad}
+                                </span>
+
+                                <button
+                                    class="btn-cant"
+                                    onclick="cambiarCantidad(${index}, 1)"
+                                >+</button>
                             </div>
                         </div>
+
                         <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; height: 100%;">
+
                             <div class="acciones-item-carrito">
-                                <button onclick="editarItemCarrito(${index})" class="btn-accion-carrito" title="Editar producto">
-                                    <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+
+                                <button
+                                    onclick="editarItemCarrito(${index})"
+                                    class="btn-accion-carrito"
+                                    title="Editar producto"
+                                >
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0-1.83 1.83 3.75 3.75 1.83 1.83z"/>
+                                    </svg>
                                 </button>
-                                <button onclick="eliminarDelCarrito(${index})" class="btn-accion-carrito btn-eliminar" title="Eliminar">
-                                    <svg viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14V4zM6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg>
+
+                                <button
+                                    onclick="eliminarDelCarrito(${index})"
+                                    class="btn-accion-carrito btn-eliminar"
+                                    title="Eliminar"
+                                >
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14V4zM6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/>
+                                    </svg>
                                 </button>
+
                             </div>
-                            <span style="font-weight: 700; margin-top: 15px;">${subtotal.toFixed(2)} €</span>
+
+                            <span style="font-weight: 700; margin-top: 15px;">
+                                ${subtotal.toFixed(2)} €
+                            </span>
                         </div>
                     </div>
                 `;
             });
 
             lista.innerHTML = html;
-            totalEl.innerText = totalGeneral.toFixed(2) + ' €';
+            totalEl.innerText =
+                totalGeneral.toFixed(2) + ' €';
         }
 
         function editarItemCarrito(index) {
@@ -1427,7 +1864,11 @@
 
         function cambiarCantidad(index, delta) {
             carrito[index].cantidad += delta;
-            if (carrito[index].cantidad <= 0) carrito.splice(index, 1);
+
+            if (carrito[index].cantidad <= 0) {
+                carrito.splice(index, 1);
+            }
+
             actualizarContadorCarrito();
             renderizarListaCarrito();
         }
@@ -1440,42 +1881,79 @@
 
         function enviarWhatsApp() {
             if (carrito.length === 0) return;
-            let texto = "Hola, quiero realizar el siguiente pedido:\n\n";
+
+            let texto =
+                "Hola, quiero realizar el siguiente pedido:\n\n";
+
             let totalGeneral = 0;
 
             carrito.forEach((item, i) => {
-                let subtotal = item.precio * item.cantidad;
-                texto += `${i + 1}. *${item.titulo}* (x${item.cantidad})\n`;
-                texto += `- Talla: ${item.talla}\n`;
+                let subtotal =
+                    item.precio * item.cantidad;
+
+                texto +=
+                    `${i + 1}. *${item.titulo}* (x${item.cantidad})\n`;
+
+                texto +=
+                    `- Talla: ${item.talla}\n`;
 
                 if (item.personalizacion.includes("Nombre:")) {
-                    let partes = item.personalizacion.split(", ");
-                    let parteNombre = partes[0] ? partes[0].replace("Nombre: ", "") : "N/A";
-                    let parteNumero = partes[1] ? partes[1].replace("Nº: ", "") : "N/A";
+                    let partes =
+                        item.personalizacion.split(", ");
 
-                    texto += `- Personalización:\n`;
-                    texto += `      - Nombre: ${parteNombre}\n`;
-                    texto += `      - Nº: ${parteNumero}\n`;
+                    let parteNombre =
+                        partes[0]
+                            ? partes[0].replace("Nombre: ", "")
+                            : "N/A";
+
+                    let parteNumero =
+                        partes[1]
+                            ? partes[1].replace("Nº: ", "")
+                            : "N/A";
+
+                    texto +=
+                        `- Personalización:\n`;
+
+                    texto +=
+                        `      - Nombre: ${parteNombre}\n`;
+
+                    texto +=
+                        `      - Nº: ${parteNumero}\n`;
+
                 } else {
-                    texto += `- Personalización: Sin personalización\n`;
+                    texto +=
+                        `- Personalización: Sin personalización\n`;
                 }
 
                 if (item.parches !== "Sin parches") {
                     texto += `- Parches:\n`;
-                    let listaParches = item.parches.split(" | ");
+
+                    let listaParches =
+                        item.parches.split(" | ");
+
                     listaParches.forEach(parche => {
-                        texto += `      - ${parche}\n`;
+                        texto +=
+                            `      - ${parche}\n`;
                     });
+
                 } else {
-                    texto += `- Parches: Sin parches\n`;
+                    texto +=
+                        `- Parches: Sin parches\n`;
                 }
 
-                texto += `- Subtotal: ${subtotal.toFixed(2)} €\n\n`;
+                texto +=
+                    `- Subtotal: ${subtotal.toFixed(2)} €\n\n`;
+
                 totalGeneral += subtotal;
             });
 
-            texto += `*Total del pedido: ${totalGeneral.toFixed(2)} €*`;
-            window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+            texto +=
+                `*Total del pedido: ${totalGeneral.toFixed(2)} €*`;
+
+            window.open(
+                `https://wa.me/?text=${encodeURIComponent(texto)}`,
+                '_blank'
+            );
         }
 
         cargarDatos();
