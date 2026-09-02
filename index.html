@@ -394,7 +394,7 @@
         .camiseta-cotas-container {
             position: relative;
             display: inline-block;
-            max-width: 220px;
+            max-width: 600px;
             margin: 0 auto;
             background: #000000; /* Fondo negro solicitado para contraste */
             padding: 12px;
@@ -407,7 +407,7 @@
             border-radius: 6px;
         }
         
-        /* Líneas de cota flotantes sobre la imagen de la camiseta */
+        /* Líneas de cota flotantes sobre la imagen de la camiseta - Actualizadas y bajadas */
         .cota-tag {
             position: absolute;
             font-size: 11px;
@@ -421,14 +421,14 @@
             z-index: 5;
         }
         .cota-ancho {
-            top: 45%;
-            left: 50%;
+            top: 49%; /* Bajada para acercarse más a la línea horizontal */
+            left: 54%;
             transform: translate(-50%, -50%);
         }
         .cota-largo {
-            top: 60%;
-            left: 15%;
-            transform: translateY(-50%);
+            top: 66%; /* Bajada para acercarse más a la flecha inferior de la línea vertical */
+            left: 33%;
+            transform: translateY(-50%) rotate(-90deg);
         }
 
         .loader { text-align: center; padding: 40px; font-size: 1.1rem; color: var(--text-muted); }
@@ -643,9 +643,9 @@
                             </marker>
                         </defs>
                         <!-- Flecha de Ancho (Horizontal) -->
-                        <line x1="45" y1="95" x2="155" y2="95" stroke="#3b82f6" stroke-width="1.5" marker-start="url(#flechaCota)" marker-end="url(#flechaCota)"></line>
+                        <line x1="54" y1="130" x2="146" y2="130" stroke="#3b82f6" stroke-width="1.5" marker-start="url(#flechaCota)" marker-end="url(#flechaCota)"></line>
                         <!-- Flecha de Largo (Vertical) -->
-                        <line x1="30" y1="40" x2="30" y2="220" stroke="#3b82f6" stroke-width="1.5" marker-start="url(#flechaCota)" marker-end="url(#flechaCota)"></line>
+                        <line x1="79" y1="48" x2="79" y2="200" stroke="#3b82f6" stroke-width="1.5" marker-start="url(#flechaCota)" marker-end="url(#flechaCota)"></line>
                     </svg>
 
                     <!-- Cotas dinámicas flotantes -->
