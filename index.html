@@ -460,7 +460,7 @@
         </div>
     </div>
 
-    <!-- Modal Guía de Tallas con Pestañas -->
+    <!-- Modal Guía de Tallas con Pestañas Reorganizadas -->
     <div class="modal-overlay" id="modalGuiaTallas">
         <div class="modal-contenido">
             <div class="modal-header">
@@ -468,16 +468,35 @@
                 <button class="btn-cerrar-modal" onclick="cerrarModal('modalGuiaTallas')">✕</button>
             </div>
             
-            <!-- Pestañas de Versiones -->
+            <!-- Pestañas de Versiones (Ordenadas: Jugador, Retro, Fan Hombre, Fan Mujer) -->
             <div class="size-tabs">
-                <button class="tab-btn active" onclick="switchSizeTab(event, 'retro')">Retro</button>
+                <button class="tab-btn active" onclick="switchSizeTab(event, 'player')">Jugador</button>
+                <button class="tab-btn" onclick="switchSizeTab(event, 'retro')">Retro</button>
                 <button class="tab-btn" onclick="switchSizeTab(event, 'fan-hombre')">Fan (Hombre)</button>
-                <button class="tab-btn" onclick="switchSizeTab(event, 'player')">Jugador</button>
                 <button class="tab-btn" onclick="switchSizeTab(event, 'fan-mujer')">Fan (Mujer)</button>
             </div>
 
-            <!-- Pestaña 1: Retro -->
-            <div id="retro" class="size-tab-content active">
+            <!-- Pestaña 1: Jugador (Player) -->
+            <div id="player" class="size-tab-content active">
+                <p class="size-subtitle">Medidas aproximadas en centímetros y recomendaciones.</p>
+                <table class="tabla-tallas">
+                    <thead>
+                        <tr><th>Talla</th><th>Ancho</th><th>Largo</th><th>Estatura</th><th>Peso</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>S</td><td>46 cm</td><td>68 cm</td><td>160-170 cm</td><td>50-60 kg</td></tr>
+                        <tr><td>M</td><td>48 cm</td><td>70 cm</td><td>170-175 cm</td><td>60-65 kg</td></tr>
+                        <tr><td>L</td><td>50 cm</td><td>72 cm</td><td>175-180 cm</td><td>65-70 kg</td></tr>
+                        <tr><td>XL</td><td>52 cm</td><td>74 cm</td><td>180-185 cm</td><td>70-75 kg</td></tr>
+                        <tr><td>XXL</td><td>54 cm</td><td>76 cm</td><td>185-190 cm</td><td>75-85 kg</td></tr>
+                        <tr><td>3XL</td><td>56 cm</td><td>78 cm</td><td>190-195 cm</td><td>85-90 kg</td></tr>
+                        <tr><td>4XL</td><td>58 cm</td><td>80 cm</td><td>195-200 cm</td><td>95-100 kg</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pestaña 2: Retro -->
+            <div id="retro" class="size-tab-content">
                 <p class="size-subtitle">Medidas aproximadas en centímetros y recomendaciones.</p>
                 <table class="tabla-tallas">
                     <thead>
@@ -495,7 +514,7 @@
                 </table>
             </div>
 
-            <!-- Pestaña 2: Fan (Hombre) -->
+            <!-- Pestaña 3: Fan (Hombre) -->
             <div id="fan-hombre" class="size-tab-content">
                 <p class="size-subtitle">Medidas aproximadas en centímetros y recomendaciones.</p>
                 <table class="tabla-tallas">
@@ -510,25 +529,6 @@
                         <tr><td>XXL</td><td>56 cm</td><td>78 cm</td><td>190-195 cm</td><td>90-97 kg</td></tr>
                         <tr><td>3XL</td><td>58 cm</td><td>80 cm</td><td>192-197 cm</td><td>97-104 kg</td></tr>
                         <tr><td>4XL</td><td>60 cm</td><td>82 cm</td><td>197-200 cm</td><td>104-110 kg</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pestaña 3: Jugador (Player) -->
-            <div id="player" class="size-tab-content">
-                <p class="size-subtitle">Medidas aproximadas en centímetros y recomendaciones.</p>
-                <table class="tabla-tallas">
-                    <thead>
-                        <tr><th>Talla</th><th>Ancho</th><th>Largo</th><th>Estatura</th><th>Peso</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>S</td><td>46 cm</td><td>68 cm</td><td>160-170 cm</td><td>50-60 kg</td></tr>
-                        <tr><td>M</td><td>48 cm</td><td>70 cm</td><td>170-175 cm</td><td>60-65 kg</td></tr>
-                        <tr><td>L</td><td>50 cm</td><td>72 cm</td><td>175-180 cm</td><td>65-70 kg</td></tr>
-                        <tr><td>XL</td><td>52 cm</td><td>74 cm</td><td>180-185 cm</td><td>70-75 kg</td></tr>
-                        <tr><td>XXL</td><td>54 cm</td><td>76 cm</td><td>185-190 cm</td><td>75-85 kg</td></tr>
-                        <tr><td>3XL</td><td>56 cm</td><td>78 cm</td><td>190-195 cm</td><td>85-90 kg</td></tr>
-                        <tr><td>4XL</td><td>58 cm</td><td>80 cm</td><td>195-200 cm</td><td>95-100 kg</td></tr>
                     </tbody>
                 </table>
             </div>
