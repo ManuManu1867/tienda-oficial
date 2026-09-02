@@ -306,7 +306,6 @@
             border: 1px solid var(--border);
         }
 
-        /* Estilos y pestañas de la guía de tallas */
         .size-tabs {
             display: flex;
             gap: 6px;
@@ -355,7 +354,6 @@
         .tabla-tallas th, .tabla-tallas td { border: 1px solid var(--border); padding: 6px; text-align: center; }
         .tabla-tallas th { background: var(--surface); font-weight: 700; }
         
-        /* Filas interactivas en la tabla de tallas */
         .tabla-tallas tbody tr.size-row {
             cursor: pointer;
             transition: background-color 0.2s;
@@ -373,7 +371,6 @@
             color: #111827;
         }
 
-        /* Estilos del Visor Visual de Medidas con Fondo Negro y Flechas de Cota */
         .size-visual-container {
             margin-top: 15px;
             background: var(--surface);
@@ -396,7 +393,7 @@
             display: inline-block;
             max-width: 600px;
             margin: 0 auto;
-            background: #000000; /* Fondo negro solicitado para contraste */
+            background: #000000;
             padding: 12px;
             border-radius: 8px;
         }
@@ -407,7 +404,6 @@
             border-radius: 6px;
         }
         
-        /* Líneas de cota flotantes sobre la imagen de la camiseta - Actualizadas y bajadas */
         .cota-tag {
             position: absolute;
             font-size: 11px;
@@ -421,12 +417,12 @@
             z-index: 5;
         }
         .cota-ancho {
-            top: 49%; /* Bajada para acercarse más a la línea horizontal */
+            top: 49%;
             left: 54%;
             transform: translate(-50%, -50%);
         }
         .cota-largo {
-            top: 66%; /* Bajada para acercarse más a la flecha inferior de la línea vertical */
+            top: 66%;
             left: 33%;
             transform: translateY(-50%) rotate(-90deg);
         }
@@ -536,7 +532,7 @@
         </div>
     </div>
 
-    <!-- Modal Guía de Tallas con Fondo Negro y Flechas de Cota -->
+    <!-- Modal Guía de Tallas -->
     <div class="modal-overlay" id="modalGuiaTallas">
         <div class="modal-contenido">
             <div class="modal-header">
@@ -544,7 +540,6 @@
                 <button class="btn-cerrar-modal" onclick="cerrarModal('modalGuiaTallas')">✕</button>
             </div>
             
-            <!-- Pestañas de Versiones -->
             <div class="size-tabs">
                 <button class="tab-btn active" onclick="switchSizeTab(event, 'player')">Jugador</button>
                 <button class="tab-btn" onclick="switchSizeTab(event, 'retro')">Retro</button>
@@ -552,9 +547,8 @@
                 <button class="tab-btn" onclick="switchSizeTab(event, 'fan-mujer')">Fan (Mujer)</button>
             </div>
 
-            <!-- Pestaña 1: Jugador (Player) -->
             <div id="player" class="size-tab-content active">
-                <p class="size-subtitle">Medidas aproximadas en centímetros y recomendaciones. Pincha en una fila para ver cotas.</p>
+                <p class="size-subtitle">Medidas aproximadas en centímetros y recomendaciones. Pincha en una talla para verla reflejada abajo.</p>
                 <table class="tabla-tallas">
                     <thead>
                         <tr><th>Talla</th><th>Ancho</th><th>Largo</th><th>Estatura</th><th>Peso</th></tr>
@@ -571,7 +565,6 @@
                 </table>
             </div>
 
-            <!-- Pestaña 2: Retro -->
             <div id="retro" class="size-tab-content">
                 <p class="size-subtitle">Medidas aproximadas en centímetros y recomendaciones. Pincha en una fila para ver cotas.</p>
                 <table class="tabla-tallas">
@@ -590,7 +583,6 @@
                 </table>
             </div>
 
-            <!-- Pestaña 3: Fan (Hombre) -->
             <div id="fan-hombre" class="size-tab-content">
                 <p class="size-subtitle">Medidas aproximadas en centímetros y recomendaciones. Pincha en una fila para ver cotas.</p>
                 <table class="tabla-tallas">
@@ -609,7 +601,6 @@
                 </table>
             </div>
 
-            <!-- Pestaña 4: Fan (Mujer) -->
             <div id="fan-mujer" class="size-tab-content">
                 <p class="size-subtitle">Medidas aproximadas en centímetros y recomendaciones. Pincha en una fila para ver cotas.</p>
                 <table class="tabla-tallas">
@@ -628,27 +619,21 @@
                 </table>
             </div>
 
-            <!-- Visor Gráfico con Fondo Negro y Flechas de Cota SVG -->
             <div class="size-visual-container">
                 <div class="size-visual-title">Vista previa de cotas (Selecciona talla)</div>
                 <div class="camiseta-cotas-container">
-                    <!-- Imagen de la camiseta corregida -->
                     <img src="https://lh3.googleusercontent.com/d/1p1JiO40x85Rq2s1l5g8aiUhdB7eRRrJs" alt="Camiseta Guía de Tallas">
                     
-                    <!-- Capa SVG con flechas de cota profesionales -->
                     <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;" viewBox="0 0 200 250">
                         <defs>
                             <marker id="flechaCota" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
                                 <path d="M 0 0 L 10 5 L 0 10 z" fill="#3b82f6"></path>
                             </marker>
                         </defs>
-                        <!-- Flecha de Ancho (Horizontal) -->
                         <line x1="54" y1="130" x2="146" y2="130" stroke="#3b82f6" stroke-width="1.5" marker-start="url(#flechaCota)" marker-end="url(#flechaCota)"></line>
-                        <!-- Flecha de Largo (Vertical) -->
                         <line x1="79" y1="48" x2="79" y2="200" stroke="#3b82f6" stroke-width="1.5" marker-start="url(#flechaCota)" marker-end="url(#flechaCota)"></line>
                     </svg>
 
-                    <!-- Cotas dinámicas flotantes -->
                     <div id="cotaAncho" class="cota-tag cota-ancho">46 cm</div>
                     <div id="cotaLargo" class="cota-tag cota-largo">68 cm</div>
                 </div>
